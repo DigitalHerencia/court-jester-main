@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { jacquard, kings } from "@/app/fonts"
 import { ToastProvider } from "@/components/toast-provider"
-import "./globals.css"
+import "@/app/globals.css"
 
 export const metadata: Metadata = {
   title: "Court Jester",
@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://a5fvmmg873kgkibm.public.blob.vercel-storage.com/court-jester/favicon-1K7OJP0Tf7FPpKDkgC7ljht44PVI1X.ico"
         />
       </head>
-      <body className="font-kings">
+      <body className="mx-auto max-w-7xl p-2 font-kings">
         <ToastProvider />
         {children}
       </body>
@@ -36,4 +36,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 
 
-import './globals.css'

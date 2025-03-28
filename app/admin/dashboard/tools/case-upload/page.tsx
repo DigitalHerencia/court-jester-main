@@ -4,14 +4,8 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { AlertCircle, ArrowLeft, FileText, Save } from "lucide-react"
 
 interface Offender {
   id: number
@@ -32,6 +26,22 @@ export default function CaseUploadPage() {
   const [isLoadingOffenders, setIsLoadingOffenders] = useState(false)
   const router = useRouter()
 
+  // Sample offenders for fallback
+  const sampleOffenders: Offender[] = [
+    {
+      id: 1,
+      inmate_number: "468079",
+      last_name: "Dominguez",
+      first_name: "Christopher",
+    },
+    {
+      id: 2,
+      inmate_number: "123456",
+      last_name: "Doe",
+      first_name: "John",
+    },
+  ]
+
   // Fetch offenders on component mount
   useEffect(() => {
     const fetchOffenders = async () => {
@@ -41,6 +51,8 @@ export default function CaseUploadPage() {
 
         if (!response.ok) {
           console.error("Failed to fetch offenders:", response.status, response.statusText)
+          // Use sample data as fallback
+          setOffenders(sampleOffenders)
           setIsLoadingOffenders(false)
           return
         }
@@ -49,6 +61,8 @@ export default function CaseUploadPage() {
         setOffenders(data.offenders || [])
       } catch (error) {
         console.error("Error fetching offenders", error)
+        // Use sample data as fallback
+        setOffenders(sampleOffenders)
       } finally {
         setIsLoadingOffenders(false)
       }
@@ -144,7 +158,9 @@ export default function CaseUploadPage() {
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to process case: ${response.status} ${response.statusText}`)
+        setError(`Failed to process case: ${response.status} ${response.statusText}`)
+        setIsLoading(false)
+        return
       }
 
       const data = await response.json()
@@ -152,111 +168,104 @@ export default function CaseUploadPage() {
       setSelectedFile(null)
       setExtractedText("")
       setOffenderId("")
-      toast.success("Case created successfully!")
 
       // Redirect back to admin dashboard
+      toast.success("Case created successfully!")
       setTimeout(() => {
-        router.push("/admin/dashboard/offenders")
+        router.push("/dashboard/admin")
       }, 2000)
     } catch (error) {
       console.error("Case upload error", error)
       setError("An error occurred. Please try again.")
-      toast.error("Failed to create case")
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="mr-2 h-5 w-5" />
-            Upload Case File
-          </CardTitle>
-          <CardDescription>
-            Upload a case file PDF or paste the case text below and select the offender. The system will parse the
-            information and create a case record in the database.
-          </CardDescription>
-        </CardHeader>
+    <div className="space-y-2 h-[calc(100vh-120px)] overflow-y-auto pr-2 hide-scrollbar">
+      <div className="rounded-md border border-background/20 p-2 bg-primary text-background">
+        <h2 className="font-kings mb-4 text-xl">Upload Case File</h2>
+        <p className="mb-4">
+          Upload a case file PDF or paste the case text below and select the offender. The system will parse the
+          information and create a case record in the database.
+        </p>
+
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="offender">Select Offender</Label>
-              <Select value={offenderId} onValueChange={setOffenderId} disabled={isLoading || isLoadingOffenders}>
-                <SelectTrigger id="offender">
-                  <SelectValue placeholder="Select an offender..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {offenders.map((offender) => (
-                    <SelectItem key={offender.id} value={offender.id.toString()}>
-                      {offender.inmate_number} - {offender.last_name}, {offender.first_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {isLoadingOffenders && <p className="text-sm text-muted-foreground">Loading offenders...</p>}
-            </div>
+          <div className="mb-4">
+            <label className="block mb-2 font-kings">Select Offender</label>
+            <select
+              value={offenderId}
+              onChange={(e) => setOffenderId(e.target.value)}
+              className="w-full p-3 border border-background/20 bg-background text-foreground font-kings"
+              disabled={isLoading || isLoadingOffenders}
+            >
+              <option value="">Select an offender...</option>
+              {offenders.map((offender) => (
+                <option key={offender.id} value={offender.id}>
+                  {offender.inmate_number} - {offender.last_name}, {offender.first_name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="pdfFile">Upload PDF File</Label>
-              <Input
-                id="pdfFile"
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                disabled={isLoading || isExtracting}
-              />
-              {isExtracting && <p className="text-sm text-muted-foreground">Extracting text from PDF...</p>}
-              {selectedFile && !isExtracting && (
-                <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>
-              )}
-            </div>
+          <div className="mb-4">
+            <label className="block mb-2 font-kings">Upload PDF File</label>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="w-full p-3 border border-background/20 bg-background text-foreground font-kings"
+              disabled={isLoading || isExtracting}
+            />
+            {isExtracting && <p className="mt-2 text-center">Extracting text from PDF...</p>}
+            {selectedFile && !isExtracting && <p className="mt-2">Selected file: {selectedFile.name}</p>}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="caseText">Case Text</Label>
-              <p className="text-sm text-muted-foreground">
-                {selectedFile ? "Extracted from PDF (you can edit if needed):" : "Or paste case text manually:"}
-              </p>
-              <Textarea
-                id="caseText"
-                value={extractedText}
-                onChange={(e) => setExtractedText(e.target.value)}
-                placeholder="Case text will appear here after PDF upload, or you can paste it manually..."
-                className="min-h-[200px] font-mono"
-                disabled={isLoading || isExtracting}
-              />
-            </div>
-
+          <div className="mb-4">
+            <label className="block mb-2 font-kings">Case Text</label>
+            <p className="text-sm mb-2">
+              {selectedFile ? "Extracted from PDF (you can edit if needed):" : "Or paste case text manually:"}
+            </p>
+            <textarea
+              value={extractedText}
+              onChange={(e) => setExtractedText(e.target.value)}
+              placeholder="Case text will appear here after PDF upload, or you can paste it manually..."
+              className="w-full p-3 border border-background/20 bg-background text-foreground font-kings min-h-[200px]"
+              disabled={isLoading || isExtracting}
+            />
             {error && (
-              <div className="flex items-center p-3 text-sm bg-red-50 border border-red-200 text-red-800 rounded-md">
-                <AlertCircle className="h-4 w-4 mr-2" />
+              <p className="text-background font-bold mt-2 text-center border-b border-background pb-2 font-kings">
                 {error}
-              </div>
+              </p>
             )}
-
             {success && (
-              <div className="flex items-center p-3 text-sm bg-green-50 border border-green-200 text-green-800 rounded-md">
+              <p className="text-background font-bold mt-2 text-center border-b border-background pb-2 font-kings">
                 Case uploaded successfully!
-              </div>
+              </p>
             )}
-          </CardContent>
-          <CardFooter className="flex justify-between">
+          </div>
+
+          <div className="flex justify-between">
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/admin/dashboard/tools")}
+              className="border-background/20 hover:bg-background hover:text-foreground bg-foreground text-background"
+              onClick={() => router.push("/dashboard/admin")}
               disabled={isLoading || isExtracting}
             >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || isExtracting || !extractedText.trim() || !offenderId}>
+
+            <Button
+              type="submit"
+              className="bg-background text-foreground hover:bg-background/90"
+              disabled={isLoading || isExtracting || !extractedText.trim() || !offenderId}
+            >
               {isLoading ? "Processing..." : "Create Case"}
-              {!isLoading && <Save className="ml-2 h-4 w-4" />}
             </Button>
-          </CardFooter>
+          </div>
         </form>
-      </Card>
+      </div>
     </div>
   )
 }

@@ -5,7 +5,10 @@
 :root {
   --background: #e8ddca;
   --foreground: #292520;
-  --primary: #5c4032;
+  --sidebar-border: #292520;
+  --sidebar-accent: #e8ddca;
+  --sidebar-width-icon: 48px;
+  --sidebar-width: 200px;
 }
 
 body {
@@ -62,4 +65,3 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
-

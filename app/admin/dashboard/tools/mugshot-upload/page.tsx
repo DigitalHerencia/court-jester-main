@@ -4,21 +4,8 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter, useSearchParams } from "next/navigation"
-import { toast } from "sonner"
 import Image from "next/image"
-import { AlertCircle, ArrowLeft, Camera, Save } from "lucide-react"
-
-interface Offender {
-  id: number
-  inmate_number: string
-  last_name: string
-  first_name: string
-}
 
 export default function MugshotUploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -27,7 +14,7 @@ export default function MugshotUploadPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
-  const [offenders, setOffenders] = useState<Offender[]>([])
+  const [offenders, setOffenders] = useState<any[]>([])
   const [isLoadingOffenders, setIsLoadingOffenders] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -45,15 +32,25 @@ export default function MugshotUploadPage() {
     const fetchOffenders = async () => {
       setIsLoadingOffenders(true)
       try {
-        const response = await fetch("/api/admin/offenders")
+        const response = await fetch("/api/offenders")
 
+        // Check if response is ok before trying to parse JSON
         if (!response.ok) {
           console.error("Failed to fetch offenders:", response.status, response.statusText)
           setIsLoadingOffenders(false)
           return
         }
 
-        const data = await response.json()
+        // Try to parse JSON with error handling
+        let data
+        try {
+          data = await response.json()
+        } catch (parseError) {
+          console.error("Error parsing offenders response:", parseError)
+          setIsLoadingOffenders(false)
+          return
+        }
+
         setOffenders(data.offenders || [])
       } catch (error) {
         console.error("Error fetching offenders", error)
@@ -97,79 +94,84 @@ export default function MugshotUploadPage() {
       const formData = new FormData()
       formData.append("mugshot", selectedFile)
 
-      const response = await fetch(`/api/admin/offenders/${offenderId}/mugshot`, {
+      const response = await fetch(`/api/offenders/${offenderId}/mugshot`, {
         method: "POST",
         body: formData,
       })
 
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        throw new Error(`Failed to upload mugshot: ${response.status} ${response.statusText}`)
+        setError(`Failed to upload mugshot: ${response.status} ${response.statusText}`)
+        setIsLoading(false)
+        return
       }
 
-      const data = await response.json()
+      // Try to parse JSON with error handling
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        console.error("Error parsing mugshot upload response:", parseError)
+        setError("Failed to parse server response. Please try again.")
+        setIsLoading(false)
+        return
+      }
+
       setSuccess(true)
       setSelectedFile(null)
       setPreviewUrl(null)
-      toast.success("Mugshot uploaded successfully!")
 
       // Redirect back to admin dashboard
       setTimeout(() => {
-        router.push("/admin/dashboard/offenders")
+        router.push("/dashboard/admin")
       }, 2000)
     } catch (error) {
       console.error("Mugshot upload error", error)
       setError("An error occurred. Please try again.")
-      toast.error("Failed to upload mugshot")
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Camera className="mr-2 h-5 w-5" />
-            Upload Mugshot
-          </CardTitle>
-          <CardDescription>
-            Upload a mugshot image for an offender. The image will be stored in Vercel Blob and associated with the
-            offender's profile.
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="offender">Select Offender</Label>
-              <Select value={offenderId} onValueChange={setOffenderId} disabled={isLoading || isLoadingOffenders}>
-                <SelectTrigger id="offender">
-                  <SelectValue placeholder="Select an offender..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {offenders.map((offender) => (
-                    <SelectItem key={offender.id} value={offender.id.toString()}>
-                      {offender.inmate_number} - {offender.last_name}, {offender.first_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {isLoadingOffenders && <p className="text-sm text-muted-foreground">Loading offenders...</p>}
-            </div>
+    <div className="space-y-2 h-[calc(100vh-120px)] overflow-y-auto pr-2 hide-scrollbar">
+      <div className="rounded-md border border-background/20 p-4 bg-primary text-background">
+        <h2 className="font-kings mb-4 text-xl">Upload Mugshot</h2>
+        <p className="mb-4">
+          Upload a mugshot image for an offender. The image will be stored in Vercel Blob and associated with the
+          offender's profile.
+        </p>
 
-            <div className="space-y-2">
-              <Label htmlFor="mugshotFile">Upload Mugshot</Label>
-              <Input
-                id="mugshotFile"
-                type="file"
-                accept="image/jpeg,image/png"
-                onChange={handleFileChange}
-                disabled={isLoading}
-              />
-            </div>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block mb-2 font-kings">Select Offender</label>
+            <select
+              value={offenderId}
+              onChange={(e) => setOffenderId(e.target.value)}
+              className="w-full p-3 border border-background/20 bg-background text-foreground font-kings"
+              disabled={isLoading || isLoadingOffenders}
+            >
+              <option value="">Select an offender...</option>
+              {offenders.map((offender) => (
+                <option key={offender.id} value={offender.id}>
+                  {offender.inmate_number} - {offender.last_name}, {offender.first_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-2 font-kings">Upload Mugshot</label>
+            <input
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={handleFileChange}
+              className="w-full p-3 border border-background/20 bg-background text-foreground font-kings"
+              disabled={isLoading}
+            />
 
             {previewUrl && (
-              <div className="flex justify-center mt-4">
-                <div className="relative w-48 h-64 border-2 border-muted">
+              <div className="mt-4 flex justify-center">
+                <div className="relative w-48 h-64 border-2 border-background">
                   <Image
                     src={previewUrl || "/placeholder.svg"}
                     alt="Mugshot preview"
@@ -181,34 +183,38 @@ export default function MugshotUploadPage() {
             )}
 
             {error && (
-              <div className="flex items-center p-3 text-sm bg-red-50 border border-red-200 text-red-800 rounded-md">
-                <AlertCircle className="h-4 w-4 mr-2" />
+              <p className="text-background font-bold mt-2 text-center border-b border-background pb-2 font-kings">
                 {error}
-              </div>
+              </p>
             )}
-
             {success && (
-              <div className="flex items-center p-3 text-sm bg-green-50 border border-green-200 text-green-800 rounded-md">
+              <p className="text-background font-bold mt-2 text-center border-b border-background pb-2 font-kings">
                 Mugshot uploaded successfully!
-              </div>
+              </p>
             )}
-          </CardContent>
-          <CardFooter className="flex justify-between">
+          </div>
+
+          <div className="flex justify-between">
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/admin/dashboard/tools")}
+              className="border-background/20 hover:bg-background hover:text-foreground bg-foreground text-background"
+              onClick={() => router.push("/dashboard/admin")}
               disabled={isLoading}
             >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || !selectedFile || !offenderId}>
+
+            <Button
+              type="submit"
+              className="bg-background text-foreground hover:bg-background/90"
+              disabled={isLoading || !selectedFile || !offenderId}
+            >
               {isLoading ? "Uploading..." : "Upload Mugshot"}
-              {!isLoading && <Save className="ml-2 h-4 w-4" />}
             </Button>
-          </CardFooter>
+          </div>
         </form>
-      </Card>
+      </div>
     </div>
   )
 }
