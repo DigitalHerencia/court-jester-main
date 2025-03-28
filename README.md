@@ -32,7 +32,7 @@
 Court Jester is a modern, full-stack legal management platform that streamlines offender case management, notifications, motions, and more. Built with cutting-edge technologies, Court Jester delivers a seamless experience for legal teams and offenders alike.
 
 ---
-![alt text](./public/homepage.png)
+![alt text](https://raw.githubusercontent.com/DigitalHerencia/court-jester-main/refs/heads/main/public/fonts/homepage.png)
 
 ---
 
