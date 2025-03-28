@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -24,54 +22,34 @@ export default function CaseUploadPage() {
   const [success, setSuccess] = useState(false)
   const [offenders, setOffenders] = useState<Offender[]>([])
   const [isLoadingOffenders, setIsLoadingOffenders] = useState(false)
+  const [fetchError, setFetchError] = useState("")
   const router = useRouter()
 
-  // Sample offenders for fallback
-  const sampleOffenders: Offender[] = [
-    {
-      id: 1,
-      inmate_number: "468079",
-      last_name: "Dominguez",
-      first_name: "Christopher",
-    },
-    {
-      id: 2,
-      inmate_number: "123456",
-      last_name: "Doe",
-      first_name: "John",
-    },
-  ]
-
-  // Fetch offenders on component mount
-  useEffect(() => {
-    const fetchOffenders = async () => {
-      setIsLoadingOffenders(true)
-      try {
-        const response = await fetch("/api/admin/offenders")
-
-        if (!response.ok) {
-          console.error("Failed to fetch offenders:", response.status, response.statusText)
-          // Use sample data as fallback
-          setOffenders(sampleOffenders)
-          setIsLoadingOffenders(false)
-          return
-        }
-
-        const data = await response.json()
-        setOffenders(data.offenders || [])
-      } catch (error) {
-        console.error("Error fetching offenders", error)
-        // Use sample data as fallback
-        setOffenders(sampleOffenders)
-      } finally {
-        setIsLoadingOffenders(false)
+  // Fetch offenders on component mount (production: no fallback data)
+  const fetchOffenders = async () => {
+    setIsLoadingOffenders(true)
+    setFetchError("")
+    try {
+      const response = await fetch("/api/admin/offenders")
+      if (!response.ok) {
+        throw new Error(`Failed to fetch offenders: ${response.status} ${response.statusText}`)
       }
+      const data = await response.json()
+      setOffenders(data.offenders || [])
+    } catch (err) {
+      console.error("Error fetching offenders:", err)
+      setFetchError("Unable to load offender data. Please check your database connection and try again.")
+      setOffenders([])
+    } finally {
+      setIsLoadingOffenders(false)
     }
+  }
 
+  useEffect(() => {
     fetchOffenders()
   }, [])
 
-  // Handle file selection
+  // Handle file selection and PDF extraction
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
 
@@ -81,7 +59,6 @@ export default function CaseUploadPage() {
       return
     }
 
-    // Check if file is a PDF
     if (file.type !== "application/pdf") {
       setError("Please select a PDF file")
       setSelectedFile(null)
@@ -91,45 +68,30 @@ export default function CaseUploadPage() {
     setSelectedFile(file)
     setError("")
 
-    // Extract text from PDF
     await extractTextFromPdf(file)
   }
 
-  // Extract text from PDF using PDF.js
   const extractTextFromPdf = async (file: File) => {
     setIsExtracting(true)
     setError("")
 
     try {
-      // Load the PDF.js library dynamically
       const pdfjsLib = await import("pdfjs-dist")
-
-      // Set the worker source
       pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-
-      // Read the file as ArrayBuffer
       const arrayBuffer = await file.arrayBuffer()
-
-      // Load the PDF document
       const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer })
       const pdf = await loadingTask.promise
-
       let fullText = ""
-
-      // Extract text from each page
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i)
         const textContent = await page.getTextContent()
         const pageText = textContent.items.map((item: any) => item.str).join(" ")
         fullText += pageText + "\n"
       }
-
       setExtractedText(fullText)
-    } catch (error) {
-      console.error("Error extracting text from PDF:", error)
-      setError("Failed to extract text from PDF. Please try again.")
-
-      // Fallback: Ask user to paste the text manually
+    } catch (err) {
+      console.error("Error extracting text from PDF:", err)
+      setError("Failed to extract text from PDF. Please try again or paste the case text manually.")
       toast.error("PDF extraction failed. Please copy and paste the case text manually.")
     } finally {
       setIsExtracting(false)
@@ -151,9 +113,7 @@ export default function CaseUploadPage() {
     try {
       const response = await fetch("/api/cases", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ caseText: extractedText, offenderId: Number.parseInt(offenderId) }),
       })
 
@@ -168,15 +128,12 @@ export default function CaseUploadPage() {
       setSelectedFile(null)
       setExtractedText("")
       setOffenderId("")
-
-      // Redirect back to admin dashboard
       toast.success("Case created successfully!")
-      setTimeout(() => {
-        router.push("/dashboard/admin")
-      }, 2000)
-    } catch (error) {
-      console.error("Case upload error", error)
+      setTimeout(() => router.push("/dashboard/admin"), 2000)
+    } catch (err) {
+      console.error("Case upload error:", err)
       setError("An error occurred. Please try again.")
+    } finally {
       setIsLoading(false)
     }
   }
@@ -186,10 +143,9 @@ export default function CaseUploadPage() {
       <div className="rounded-md border border-background/20 p-2 bg-primary text-background">
         <h2 className="font-kings mb-4 text-xl">Upload Case File</h2>
         <p className="mb-4">
-          Upload a case file PDF or paste the case text below and select the offender. The system will parse the
-          information and create a case record in the database.
+          Upload a case file PDF or paste the case text below and select the offender. The system will parse the information
+          and create a case record in the database.
         </p>
-
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block mb-2 font-kings">Select Offender</label>
@@ -206,6 +162,14 @@ export default function CaseUploadPage() {
                 </option>
               ))}
             </select>
+            {fetchError && (
+              <div className="mt-2 text-red-500">
+                <p>{fetchError}</p>
+                <Button onClick={fetchOffenders} className="mt-2 bg-background text-foreground hover:bg-background/90">
+                  Retry
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="mb-4">
@@ -255,7 +219,6 @@ export default function CaseUploadPage() {
             >
               Cancel
             </Button>
-
             <Button
               type="submit"
               className="bg-background text-foreground hover:bg-background/90"
@@ -269,4 +232,3 @@ export default function CaseUploadPage() {
     </div>
   )
 }
-

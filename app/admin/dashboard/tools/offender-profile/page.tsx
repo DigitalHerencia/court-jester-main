@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 
@@ -11,7 +9,28 @@ export default function OffenderProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [fetchError, setFetchError] = useState("")
   const router = useRouter()
+
+  // If reference data is needed for profile creation, fetch it here.
+  // This example assumes no external fetch is required. If needed, implement similar retry logic as in CaseUploadPage.
+  useEffect(() => {
+    const fetchProfileReference = async () => {
+      try {
+        const response = await fetch("/api/admin/offenders/profile-info")
+        if (!response.ok) {
+          throw new Error(`Failed to fetch profile info: ${response.status} ${response.statusText}`)
+        }
+        // Use the fetched data as necessary...
+      } catch (err) {
+        console.error("Error fetching profile info:", err)
+        setFetchError("Unable to load profile reference data. Please try again later.")
+      }
+    }
+
+    // Uncomment the next line if profile reference data is required.
+    // fetchProfileReference()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,20 +41,16 @@ export default function OffenderProfilePage() {
     try {
       const response = await fetch("/api/offenders/profile", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ profileText }),
       })
 
-      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
         setError(`Failed to process profile: ${response.status} ${response.statusText}`)
         setIsLoading(false)
         return
       }
 
-      // Try to parse JSON with error handling
       let data
       try {
         data = await response.json()
@@ -49,17 +64,15 @@ export default function OffenderProfilePage() {
       setSuccess(true)
       setProfileText("")
 
-      // Redirect to mugshot upload for this offender
       if (data.offenderId) {
         router.push(`/dashboard/admin/mugshot-upload?offenderId=${data.offenderId}`)
       } else {
-        setTimeout(() => {
-          router.push("/dashboard/admin")
-        }, 2000)
+        setTimeout(() => router.push("/dashboard/admin"), 2000)
       }
-    } catch (error) {
-      console.error("Profile creation error", error)
+    } catch (err) {
+      console.error("Profile creation error:", err)
       setError("An error occurred. Please try again.")
+    } finally {
       setIsLoading(false)
     }
   }
@@ -72,6 +85,15 @@ export default function OffenderProfilePage() {
           Paste the offender profile text below. The system will parse the information and create a profile in the
           database.
         </p>
+
+        {fetchError && (
+          <div className="mb-4 text-red-500">
+            <p>{fetchError}</p>
+            <Button className="mt-2 bg-background text-foreground hover:bg-background/90">
+              Retry
+            </Button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -104,7 +126,6 @@ export default function OffenderProfilePage() {
             >
               Cancel
             </Button>
-
             <Button
               type="submit"
               className="bg-background text-foreground hover:bg-background/90"
@@ -115,41 +136,6 @@ export default function OffenderProfilePage() {
           </div>
         </form>
       </div>
-
-      <div className="rounded-md border border-background/20 p-4 bg-foreground text-background">
-        <h2 className="font-kings mb-4 text-xl">Example Format</h2>
-
-        <div className="rounded-md border border-background/20 p-4 bg-background text-foreground">
-          <pre className="whitespace-pre-wrap text-sm">
-            {`Details
-Offender ID: 468079
-NMCD Number: 
-Last Name: Dominguez
-First Name: Christopher
-Middle Name: 
-Offender Status: INACTIVE
-Facility/Region: 
-Demographics
-Age: 42
-Height: 5 ft 10 in
-Weight: 168
-Eye Color: Brown
-Hair: Brown or Dark Brown
-Religion: 
-Education: 
-Complexion: 
-Ethnicity: Hispanic
-Alias: No Alias Found
-Current Offense(s)
-No Offenses Found
-Past Offense(s)
-Offense Status
-Burglary (automobile) - conspiracy [ D-0307-CR-2008-1281 ] Completed
-Burglary (automobile) [ D-0307-CR-2008-1281 ] Completed`}
-          </pre>
-        </div>
-      </div>
     </div>
   )
 }
-
