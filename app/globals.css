@@ -1,0 +1,65 @@
+/** @format */
+
+@import "tailwindcss";
+
+:root {
+  --background: #e8ddca;
+  --foreground: #292520;
+  --primary: #5c4032;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.font-jacquard {
+  font-family: "Jacquard 24 Charted", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.font-kings {
+  font-family: "Kings", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.page-transition {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.scrollable-area {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--foreground) var(--background);
+}
+
+.scrollable-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-area::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+.scrollable-area::-webkit-scrollbar-thumb {
+  background-color: var(--foreground);
+  border-radius: 4px;
+  border: 2px solid var(--background);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
