@@ -25,7 +25,7 @@ export default function CaseUploadPage() {
   const [fetchError, setFetchError] = useState("")
   const router = useRouter()
 
-  // Fetch offenders on component mount (production: no fallback data)
+  // Fetch offenders from the admin endpoint
   const fetchOffenders = async () => {
     setIsLoadingOffenders(true)
     setFetchError("")
@@ -74,7 +74,6 @@ export default function CaseUploadPage() {
   const extractTextFromPdf = async (file: File) => {
     setIsExtracting(true)
     setError("")
-
     try {
       const pdfjsLib = await import("pdfjs-dist")
       pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
@@ -111,7 +110,7 @@ export default function CaseUploadPage() {
     }
 
     try {
-      const response = await fetch("/api/cases", {
+      const response = await fetch("/api/admin/cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ caseText: extractedText, offenderId: Number.parseInt(offenderId) }),
@@ -129,7 +128,8 @@ export default function CaseUploadPage() {
       setExtractedText("")
       setOffenderId("")
       toast.success("Case created successfully!")
-      setTimeout(() => router.push("/dashboard/admin"), 2000)
+      // Redirect to the admin cases overview page (which lists cases per offender)
+      setTimeout(() => router.push("/admin/dashboard/cases"), 2000)
     } catch (err) {
       console.error("Case upload error:", err)
       setError("An error occurred. Please try again.")
@@ -214,7 +214,7 @@ export default function CaseUploadPage() {
               type="button"
               variant="outline"
               className="border-background/20 hover:bg-background hover:text-foreground bg-foreground text-background"
-              onClick={() => router.push("/dashboard/admin")}
+              onClick={() => router.push("/admin/dashboard")}
               disabled={isLoading || isExtracting}
             >
               Cancel

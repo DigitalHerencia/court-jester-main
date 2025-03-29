@@ -13,19 +13,34 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simple login - direct redirect based on username
-    if (username === "admin") {
-      // Redirect to admin dashboard
-      window.location.href = "/admin/dashboard"
-    } else if (username) {
-      // Redirect to offender dashboard with the inmate number
-      window.location.href = `/offender/dashboard/${username}`
-    } else {
-      toast.error("Invalid credentials")
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: username })
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        toast.error(data.error || "Login failed")
+        setIsLoading(false)
+        return
+      }
+      if (data.role === "admin") {
+        router.push("/admin/dashboard")
+      } else if (data.role === "offender") {
+        if (data.newUser) {
+          router.push("/confirmation")
+        } else {
+          router.push(`/offender/dashboard/${data.offenderId}`)
+        }
+      }
+    } catch (error: any) {
+      console.error("Login error:", error)
+      toast.error("An error occurred during login")
       setIsLoading(false)
     }
   }
@@ -68,9 +83,10 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-8 text-sm text-center font-kings">Versión 3.0 • "La Pinta Edition" • Sin vigilancia</p>
+        <p className="mt-8 text-sm text-center font-kings">
+          Versión 3.0 • "La Pinta Edition" • Sin vigilancia
+        </p>
       </div>
     </div>
   )
 }
-

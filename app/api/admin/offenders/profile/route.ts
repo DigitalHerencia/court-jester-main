@@ -3,7 +3,8 @@ import { requireAdmin } from "@/lib/auth"
 import { parseOffenderProfile } from "@/lib/profile-parser"
 
 export async function POST(request: NextRequest) {
-  const session = await requireAdmin()
+  const token = request.cookies.get('token')?.value;
+  const session = await requireAdmin(token);
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

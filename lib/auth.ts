@@ -1,34 +1,36 @@
-import { NextRequest } from "next/server"
+// lib/auth.ts
+import jwt from "jsonwebtoken";
 
-interface Session {
-  username: string
-  role: string
-  offenderId?: number
+const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"; // In production, set via environment variable
+const JWT_EXPIRES_IN = "7d";
+
+interface TokenPayload {
+  role: "admin" | "offender";
+  offenderId?: number;
+  newUser?: boolean;
 }
 
-// Dummy authentication function - replace with real authentication logic
-export async function requireAuth(): Promise<Session | null> {
-  const request = new NextRequest(new URL("http://localhost:3000/api/auth/session")) // Dummy request
-
-  const authHeader = request.headers.get("authorization")
-
-  if (authHeader === "Bearer admin") {
-    return { username: "admin", role: "admin" }
-  }
-
-  if (authHeader === "Bearer 468079") {
-    return { username: "468079", role: "offender", offenderId: 1 } // Dummy offenderId
-  }
-
-  return null
+export function signToken(payload: TokenPayload): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
-// Dummy admin authentication function - replace with real authentication logic
-export async function requireAdmin(): Promise<Session | null> {
-  const session = await requireAuth()
-  if (session && session.role === "admin") {
-    return session
+export function verifyToken(token: string): TokenPayload | null {
+  try {
+    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+  } catch (error) {
+    console.error("JWT verification error:", error);
+    return null;
   }
-  return null
 }
 
+export async function requireAdmin(token: string | undefined): Promise<TokenPayload | null> {
+  if (!token) return null;
+  const payload = verifyToken(token);
+  return payload && payload.role === "admin" ? payload : null;
+}
+
+export async function requireOffender(token: string | undefined): Promise<TokenPayload | null> {
+  if (!token) return null;
+  const payload = verifyToken(token);
+  return payload && payload.role === "offender" ? payload : null;
+}

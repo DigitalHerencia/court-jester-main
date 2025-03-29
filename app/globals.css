@@ -1,6 +1,6 @@
 /** @format */
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #e8ddca;
@@ -9,6 +9,8 @@
   --sidebar-accent: #e8ddca;
   --sidebar-width-icon: 48px;
   --sidebar-width: 200px;
+  --radix-toast-swipe-move-x: calc(-100% - 10px);
+  --radix-toast-swipe-end-x: 0;
 }
 
 body {
@@ -19,13 +21,13 @@ body {
 }
 
 .font-jacquard {
-  font-family: "Jacquard 24 Charted", serif;
+  font-family: 'Jacquard 24 Charted', serif;
   font-weight: 400;
   font-style: normal;
 }
 
 .font-kings {
-  font-family: "Kings", serif;
+  font-family: 'Kings', serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -64,4 +66,12 @@ body {
 .hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+.home-button {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+.home-button:hover {
+  background-color: var(--foreground);
 }

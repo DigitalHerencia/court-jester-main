@@ -4,7 +4,8 @@ import { requireAdmin } from '@/lib/auth';
 import { resetDatabase, seedDatabase } from '@/lib/db-schema';
 
 export async function POST(request: NextRequest) {
-  const session = await requireAdmin();
+  const token = request.cookies.get('token')?.value;
+  const session = await requireAdmin(token);
   if (!session) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }

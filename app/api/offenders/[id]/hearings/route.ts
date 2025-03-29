@@ -1,9 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { requireAuth } from "@/lib/auth"
+import { requireOffender } from "@/lib/auth"
 import { query } from "@/lib/db"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const session = await requireAuth()
+  const token = request.cookies.get("token")?.value;
+  const session = await requireOffender(token)
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

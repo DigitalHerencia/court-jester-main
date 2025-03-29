@@ -5,7 +5,8 @@ import { uploadMugshot } from "@/lib/blob";
 import { query } from "@/lib/db";
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const session = await requireAdmin();
+  const token = request.cookies.get('token')?.value;
+  const session = await requireAdmin(token);
 
   if (!session) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
