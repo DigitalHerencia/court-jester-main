@@ -1,0 +1,38 @@
+/** @format */
+
+@import 'tailwindcss';
+
+:root {
+  --background: #e8ddca;
+  --foreground: #292520;
+  --radix-toast-swipe-move-x: calc(-100% - 10px);
+  --radix-toast-swipe-end-x: 0;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.font-jacquard {
+  font-family: 'Jacquard 24 Charted', serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.font-kings {
+  font-family: 'Kings', serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
