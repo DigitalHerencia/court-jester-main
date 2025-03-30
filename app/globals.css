@@ -5,33 +5,33 @@
   @theme {
     
     --color-*: initial;
-    --background: hsl(38, 44%, 85%)
-    --foreground: hsl(36, 10%, 15%)
+    --background: hsl(38, 44%, 85%);
+    --foreground: hsl(36, 10%, 15%);
     
-    --card: hsl(38, 44%, 85%)
-    --card-foreground: hsl(36, 10%, 15%)
+    --card: hsl(38, 44%, 85%);
+    --card-foreground: hsl(36, 10%, 15%);
     
-    --popover: hsl(38, 44%, 85%)
-    --popover-foreground: hsl(36, 10%, 15%)
+    --popover: hsl(38, 44%, 85%);
+    --popover-foreground: hsl(36, 10%, 15%);
     
-    --primary: hsl(36, 10%, 15%)
-    --primary-foreground: hsl(38, 44%, 85%)
+    --primary: hsl(36, 10%, 15%);
+    --primary-foreground: hsl(38, 44%, 85%);
     
-    --secondary: hsl(25, 29%, 28%)
-    --secondary-foreground: hsl(38, 44%, 85%)
+    --secondary: hsl(25, 29%, 28%);
+    --secondary-foreground: hsl(38, 44%, 85%);
     
-    --muted: hsl(36, 10%, 20%)
-    --muted-foreground: hsl(38, 44%, 85%)
+    --muted: hsl(36, 10%, 20%);
+    --muted-foreground: hsl(38, 44%, 85%);
     
-    --accent: hsl(38, 44%, 85%)
-    --accent-foreground: hsl(36, 10%, 15%)
+    --accent: hsl(38, 44%, 85%);
+    --accent-foreground: hsl(36, 10%, 15%);
     
-    --destructive: hsl(0, 65%, 40%)
-    --destructive-foreground: hsl(38, 44%, 85%)
+    --destructive: hsl(0, 65%, 40%);
+    --destructive-foreground: hsl(38, 44%, 85%);
     
-    --border: hsl(38, 44%, 85%)
-    --input: hsl(38, 44%, 85%)
-    --ring: hsl(38, 44%, 85%)
+    --border: hsl(38, 44%, 85%);
+    --input: hsl(38, 44%, 85%);
+    --ring: hsl(38, 44%, 85%);
     --radius: 0.5rem;
   }
 
@@ -42,10 +42,6 @@
     overflow-x: hidden;
     background-color: hsl(var(--background));
     
-  }
-
-  
-  .home {
   }
 
 .font-jacquard {
@@ -154,4 +150,26 @@
   color: hsl(var(--foreground));
 }
 
+.bg-background {
+  background-color: var(--background) /* #e8ddca */;
+}
 
+.text-foreground {
+  color: var(--foreground) /*#292520 */; 
+}
+
+.bg-foreground {
+  background-color: var(--foreground) /*#292520 */; 
+}
+
+.text-background {
+  color: var(--background) /* #e8ddca */;
+}
+
+.border-foreground {
+  border: 2px var(--foreground) /*#292520 */; 
+}
+
+.border-background {
+  border: 2px  var(--background) /* #e8ddca */;
+}

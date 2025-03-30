@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { Button } from "../ui/button"
+import Link from "next/link"
 
 // Client-side logout function
 async function logout() {
@@ -13,13 +14,14 @@ async function logout() {
   }
 }
 
-
 export function AdminDashboardHeader() {
   return (
-    <header className="mb-2 flex items-center justify-between">
-      <h1 className="font-jacquard text-4xl font-normal">Admin Dashboard</h1>
+    <header className="flex justify-between items-center py-4 border-b border-foreground/10 mb-6">
+      <Link href="/admin/dashboard" className="font-jacquard text-2xl sm:text-3xl">
+        Court Jester
+      </Link>
       <Button
-        className="rounded-md border border-foreground/20 bg-background px-3 py-1 text-sm text-foreground hover:bg-foreground/10"
+        className="bg-foreground text-background hover:bg-foreground/90 font-kings px-4 py-2 rounded-md"
         onClick={logout}
       >
         Logout
@@ -30,10 +32,12 @@ export function AdminDashboardHeader() {
 
 export function OffenderDashboardHeader() {
   return (
-    <header className="mb-2 flex items-center justify-between">
-      <h1 className="font-jacquard text-4xl font-normal">Offender Dashboard</h1>
+    <header className="flex justify-between items-center py-4 border-b border-foreground/10 mb-6">
+      <Link href="/offender/dashboard" className="font-jacquard text-2xl sm:text-3xl">
+        Court Jester
+      </Link>
       <Button
-        className="rounded-md border border-foreground/20 bg-background px-3 py-1 text-sm text-foreground hover:bg-foreground/10"
+        className="bg-foreground text-background hover:bg-foreground/90 font-kings px-4 py-2 rounded-md"
         onClick={logout}
       >
         Logout
@@ -48,4 +52,3 @@ export function DashboardHeader() {
 
   return isAdmin ? <AdminDashboardHeader /> : <OffenderDashboardHeader />
 }
-

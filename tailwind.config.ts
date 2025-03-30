@@ -1,88 +1,60 @@
-import type { Config } from "tailwindcss"
-import typography from '@tailwindcss/typography';
-import tailwindcssAnimate from 'tailwindcss-animate';
+import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
+  darkMode: ["class", ".dark"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx,js,jsx}",
+    "./pages/**/*.{ts,tsx,js,jsx}",
+    "./components/**/*.{ts,tsx,js,jsx}",
+    "./src/**/*.{ts,tsx,js,jsx}",
   ],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "sm": "640px",
-        "md": "768px",
-        "lg": "1024px",
-        "xl": "1280px",
-        "2xl": "1536px",
-      },
-    },
     extend: {
       colors: {
-        border: "hsl(36, 33%, 90%)",
-        input: "hsl(36, 33%, 90%)",
-        ring: "hsl(36, 33%, 90%)",
-        background: " hsl(38, 44%, 85%)",
-        foreground: "hsl(36, 10%, 15%)",
+        background: "hsl(var(--background) / <alpha-value>)",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
+        card: "hsl(var(--card) / <alpha-value>)",
+        "card-foreground": "hsl(var(--card-foreground) / <alpha-value>)",
+        popover: "hsl(var(--popover) / <alpha-value>)",
+        "popover-foreground": "hsl(var(--popover-foreground) / <alpha-value>)",
         primary: {
-          DEFAULT: "hsl(36, 10%, 15%)",
-          foreground: "hsl(36, 33%, 85%)",
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT: "hsl(25, 29%, 28%)",
-          foreground: "hsl(36, 33%, 85%)",
-        },
-        destructive: {
-          DEFAULT: "hsl(0, 65%, 40%)",
-          foreground: "hsl(36, 33%, 85%)",
+          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "hsl(36, 10%, 20%)",
-          foreground: "hsl(36, 33%, 70%)",
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "hsl(36, 33%, 75%)",
-          foreground: "hsl(36, 10%, 15%)",
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
         },
-        popover: {
-          DEFAULT: "hsl(36, 33%, 85%)",
-          foreground: "hsl(36, 10%, 15%)",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
         },
-        card: {
-          DEFAULT: "hsl(36, 33%, 85%)",
-          foreground: "hsl(36, 10%, 15%)",
-        },
+        border: "hsl(var(--border) / <alpha-value>)",
+        input: "hsl(var(--input) / <alpha-value>)",
+        ring: "hsl(var(--ring) / <alpha-value>)",
       },
       borderRadius: {
-        lg: "0.5rem",
-        md: "calc(0.5rem - 2px)",
-        sm: "calc(0.5rem - 4px)",
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
         kings: ["Kings", "serif"],
         jacquard: ['"Jacquard 24 Charted"', "serif"],
-      },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "100" },
-        },
-        "accordion-up": {
-          from: { height:"100" },
-          to: { height: "0" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        sans: ["var(--font-sans)", ...defaultTheme.fontFamily.sans],
       },
     },
   },
-  plugins: [tailwindcssAnimate,typography],
-} satisfies Config
+  plugins: [],
+};
 
-export default config
+export default config;

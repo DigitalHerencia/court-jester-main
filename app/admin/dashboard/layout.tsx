@@ -18,11 +18,13 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   }
 
   return (
-    <div className="space-y-2 h-[calc(100vh-120px)] overflow-y-auto pr-2 hide-scrollbar">
-      {/* Header and tabs with old styling */}
+    <div className="container mx-auto px-4 sm:px-6 py-4 bg-background text-foreground">
+      {/* Header and tabs with updated styling */}
       <DashboardHeader />
       <DashboardTabs role="admin" />
-      {children}
+      <div className="space-y-4 h-[calc(100vh-180px)] overflow-y-auto hide-scrollbar">
+        {children}
+      </div>
     </div>
   )
 }

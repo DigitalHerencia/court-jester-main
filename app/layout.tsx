@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { jacquard, kings } from "@/app/fonts"
-import "./globals.css"
+import "@/app/globals.css"
 
 export const metadata: Metadata = {
   title: "Court Jester",
@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="icon"
         />
       </head>
-      <body className="font-kings">{children}</body>
+      <body className="font-kings bg-background">{children}</body>
     </html>
   )
 }

@@ -38,28 +38,28 @@ export function DashboardTabs({ role, offenderId }: DashboardTabsProps) {
         ];
 
   return (
-    <div className="mb-4 border-b border-foreground/20">
-      <nav className="-mb-px flex space-x-4 overflow-x-auto">
+    <div className="mb-8">
+      <div className="flex w-full rounded-md border-2 border-foreground overflow-hidden">
         {tabs.map((tab) => (
           <Link
             key={tab.href}
             className={cn(
-              "inline-flex whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium",
-              pathname === tab.href
-                ? "border-foreground text-foreground"
-                : "border-transparent text-foreground/60 hover:border-foreground/40 hover:text-foreground/80"
+              "relative flex-1 px-4 py-2 text-center transition-colors font-kings",
+              pathname === tab.href || pathname.startsWith(tab.href.replace(/\/$/, ""))
+                ? "font-medium bg-background text-foreground"
+                : "bg-foreground text-background hover:bg-foreground/90"
             )}
             href={tab.href}
           >
-            {tab.label}
+            <span>{tab.label}</span>
             {tab.count && (
-              <span className="ml-2 rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
+              <span className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
                 {tab.count}
               </span>
             )}
           </Link>
         ))}
-      </nav>
+      </div>
     </div>
   );
 }

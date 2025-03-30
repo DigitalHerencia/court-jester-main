@@ -1,12 +1,10 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import { toast } from "sonner"
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -19,6 +17,7 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
+    // Check if username (prisoner number) is entered
     if (!username.trim()) {
       setError("Por favor ingrese un número de preso");
       setIsLoading(false);
@@ -32,6 +31,7 @@ export default function LoginPage() {
         body: JSON.stringify({ credential: username }),
       });
 
+      // Get the raw response text and then parse it.
       const responseText = await response.text();
       const data = JSON.parse(responseText);
 
@@ -43,6 +43,7 @@ export default function LoginPage() {
         return;
       }
 
+      // Successful login—navigate based on role and status.
       if (data.success) {
         const { role, newUser, offenderId } = data;
         if (role === "admin") {
@@ -63,14 +64,13 @@ export default function LoginPage() {
     }
   };
 
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground">
       <div className="w-full max-w-md flex flex-col items-center">
         <h1 className="text-6xl font-jacquard mb-2">Court Jester</h1>
         <p className="text-2xl mb-8 italic font-kings">Tu camarada en la sombra</p>
 
-        <div className="relative w-full h-full mb-8 flex justify-center">
+        <div className="relative mb-8 flex justify-center">
           <Image
             priority
             alt="Court Jester"
@@ -94,19 +94,17 @@ export default function LoginPage() {
 
           {error && <div className="mb-4 text-red-500 text-center font-kings">{error}</div>}
 
-          <Button
-            className="w-full p-3 font-bold uppercase font-kings"
-            disabled={isLoading}
-            type="submit"
-            variant="default"
-          >
-            {isLoading ? "Procesando..." : "BUSCAR"}
+          <Button 
+          className=
+          "w-full bg-foreground text-background hover:bg-background hover:text-foreground">
+          {isLoading ? "Procesando..." : "BUSCAR"}
           </Button>
         </form>
 
-        <p className="mt-6 text-sm text-center font-kings">Versión 3.0 • &quot;La Pinta Edition&quot; • Sin Vigilancia</p>
+        <p className="mt-6 text-sm text-center font-kings">
+          Versión 3.0 • &quot;La Pinta Edition&quot; • Sin Vigilancia
+        </p>
       </div>
     </div>
-  )
+  );
 }
-
