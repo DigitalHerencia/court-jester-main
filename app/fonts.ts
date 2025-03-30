@@ -1,4 +1,4 @@
-import { Jacquard_24_Charted, Kings } from "next/font/google"
+import { Jacquard_24_Charted, Kings } from 'next/font/google'
 
 export const jacquard = Jacquard_24_Charted({
   subsets: ["latin"],
@@ -13,4 +13,3 @@ export const kings = Kings({
   variable: "--font-kings",
   display: "swap",
 })
-

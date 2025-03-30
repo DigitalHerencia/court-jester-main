@@ -1,38 +1,157 @@
 /** @format */
 
-@import 'tailwindcss';
+@import "tailwindcss";
 
-:root {
-  --background: #e8ddca;
-  --foreground: #292520;
-  --radix-toast-swipe-move-x: calc(-100% - 10px);
-  --radix-toast-swipe-end-x: 0;
-}
+  @theme {
+    
+    --color-*: initial;
+    --background: hsl(38, 44%, 85%)
+    --foreground: hsl(36, 10%, 15%)
+    
+    --card: hsl(38, 44%, 85%)
+    --card-foreground: hsl(36, 10%, 15%)
+    
+    --popover: hsl(38, 44%, 85%)
+    --popover-foreground: hsl(36, 10%, 15%)
+    
+    --primary: hsl(36, 10%, 15%)
+    --primary-foreground: hsl(38, 44%, 85%)
+    
+    --secondary: hsl(25, 29%, 28%)
+    --secondary-foreground: hsl(38, 44%, 85%)
+    
+    --muted: hsl(36, 10%, 20%)
+    --muted-foreground: hsl(38, 44%, 85%)
+    
+    --accent: hsl(38, 44%, 85%)
+    --accent-foreground: hsl(36, 10%, 15%)
+    
+    --destructive: hsl(0, 65%, 40%)
+    --destructive-foreground: hsl(38, 44%, 85%)
+    
+    --border: hsl(38, 44%, 85%)
+    --input: hsl(38, 44%, 85%)
+    --ring: hsl(38, 44%, 85%)
+    --radius: 0.5rem;
+  }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  height: 100vh;
-  overflow: hidden;
-}
+  /* Custom Court Jester Styles */
+  
+  body {
+    height: 100vh;
+    overflow-x: hidden;
+    background-color: hsl(var(--background));
+    
+  }
+
+  
+  .home {
+  }
 
 .font-jacquard {
-  font-family: 'Jacquard 24 Charted', serif;
+  font-family: "Jacquard 24 Charted", serif;
   font-weight: 400;
   font-style: normal;
 }
 
 .font-kings {
-  font-family: 'Kings', serif;
+  font-family: "Kings", serif;
   font-weight: 400;
   font-style: normal;
 }
 
+.page-transition {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.scrollable-area {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--foreground)) hsl(var(--background));
+}
+
+.scrollable-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-area::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+.scrollable-area::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--foreground));
+  border-radius: 4px;
+  border: 2px solid hsl(var(--background));
+}
+
+/* Hide scrollbar for Chrome, Safari, Opera, IE, Edge, and Firefox */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Card Styles */
+.card-primary {
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--primary));
+  padding: 1rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.card-secondary {
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--primary));
+  padding: 1rem;
+  background-color: hsl(var(--foreground));
+  color: hsl(var(--background));
+}
+
+.card-content {
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--background));
+  padding: 1rem;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Button Link Styles */
+.button-link {
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--primary));
+  padding: 1rem;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition: background-color 0.2s;
+}
+
+.button-link:hover {
+  background-color: hsla(var(--background), 0.9);
+}
+
+/* Settings Control Styles */
+.settings-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--primary));
+  padding: 1rem;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Notification Styles */
+.notification-item {
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--primary));
+  padding: 1rem;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+
