@@ -1,5 +1,5 @@
 // app/offender/dashboard/[id]/layout.tsx
-import { DashboardHeader } from "@/components/shared/dashboard-header";
+import { OffenderDashboardHeader } from "@/components/shared/dashboard-header";
 import { DashboardTabs } from "@/components/shared/dashboard-tabs";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -15,12 +15,15 @@ export default async function OffenderDashboardLayout({ children }: { children: 
   if (!payload || payload.role !== "offender") {
     redirect("/");
   }
-  // Pass the offender id (which is now the inmate number) from the token to DashboardTabs
+
   return (
-    <div className="space-y-2 h-[calc(100vh-120px)] overflow-y-auto pr-2 hide-scrollbar">
-      <DashboardHeader />
+    <div className="container mx-auto px-4 sm:px-6 py-4 bg-background text-foreground">
+      {/* Header and tabs with styling matching the admin dashboard */}
+      <OffenderDashboardHeader />
       <DashboardTabs offenderId={String(payload.offenderId)} role="offender" />
-      {children}
+      <div className="space-y-4 h-[calc(100vh-180px)] overflow-y-auto hide-scrollbar">
+        {children}
+      </div>
     </div>
   );
 }
