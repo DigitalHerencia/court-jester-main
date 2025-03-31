@@ -1,66 +1,68 @@
 "use client";
 
-import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { toast } from "sonner";
 
+type FormData = {
+  username: string;
+};
+
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<FormData>();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    // Check if username (prisoner number) is entered
+  const onSubmit = async (data: FormData) => {
+    const username = data.username;
     if (!username.trim()) {
-      setError("Por favor ingrese un número de preso");
-      setIsLoading(false);
+      // Show dismissible toast error instead of form error
+      toast.error("Ingrese un número de preso válido", {
+        dismissible: true, // Make toast dismissible
+        duration: 5000, // 5 seconds duration
+      });
       return;
     }
-
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: username }),
       });
-
-      // Get the raw response text and then parse it.
       const responseText = await response.text();
-      const data = JSON.parse(responseText);
-
+      const result = JSON.parse(responseText);
       if (!response.ok) {
-        const errorMessage = data.error || "Login failed";
-        setError(errorMessage);
-        toast.error(errorMessage);
-        setIsLoading(false);
+        const errorMessage = result.error || "Login failed";
+        toast.error(errorMessage, {
+          dismissible: true,
+          duration: 5000,
+        });
         return;
       }
-
-      // Successful login—navigate based on role and status.
-      if (data.success) {
-        const { role, newUser, offenderId } = data;
+      if (result.success) {
+        const { role, newUser, offenderId } = result;
         if (role === "admin") {
           router.push("/admin/dashboard");
         } else if (role === "offender") {
           router.push(newUser ? "/confirmation" : `/offender/dashboard/${offenderId}`);
         }
       } else {
-        setError("Unknown error occurred");
-        toast.error("Unknown error occurred");
-        setIsLoading(false);
+        toast.error("Unknown error occurred", {
+          dismissible: true,
+          duration: 5000,
+        });
       }
     } catch (error: unknown) {
       const errorMessage = (error as Error).message || "An error occurred during login";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setIsLoading(false);
+      toast.error(errorMessage, {
+        dismissible: true,
+        duration: 5000,
+      });
     }
   };
 
@@ -80,24 +82,23 @@ export default function LoginPage() {
           />
         </div>
 
-        <form className="w-full" onSubmit={handleSubmit}>
+        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <input
-              className="w-full p-3 border border-foreground bg-background text-foreground text-center font-kings"
-              disabled={isLoading}
+              className="w-full p-3 border-2 rounded-md border-border bg-background text-foreground text-center font-kings"
               placeholder="Número de preso"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              {...register("username")}
             />
+            {/* Removed the error message div that was here */}
           </div>
 
-          {error && <div className="mb-4 text-red-500 text-center font-kings">{error}</div>}
-
-          <Button 
-          className=
-          "w-full bg-foreground text-background hover:bg-background hover:text-foreground">
-          {isLoading ? "Procesando..." : "BUSCAR"}
+          <Button
+            className="w-full bg-foreground text-background hover:bg-background hover:text-foreground"
+            disabled={isSubmitting}
+            type="submit"
+          >
+            {isSubmitting ? "Procesando..." : "BUSCAR"}
           </Button>
         </form>
 

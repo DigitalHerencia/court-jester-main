@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -146,9 +148,7 @@ export default function CaseUploadPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Upload Case File</CardTitle>
-                <CardDescription>
-                  Upload a PDF case file to extract and create case records.
-                </CardDescription>
+                <CardDescription>Upload a PDF case file to extract and create case records.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -162,9 +162,7 @@ export default function CaseUploadPage() {
                       onChange={handleFileChange}
                       disabled={isUploading}
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Accepted format: PDF. Maximum size: 10MB.
-                    </p>
+                    <p className="text-sm text-muted-foreground">Accepted format: PDF. Maximum size: 10MB.</p>
                   </div>
 
                   {isUploading && (
@@ -188,9 +186,7 @@ export default function CaseUploadPage() {
                         <AlertTitle>{uploadResult.message}</AlertTitle>
                       </div>
                       {uploadResult.details && (
-                        <AlertDescription className="mt-2">
-                          {uploadResult.details}
-                        </AlertDescription>
+                        <AlertDescription className="mt-2">{uploadResult.details}</AlertDescription>
                       )}
                     </Alert>
                   )}
@@ -258,3 +254,4 @@ export default function CaseUploadPage() {
     </div>
   )
 }
+

@@ -1,77 +1,76 @@
-"use client";
-import { useParams } from "next/navigation";
+"use client"
+import { useParams } from "next/navigation"
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Link from "next/link";
-import { toast } from "sonner";
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Link from "next/link"
 
 interface CaseData {
   case: {
-    id: number;
-    case_number: string;
-    offender_id: number;
-    offender_name: string;
-    court: string;
-    judge: string;
-    status: string;
-    next_date: string | null;
-    created_at: string;
-    updated_at: string;
-  };
+    id: number
+    case_number: string
+    offender_id: number
+    offender_name: string
+    court: string
+    judge: string
+    status: string
+    next_date: string | null
+    created_at: string
+    updated_at: string
+  }
   charges: Array<{
-    id: number;
-    description: string;
-    statute: string;
-    severity: string;
-    disposition: string;
-  }>;
+    id: number
+    description: string
+    statute: string
+    severity: string
+    disposition: string
+  }>
   hearings: Array<{
-    id: number;
-    date: string;
-    time: string;
-    location: string;
-    type: string;
-    notes: string;
-  }>;
+    id: number
+    date: string
+    time: string
+    location: string
+    type: string
+    notes: string
+  }>
   motions: Array<{
-    id: number;
-    title: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-  }>;
+    id: number
+    title: string
+    status: string
+    created_at: string
+    updated_at: string
+  }>
 }
 
 export default function CaseDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const [caseData, setCaseData] = useState<CaseData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>()
+  const [caseData, setCaseData] = useState<CaseData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchCaseData() {
       try {
-        const response = await fetch(`/api/admin/cases/${id}`);
+        const response = await fetch(`/api/admin/cases/${id}`)
         if (!response.ok) {
-          throw new Error("Failed to fetch case data");
+          throw new Error("Failed to fetch case data")
         }
-        const data = await response.json();
-        setCaseData(data);
+        const data = await response.json()
+        setCaseData(data)
       } catch (err) {
-        console.error("Error fetching case data:", err);
-        setError("Failed to load case data. Please try again later.");
+        console.error("Error fetching case data:", err)
+        setError("Failed to load case data. Please try again later.")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
     if (id) {
-      fetchCaseData();
+      fetchCaseData()
     }
-  }, [id]);
+  }, [id])
 
   if (isLoading) {
     return (
@@ -81,7 +80,7 @@ export default function CaseDetailPage() {
           <div className="text-foreground/60">Please wait while we fetch the case data.</div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !caseData) {
@@ -95,10 +94,10 @@ export default function CaseDetailPage() {
           </Button>
         </div>
       </div>
-    );
+    )
   }
 
-  const { case: caseInfo, charges, hearings, motions } = caseData;
+  const { case: caseInfo, charges, hearings, motions } = caseData
 
   return (
     <div className="space-y-2">
@@ -221,7 +220,9 @@ export default function CaseDetailPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Motions</CardTitle>
                 <Link href={`/admin/dashboard/tools/motions-editor?caseId=${id}`}>
-                  <Button size="sm" variant="outline">Create Motion</Button>
+                  <Button size="sm" variant="outline">
+                    Create Motion
+                  </Button>
                 </Link>
               </CardHeader>
               <CardContent>
@@ -251,10 +252,10 @@ export default function CaseDetailPage() {
                                   motion.status === "Draft"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : motion.status === "Submitted"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : motion.status === "Approved"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : motion.status === "Approved"
+                                        ? "bg-green-100 text-green-800"
+                                        : "bg-red-100 text-red-800"
                                 }`}
                               >
                                 {motion.status}
@@ -265,7 +266,9 @@ export default function CaseDetailPage() {
                             <td className="px-4 py-2">
                               <div className="flex gap-2">
                                 <Link href={`/admin/dashboard/tools/motions-editor?id=${motion.id}`}>
-                                  <Button size="sm" variant="outline">View</Button>
+                                  <Button size="sm" variant="outline">
+                                    View
+                                  </Button>
                                 </Link>
                               </div>
                             </td>
@@ -281,5 +284,6 @@ export default function CaseDetailPage() {
         </Tabs>
       </div>
     </div>
-  );
+  )
 }
+

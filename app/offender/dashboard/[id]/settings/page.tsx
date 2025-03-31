@@ -1,101 +1,94 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { toast } from "sonner";
-import { DeleteAccount } from "@/components/shared/delete-account";
-import { NotificationPermission } from "@/components/shared/notification-permission";
-import { useParams } from "next/navigation";
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent,  CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from "sonner"
+import { DeleteAccount } from "@/components/shared/delete-account"
+import { NotificationPermission } from "@/components/shared/notification-permission"
+import { useParams } from "next/navigation"
+import { Settings } from "lucide-react"
 
 interface NotificationPreferences {
-  motion_updates: boolean;
-  new_cases: boolean;
-  system_alerts: boolean;
+  motion_updates: boolean
+  new_cases: boolean
+  system_alerts: boolean
 }
 
 interface OffenderSettings {
-  email?: string;
-  phone?: string;
-  notification_preferences: NotificationPreferences;
+  email?: string
+  phone?: string
+  notification_preferences: NotificationPreferences
 }
 
 export default function OffenderSettingsPage() {
-  const params = useParams<{ id: string }>();
-  const { id } = params;
-  const [settings, setSettings] = useState<OffenderSettings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const params = useParams<{ id: string }>()
+  const { id } = params
+  const [settings, setSettings] = useState<OffenderSettings | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const response = await fetch(`/api/offenders/${id}/settings`);
+        const response = await fetch(`/api/offenders/${id}/settings`)
         if (!response.ok) {
-          throw new Error("Failed to fetch settings");
+          throw new Error("Failed to fetch settings")
         }
-        const data = await response.json();
-        setSettings(data.settings);
+        const data = await response.json()
+        setSettings(data.settings)
       } catch (error) {
-        console.error("Error fetching settings:", error);
-        setError("Failed to load settings. Please try again later.");
+        console.error("Error fetching settings:", error)
+        setError("Failed to load settings. Please try again later.")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
     if (id) {
-      fetchSettings();
+      fetchSettings()
     }
-  }, [id]);
+  }, [id])
 
   const handleInputChange = (field: string, value: string) => {
-    if (!settings) return;
-    setSettings({ ...settings, [field]: value });
-  };
+    if (!settings) return
+    setSettings({ ...settings, [field]: value })
+  }
 
   const handleNotificationChange = (field: string, value: boolean) => {
-    if (!settings) return;
+    if (!settings) return
     setSettings({
       ...settings,
       notification_preferences: {
         ...settings.notification_preferences,
         [field]: value,
       },
-    });
-  };
-
+    })
+  }
 
   const saveSettings = async () => {
-    if (!settings) return;
-    setIsSaving(true);
+    if (!settings) return
+    setIsSaving(true)
     try {
       const response = await fetch(`/api/offenders/${id}/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ settings }),
-      });
+      })
       if (!response.ok) {
-        throw new Error("Failed to save settings");
+        throw new Error("Failed to save settings")
       }
-      toast.success("Settings saved successfully");
+      toast.success("Settings saved successfully")
     } catch (error) {
-      console.error("Error saving settings:", error);
-      toast.error("Failed to save settings");
+      console.error("Error saving settings:", error)
+      toast.error("Failed to save settings")
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
   if (isLoading) {
     return (
@@ -105,7 +98,7 @@ export default function OffenderSettingsPage() {
           <div className="text-foreground/60">Please wait while we fetch your settings.</div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !settings) {
@@ -116,19 +109,23 @@ export default function OffenderSettingsPage() {
           <div className="mb-4 text-foreground/60">{error || "Failed to load settings."}</div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
-      <Card>
+      <Card className="card-secondary">
         <CardHeader>
-          <CardTitle>Account Settings</CardTitle>
-          <CardDescription>Manage your contact information and preferences.</CardDescription>
+          <CardTitle className="text-2xl">Settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
+        <CardContent className="card-content space-y-4">
+          <div className="border border-border rounded-lg p-4">
+          <div className="mb-4">
+          <h2 className="text-lg font-bold mb-2" >
+            <Settings className="mr-2 inline-block h-5 w-5" />
+          Manage your contact information and preferences.</h2>
+          </div>
+          <div className="mb-4">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -162,7 +159,7 @@ export default function OffenderSettingsPage() {
             />
             <Label htmlFor="new_cases">Notify me about new cases added</Label>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-4">
             <Switch
               checked={settings.notification_preferences.system_alerts}
               id="system_alerts"
@@ -170,16 +167,17 @@ export default function OffenderSettingsPage() {
             />
             <Label htmlFor="system_alerts">Receive system alerts and updates</Label>
           </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button disabled={isSaving} onClick={saveSettings}>
+          <Button className="bg-foreground text-background w-full" disabled={isSaving} onClick={saveSettings}>
             {isSaving ? "Saving..." : "Save Settings"}
           </Button>
+          </div>
+            <NotificationPermission />
+      <DeleteAccount offenderId={id} />
+        </CardContent>
+        <CardFooter className="flex justify-end">
         </CardFooter>
       </Card>
-
-      <DeleteAccount offenderId={id} />
-      <NotificationPermission />
     </div>
-  );
+  )
 }
+

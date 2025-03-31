@@ -1,25 +1,25 @@
 import jwt from "jsonwebtoken"
 
 interface TokenPayload {
+  id: string
   offenderId?: number
   role: "admin" | "offender"
   createdAt: string
 }
 
 export async function generateToken(payload: TokenPayload): Promise<string> {
-  const expiresIn = process.env.JWT_EXPIRES_IN || "24h";
-  const expiresInNumber = expiresIn.endsWith("h") ? parseInt(expiresIn.slice(0, -1), 10) * 3600 : expiresIn.endsWith("d") ? parseInt(expiresIn.slice(0, -1), 10) * 86400 : parseInt(expiresIn, 10);
+  const expiresIn = process.env.JWT_EXPIRES_IN || "24h"
+  const expiresInNumber = expiresIn.endsWith("h")
+    ? Number.parseInt(expiresIn.slice(0, -1), 10) * 3600
+    : expiresIn.endsWith("d")
+      ? Number.parseInt(expiresIn.slice(0, -1), 10) * 86400
+      : Number.parseInt(expiresIn, 10)
 
   return new Promise((resolve, reject) => {
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET || "fallback-secret",
-      { expiresIn: expiresInNumber },
-      (err, token) => {
-        if (err) return reject(err)
-        resolve(token as string)
-      },
-    )
+    jwt.sign(payload, process.env.JWT_SECRET || "fallback-secret", { expiresIn: expiresInNumber }, (err, token) => {
+      if (err) return reject(err)
+      resolve(token as string)
+    })
   })
 }
 

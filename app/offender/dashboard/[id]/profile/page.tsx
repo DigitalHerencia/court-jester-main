@@ -1,106 +1,118 @@
-"use client";
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+"use client"
+import { useParams } from "next/navigation"
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 
 interface Offender {
-  id: number;
-  inmate_number: string;
-  nmcd_number: string | null;
-  first_name: string;
-  last_name: string;
-  middle_name?: string;
-  status: string;
-  custody_status: string;
-  account_enabled: boolean;
-  profile_enabled: boolean;
-  facility?: string;
-  age?: number;
-  // Removed date_of_birth as it does not exist in your database
-  gender: string;
-  race: string;
-  ethnicity: string;
-  mugshot_url?: string;
+  id: number
+  inmate_number: string
+  nmcd_number: string | null
+  first_name: string
+  last_name: string
+  middle_name?: string
+  status: string
+  custody_status: string
+  account_enabled: boolean
+  profile_enabled: boolean
+  facility?: string
+  age?: number
+  gender: string
+  race: string
+  ethnicity: string
+  mugshot_url?: string
 }
 
 export default function OffenderProfilePage() {
-  const { id } = useParams<{ id: string }>(); // id is the inmate number (e.g. "468079")
-  const [offender, setOffender] = useState<Offender | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>() // id is the inmate number (e.g. "468079")
+  const [offender, setOffender] = useState<Offender | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) return
     async function fetchOffenderData() {
       try {
         // Include credentials so the HTTP‑only token cookie is sent
-        const res = await fetch(`/api/offenders/${id}/profile`, { credentials: "include" });
+        const res = await fetch(`/api/offenders/${id}/profile`, { credentials: "include" })
         if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || "Failed to fetch offender profile data");
+          const err = await res.json()
+          throw new Error(err.error || "Failed to fetch offender profile data")
         }
         // API returns the offender object directly.
-        const data: Offender = await res.json();
-        setOffender(data);
+        const data: Offender = await res.json()
+        setOffender(data)
       } catch (err: unknown) {
-        console.error("Error fetching offender profile data:", err);
-        setError((err as Error).message);
+        console.error("Error fetching offender profile data:", err)
+        setError((err as Error).message)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-    fetchOffenderData();
-  }, [id]);
+    fetchOffenderData()
+  }, [id])
 
   const handlePrintProfile = () => {
-    window.print();
-    toast.success("Printing profile...");
-  };
+    window.print()
+    toast.success("Printing profile...")
+  }
 
-  if (isLoading) return <div>Loading profile...</div>;
-  if (error || !offender)
+  if (isLoading) {
     return (
-      <div>
-        <p>Error: {error || "Failed to load profile data"}</p>
-        <Button onClick={() => window.location.reload()}>Try Again</Button>
+      <div className="flex h-[calc(100vh-120px)] items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 text-2xl font-bold font-kings">Loading profile...</div>
+          <div className="text-foreground/60">Please wait while we fetch your profile data.</div>
+        </div>
       </div>
-    );
+    )
+  }
+  
+  if (error || !offender) {
+    return (
+      <div className="flex h-[calc(100vh-120px)] items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 text-2xl font-bold text-destructive font-kings">Error</div>
+          <div className="mb-4 text-foreground/60">{error || "Failed to load profile data"}</div>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Offender Profile</h1>
+    <div className="card-secondary space-y-6">
+      <h1 className="text-2xl font-bold font-kings">Offender Profile</h1>
       <div className="grid md:grid-cols-2 gap-6">
         {/* Mugshot and Basic Info */}
-        <div className="border p-6 rounded-md">
+        <div className="card-content">
           <div className="flex items-center gap-4">
-            <div className="relative h-40 w-32 border rounded-md overflow-hidden">
+            <div className="relative h-40 w-32 border border-foreground/20 rounded-md overflow-hidden">
               {offender.mugshot_url ? (
-                <Image fill alt="Mugshot" src={offender.mugshot_url} style={{ objectFit: "cover" }} />
+                <Image fill alt="Mugshot" src={offender.mugshot_url || "/placeholder.svg"} style={{ objectFit: "cover" }} />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm text-gray-500">
+                <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
                   No mugshot available
                 </div>
               )}
             </div>
             <div>
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-2xl font-semibold font-kings">
                 {offender.last_name}, {offender.first_name} {offender.middle_name || ""}
               </h2>
               <p>
                 <strong>Inmate #:</strong> {offender.inmate_number}
               </p>
               <p>
-                <strong>Custody:</strong>{" "}
-                {offender.custody_status === "in_custody" ? "In Custody" : "Released"}
+                <strong>Custody:</strong> {offender.custody_status === "in_custody" ? "In Custody" : "Released"}
               </p>
             </div>
           </div>
         </div>
         {/* Additional Information */}
-        <div className="border p-6 rounded-md">
-          <h2 className="text-lg font-semibold">Additional Information</h2>
+        <div className="card-content">
+          <h2 className="text-xl font-semibold font-kings">Additional Information</h2>
           <p>
             <strong>Status:</strong> {offender.status}
           </p>
@@ -121,7 +133,7 @@ export default function OffenderProfilePage() {
           </p>
         </div>
       </div>
-      <Button onClick={handlePrintProfile}>Print Profile</Button>
+      <Button className="font-kings" onClick={handlePrintProfile}>Print Profile</Button>
     </div>
-  );
+  )
 }

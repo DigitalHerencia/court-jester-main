@@ -64,9 +64,7 @@ export default function AdminToolsPage() {
             <CardDescription>Upload offender mugshots</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Upload and manage offender mugshot images.
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Upload and manage offender mugshot images.</p>
             <Link
               href="/admin/dashboard/tools/mugshot-upload"
               className="flex items-center text-sm font-medium text-primary hover:underline"
@@ -87,9 +85,7 @@ export default function AdminToolsPage() {
             <CardDescription>Create and edit offender profiles</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Create new offender profiles or edit existing ones.
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Create new offender profiles or edit existing ones.</p>
             <Link
               href="/admin/dashboard/tools/offender-profile"
               className="flex items-center text-sm font-medium text-primary hover:underline"
@@ -149,3 +145,4 @@ export default function AdminToolsPage() {
     </div>
   )
 }
+

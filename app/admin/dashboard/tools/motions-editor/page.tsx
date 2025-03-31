@@ -7,7 +7,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { FileEdit, Plus, Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -102,7 +110,7 @@ export default function MotionsEditorPage() {
           throw new Error("Failed to update template")
         }
         const updatedTemplate = await res.json()
-        setTemplates(prev => prev.map(t => (t.id === updatedTemplate.id ? updatedTemplate : t)))
+        setTemplates((prev) => prev.map((t) => (t.id === updatedTemplate.id ? updatedTemplate : t)))
         setSelectedTemplate(updatedTemplate)
         toast.success("Template updated successfully")
       } else {
@@ -117,7 +125,7 @@ export default function MotionsEditorPage() {
           throw new Error("Failed to create template")
         }
         const newTemplate = await res.json()
-        setTemplates(prev => [...prev, newTemplate])
+        setTemplates((prev) => [...prev, newTemplate])
         setSelectedTemplate(newTemplate)
         toast.success("Template created successfully")
       }
@@ -140,7 +148,7 @@ export default function MotionsEditorPage() {
       if (!res.ok) {
         throw new Error("Failed to delete template")
       }
-      setTemplates(prev => prev.filter(t => t.id !== selectedTemplate.id))
+      setTemplates((prev) => prev.filter((t) => t.id !== selectedTemplate.id))
       setSelectedTemplate(null)
       setIsDeleteDialogOpen(false)
       toast.success("Template deleted successfully")
@@ -171,7 +179,7 @@ export default function MotionsEditorPage() {
   // Helper: Extract variables from template content (text between curly braces)
   const extractVariables = (content: string) => {
     const matches = content.match(/{([^}]+)}/g) || []
-    return matches.map(match => match.slice(1, -1))
+    return matches.map((match) => match.slice(1, -1))
   }
 
   const formatDate = (dateString: string) => {
@@ -194,7 +202,7 @@ export default function MotionsEditorPage() {
                 Create New Template
               </Button>
               <div className="space-y-2 mt-4">
-                {templates.map(template => (
+                {templates.map((template) => (
                   <Button
                     key={template.id}
                     className="w-full justify-start"
@@ -226,18 +234,14 @@ export default function MotionsEditorPage() {
                       id="title"
                       placeholder="e.g., Motion for Discovery"
                       value={editedTemplate.title}
-                      onChange={(e) =>
-                        setEditedTemplate(prev => ({ ...prev, title: e.target.value }))
-                      }
+                      onChange={(e) => setEditedTemplate((prev) => ({ ...prev, title: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="category">Category</Label>
                     <Select
                       value={editedTemplate.category}
-                      onValueChange={(value) =>
-                        setEditedTemplate(prev => ({ ...prev, category: value }))
-                      }
+                      onValueChange={(value) => setEditedTemplate((prev) => ({ ...prev, category: value }))}
                     >
                       <SelectTrigger id="category">
                         <SelectValue placeholder="Select a category" />
@@ -261,9 +265,7 @@ export default function MotionsEditorPage() {
                       id="content"
                       placeholder="Enter the motion template content..."
                       value={editedTemplate.content}
-                      onChange={(e) =>
-                        setEditedTemplate(prev => ({ ...prev, content: e.target.value }))
-                      }
+                      onChange={(e) => setEditedTemplate((prev) => ({ ...prev, content: e.target.value }))}
                     />
                   </div>
                 </div>
@@ -302,7 +304,8 @@ export default function MotionsEditorPage() {
                         <DialogHeader>
                           <DialogTitle>Confirm Deletion</DialogTitle>
                           <DialogDescription>
-                            Are you sure you want to delete the &quot;{selectedTemplate.title}&quot; template? This action cannot be undone.
+                            Are you sure you want to delete the &quot;{selectedTemplate.title}&quot; template? This
+                            action cannot be undone.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
@@ -354,3 +357,4 @@ export default function MotionsEditorPage() {
     </div>
   )
 }
+

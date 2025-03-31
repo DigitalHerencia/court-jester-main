@@ -38,8 +38,8 @@ export function DashboardTabs({ role, offenderId }: DashboardTabsProps) {
         ];
 
   return (
-    <div className="mb-8">
-      <div className="flex w-full rounded-md border-2 border-foreground overflow-hidden">
+    <div className="mb-4">
+      <div className="flex w-full rounded-md border-2 border-border overflow-hidden">
         {tabs.map((tab) => (
           <Link
             key={tab.href}

@@ -1,79 +1,79 @@
-"use client";
-import { useParams } from "next/navigation";
+"use client"
+import { useParams } from "next/navigation"
 
-import { useState, useEffect } from "react";
-import { Bell, Calendar, FileText, Info, AlertTriangle } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
+import { useState, useEffect } from "react"
+import { Bell, Calendar, FileText, Info, AlertTriangle } from "lucide-react"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { toast } from "sonner"
 
 interface Notification {
-  id: number;
-  type: string;
-  message: string;
-  read: boolean;
-  created_at: string;
+  id: number
+  type: string
+  message: string
+  read: boolean
+  created_at: string
 }
 
 export default function OffenderNotificationsPage() {
-  const { id } = useParams<{ id: string }>();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { id } = useParams<{ id: string }>()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchNotifications() {
       try {
-        const response = await fetch(`/api/offenders/${id}/notifications`);
+        const response = await fetch(`/api/offenders/${id}/notifications`)
         if (!response.ok) {
-          throw new Error("Failed to fetch notifications");
+          throw new Error("Failed to fetch notifications")
         }
-        const data = await response.json();
-        setNotifications(data.notifications || []);
+        const data = await response.json()
+        setNotifications(data.notifications || [])
       } catch (error) {
-        console.error("Error fetching notifications:", error);
-        toast.error("Failed to load notifications");
+        console.error("Error fetching notifications:", error)
+        toast.error("Failed to load notifications")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
     if (id) {
-      fetchNotifications();
+      fetchNotifications()
     }
-  }, [id]);
+  }, [id])
 
   const markAsRead = async (notificationId: number) => {
     try {
-      const response = await fetch(`/api/offenders/${id}/notifications/${notificationId}/read`, { method: "POST" });
+      const response = await fetch(`/api/offenders/${id}/notifications/${notificationId}/read`, { method: "POST" })
       if (!response.ok) {
-        throw new Error("Failed to mark notification as read");
+        throw new Error("Failed to mark notification as read")
       }
       setNotifications(
         notifications.map((notification) =>
-          notification.id === notificationId ? { ...notification, read: true } : notification
-        )
-      );
-      toast.success("Notification marked as read");
+          notification.id === notificationId ? { ...notification, read: true } : notification,
+        ),
+      )
+      toast.success("Notification marked as read")
     } catch (error) {
-      console.error("Error marking notification as read:", error);
-      toast.error("Failed to mark notification as read");
+      console.error("Error marking notification as read:", error)
+      toast.error("Failed to mark notification as read")
     }
-  };
+  }
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "court_date":
-        return <Calendar className="h-5 w-5 text-blue-500" />;
+        return <Calendar className="h-5 w-5 text-blue-500" />
       case "motion_status":
-        return <FileText className="h-5 w-5 text-green-500" />;
+        return <FileText className="h-5 w-5 text-green-500" />
       case "system":
-        return <Info className="h-5 w-5 text-gray-500" />;
+        return <Info className="h-5 w-5 text-gray-500" />
       case "warning":
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />
       default:
-        return <Bell className="h-5 w-5 text-gray-500" />;
+        return <Bell className="h-5 w-5 text-gray-500" />
     }
-  };
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, {
@@ -82,8 +82,8 @@ export default function OffenderNotificationsPage() {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-  };
+    })
+  }
 
   if (isLoading) {
     return (
@@ -93,11 +93,11 @@ export default function OffenderNotificationsPage() {
           <div className="text-foreground/60">Please wait while we fetch your notifications.</div>
         </div>
       </div>
-    );
+    )
   }
 
-  const unreadNotifications = notifications.filter((notification) => !notification.read);
-  const readNotifications = notifications.filter((notification) => notification.read);
+  const unreadNotifications = notifications.filter((notification) => !notification.read)
+  const readNotifications = notifications.filter((notification) => notification.read)
 
   return (
     <div className="space-y-6">
@@ -152,5 +152,6 @@ export default function OffenderNotificationsPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
+

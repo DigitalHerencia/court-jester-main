@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -178,9 +180,7 @@ export default function MotionsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-2">{template.usage_count}</td>
-                  <td className="px-4 py-2">
-                    {new Date(template.modified_at).toLocaleDateString()}
-                  </td>
+                  <td className="px-4 py-2">{new Date(template.modified_at).toLocaleDateString()}</td>
                   <td className="px-4 py-2">
                     <div className="flex gap-2">
                       <Link href={`/admin/dashboard/tools/motions-editor?id=${template.id}`}>
@@ -207,3 +207,4 @@ export default function MotionsPage() {
     </div>
   )
 }
+

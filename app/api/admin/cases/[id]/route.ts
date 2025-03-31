@@ -1,16 +1,16 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { query, transaction } from "@/lib/db/db";
-import { verifyToken } from "@/lib/auth";
+import { type NextRequest, NextResponse } from "next/server"
+import { query, transaction } from "@/lib/db/db"
+import { verifyToken } from "@/lib/auth"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const { id } = await params
     // Verify admin authorization
-    const token = request.cookies.get("token")?.value;
-    const session = await verifyToken(token);
+    const token = request.cookies.get("token")?.value
+    const session = await verifyToken(token)
 
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Get case details
@@ -31,58 +31,58 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         JOIN offenders o ON c.offender_id = o.id
         WHERE c.id = $1
       `,
-      [id]
-    );
+      [id],
+    )
 
     if (caseResult.rowCount === 0) {
-      return NextResponse.json({ error: "Case not found" }, { status: 404 });
+      return NextResponse.json({ error: "Case not found" }, { status: 404 })
     }
 
     // Get related charges, hearings, motions
     const chargesResult = await query(
       `SELECT id, description, statute, severity, disposition FROM charges WHERE case_id = $1`,
-      [id]
-    );
+      [id],
+    )
     const hearingsResult = await query(
       `SELECT id, date, time, location, type, notes FROM court_dates WHERE case_id = $1 ORDER BY date ASC`,
-      [id]
-    );
+      [id],
+    )
     const motionsResult = await query(
       `SELECT id, title, status, created_at, updated_at FROM motions WHERE case_id = $1 ORDER BY created_at DESC`,
-      [id]
-    );
+      [id],
+    )
 
     return NextResponse.json({
       case: caseResult.rows[0],
       charges: chargesResult.rows,
       hearings: hearingsResult.rows,
       motions: motionsResult.rows,
-    });
+    })
   } catch (error) {
-    console.error("Error fetching case details:", error);
-    return NextResponse.json({ error: "Failed to fetch case details" }, { status: 500 });
+    console.error("Error fetching case details:", error)
+    return NextResponse.json({ error: "Failed to fetch case details" }, { status: 500 })
   }
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const { id } = await params
     // Verify admin authorization
-    const token = request.cookies.get("token")?.value;
-    const session = await verifyToken(token);
+    const token = request.cookies.get("token")?.value
+    const session = await verifyToken(token)
 
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await request.json();
+    const body = await request.json()
 
     // Check if case exists
-    const existingCase = await query("SELECT id, offender_id FROM cases WHERE id = $1", [id]);
+    const existingCase = await query("SELECT id, offender_id FROM cases WHERE id = $1", [id])
     if (existingCase.rowCount === 0) {
-      return NextResponse.json({ error: "Case not found" }, { status: 404 });
+      return NextResponse.json({ error: "Case not found" }, { status: 404 })
     }
-    const offenderId = existingCase.rows[0].offender_id;
+    const offenderId = existingCase.rows[0].offender_id
 
     // Update case
     await query(
@@ -96,8 +96,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           updated_at = NOW()
         WHERE id = $5
       `,
-      [body.court, body.judge || null, body.status, body.next_date || null, id]
-    );
+      [body.court, body.judge || null, body.status, body.next_date || null, id],
+    )
 
     // Create notification for offender if requested
     if (body.notify_offender) {
@@ -112,41 +112,41 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           )
           VALUES ($1, $2, $3, $4, NOW())
         `,
-        [offenderId, "case_updated", `Your case information has been updated.`, false]
-      );
+        [offenderId, "case_updated", `Your case information has been updated.`, false],
+      )
     }
 
-    return NextResponse.json({ message: "Case updated successfully" });
+    return NextResponse.json({ message: "Case updated successfully" })
   } catch (error) {
-    console.error("Error updating case:", error);
-    return NextResponse.json({ error: "Failed to update case" }, { status: 500 });
+    console.error("Error updating case:", error)
+    return NextResponse.json({ error: "Failed to update case" }, { status: 500 })
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const { id } = await params
     // Verify admin authorization
-    const token = request.cookies.get("token")?.value;
-    const session = await verifyToken(token);
+    const token = request.cookies.get("token")?.value
+    const session = await verifyToken(token)
 
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Check if case exists
-    const existingCase = await query("SELECT id, offender_id, case_number FROM cases WHERE id = $1", [id]);
+    const existingCase = await query("SELECT id, offender_id, case_number FROM cases WHERE id = $1", [id])
     if (existingCase.rowCount === 0) {
-      return NextResponse.json({ error: "Case not found" }, { status: 404 });
+      return NextResponse.json({ error: "Case not found" }, { status: 404 })
     }
-    const { offender_id, case_number } = existingCase.rows[0];
+    const { offender_id, case_number } = existingCase.rows[0]
 
     // Delete case and related records using a transaction
     await transaction(async (client) => {
-      await client.query("DELETE FROM motions WHERE case_id = $1", [id]);
-      await client.query("DELETE FROM court_dates WHERE case_id = $1", [id]);
-      await client.query("DELETE FROM charges WHERE case_id = $1", [id]);
-      await client.query("DELETE FROM cases WHERE id = $1", [id]);
+      await client.query("DELETE FROM motions WHERE case_id = $1", [id])
+      await client.query("DELETE FROM court_dates WHERE case_id = $1", [id])
+      await client.query("DELETE FROM charges WHERE case_id = $1", [id])
+      await client.query("DELETE FROM cases WHERE id = $1", [id])
       await client.query(
         `
           INSERT INTO offender_notifications (
@@ -158,13 +158,14 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
           )
           VALUES ($1, $2, $3, $4, NOW())
         `,
-        [offender_id, "case_deleted", `Case #${case_number} was deleted.`, false]
-      );
-    });
+        [offender_id, "case_deleted", `Case #${case_number} was deleted.`, false],
+      )
+    })
 
-    return NextResponse.json({ message: "Case deleted successfully" });
+    return NextResponse.json({ message: "Case deleted successfully" })
   } catch (error) {
-    console.error("Error deleting case:", error);
-    return NextResponse.json({ error: "Failed to delete case" }, { status: 500 });
+    console.error("Error deleting case:", error)
+    return NextResponse.json({ error: "Failed to delete case" }, { status: 500 })
   }
 }
+

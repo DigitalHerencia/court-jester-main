@@ -16,8 +16,8 @@ async function logout() {
 
 export function AdminDashboardHeader() {
   return (
-    <header className="flex justify-between items-center py-4 border-b border-foreground/10 mb-6">
-      <Link href="/admin/dashboard" className="font-jacquard text-2xl sm:text-3xl">
+    <header className="flex justify-between items-center py-4 mb-2.5">
+      <Link className="font-jacquard text-2xl sm:text-3xl" href="/admin/dashboard">
         Court Jester
       </Link>
       <Button
@@ -32,8 +32,8 @@ export function AdminDashboardHeader() {
 
 export function OffenderDashboardHeader() {
   return (
-    <header className="flex justify-between items-center py-4 border-b border-foreground/10 mb-6">
-      <Link href="/offender/dashboard" className="font-jacquard text-2xl sm:text-3xl">
+    <header className="flex justify-between items-center py-4 mb-2.5">
+      <Link className="font-jacquard text-5xl sm:text-5xl" href="/offender/dashboard">
         Court Jester
       </Link>
       <Button

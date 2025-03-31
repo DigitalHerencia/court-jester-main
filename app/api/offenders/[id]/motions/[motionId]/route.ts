@@ -1,21 +1,21 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db/db";
-import { verifyToken } from "@/lib/auth";
+import { type NextRequest, NextResponse } from "next/server"
+import { query } from "@/lib/db/db"
+import { verifyToken } from "@/lib/auth"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string; motionId: string }> }) {
   try {
-    const { id: offenderId, motionId } = await params;
+    const { id: offenderId, motionId } = await params
     // Verify authorization
-    const token = request.cookies.get("token")?.value;
-    const session = await verifyToken(token);
+    const token = request.cookies.get("token")?.value
+    const session = await verifyToken(token)
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Check offender access
     if (session.role === "offender" && session.offenderId !== Number.parseInt(offenderId)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     // Get motion details with case info
@@ -28,12 +28,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         JOIN cases c ON m.case_id = c.id
         WHERE m.id = $1 AND c.offender_id = $2
       `,
-      [motionId, offenderId]
-    );
+      [motionId, offenderId],
+    )
     if (motionResult.rowCount === 0) {
-      return NextResponse.json({ error: "Motion not found" }, { status: 404 });
+      return NextResponse.json({ error: "Motion not found" }, { status: 404 })
     }
-    const motion = motionResult.rows[0];
+    const motion = motionResult.rows[0]
 
     // Format response
     return NextResponse.json({
@@ -52,9 +52,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           judge: motion.judge,
         },
       },
-    });
+    })
   } catch (error) {
-    console.error("Error fetching motion details:", error);
-    return NextResponse.json({ error: "Failed to fetch motion details" }, { status: 500 });
+    console.error("Error fetching motion details:", error)
+    return NextResponse.json({ error: "Failed to fetch motion details" }, { status: 500 })
   }
 }
+

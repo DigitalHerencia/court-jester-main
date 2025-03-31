@@ -1,85 +1,87 @@
-"use client";
-import { useParams } from "next/navigation";
+"use client"
+import { useParams } from "next/navigation"
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import Link from "next/link";
-import {  Download, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner"
+import Link from "next/link"
+import { Download, Loader2 } from "lucide-react"
 
 interface MotionTemplate {
-  id: number;
-  title: string;
-  content: string;
-  status: string;
-  created_at: string;
-  modified_at: string;
-  pdf_url?: string;
+  id: number
+  title: string
+  content: string
+  status: string
+  created_at: string
+  modified_at: string
+  pdf_url?: string
 }
 
 export default function MotionDetailsPage() {
-  const { id } = useParams<{ id: string }>();
-  const [template, setTemplate] = useState<MotionTemplate | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [isPdfGenerationEnabled, setIsPdfGenerationEnabled] = useState(false);
-  
+  const { id } = useParams<{ id: string }>()
+  const [template, setTemplate] = useState<MotionTemplate | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
+  const [isPdfGenerationEnabled, setIsPdfGenerationEnabled] = useState(false)
+
   useEffect(() => {
     async function fetchTemplateDetails() {
       try {
-        const response = await fetch(`/api/admin/motions/${id}`);
+        const response = await fetch(`/api/admin/motions/${id}`)
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || "Failed to fetch motion template details");
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || "Failed to fetch motion template details")
         }
-        const data = await response.json();
-        setTemplate(data.template);
+        const data = await response.json()
+        setTemplate(data.template)
 
         // Check if PDF generation is enabled
-        const configResponse = await fetch("/api/admin/config");
+        const configResponse = await fetch("/api/admin/config")
         if (configResponse.ok) {
-          const configData = await configResponse.json();
-          setIsPdfGenerationEnabled(configData.enablePdfGeneration);
+          const configData = await configResponse.json()
+          setIsPdfGenerationEnabled(configData.enablePdfGeneration)
         }
       } catch (error) {
-        console.error("Error fetching motion template details:", error);
-        setError(error instanceof Error ? error.message : "Failed to load motion template details. Please try again later.");
+        console.error("Error fetching motion template details:", error)
+        setError(
+          error instanceof Error ? error.message : "Failed to load motion template details. Please try again later.",
+        )
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
     if (id) {
-      fetchTemplateDetails();
+      fetchTemplateDetails()
     }
-  }, [id]);
+  }, [id])
 
-const handleGeneratePdf = async () => {
-  if (!isPdfGenerationEnabled) {
-    toast.error("PDF generation is not enabled");
-    return;
-  }
+  const handleGeneratePdf = async () => {
+    if (!isPdfGenerationEnabled) {
+      toast.error("PDF generation is not enabled")
+      return
+    }
 
-  try {
-    const response = await fetch('/api/admin/motions/generate-pdf'); // Replace with the actual API endpoint
-    const data = await response.json();
-    // Update the template with the new PDF URL
-    setTemplate((prev) => (prev ? { ...prev, pdf_url: data.pdfUrl } : null));
-    toast.success("PDF generated successfully");
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    toast.error(error instanceof Error ? error.message : "Failed to generate PDF");
-  } finally {
-    setIsGeneratingPdf(false);
+    try {
+      const response = await fetch("/api/admin/motions/generate-pdf") // Replace with the actual API endpoint
+      const data = await response.json()
+      // Update the template with the new PDF URL
+      setTemplate((prev) => (prev ? { ...prev, pdf_url: data.pdfUrl } : null))
+      toast.success("PDF generated successfully")
+    } catch (error) {
+      console.error("Error generating PDF:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to generate PDF")
+    } finally {
+      setIsGeneratingPdf(false)
+    }
   }
-};
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
+    return new Date(dateString).toLocaleString()
+  }
 
   if (isLoading) {
     return (
@@ -89,7 +91,7 @@ const handleGeneratePdf = async () => {
           <div className="text-foreground/60">Please wait while we fetch the template data.</div>
         </div>
       </div>
-    );
+    )
   }
 
   if (Error() || !template) {
@@ -103,7 +105,7 @@ const handleGeneratePdf = async () => {
           </Button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -138,7 +140,8 @@ const handleGeneratePdf = async () => {
         <CardContent>
           <div className="mb-4 grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium">Category:</span> {template.content ? template.content.substring(0, 100) + "..." : "N/A"}
+              <span className="font-medium">Category:</span>{" "}
+              {template.content ? template.content.substring(0, 100) + "..." : "N/A"}
             </div>
             <div>
               <span className="font-medium">Last Modified:</span> {formatDate(template.modified_at)}
@@ -161,5 +164,6 @@ const handleGeneratePdf = async () => {
         </Link>
       </div>
     </div>
-  );
+  )
 }
+

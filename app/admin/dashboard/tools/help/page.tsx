@@ -30,7 +30,9 @@ export default function HelpPage() {
                   <AccordionTrigger>How do I add a new offender?</AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
-                      You can add a new offender by going to the Offender Profile tool in the Admin Tools section. Click on "Create New Offender" and fill out the required information. Alternatively, you can go to the Offenders page and click the "Add Offender" button.
+                      You can add a new offender by going to the Offender Profile tool in the Admin Tools section. Click
+                      on "Create New Offender" and fill out the required information. Alternatively, you can go to the
+                      Offenders page and click the "Add Offender" button.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
@@ -39,7 +41,9 @@ export default function HelpPage() {
                   <AccordionTrigger>How do I upload a mugshot?</AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
-                      To upload a mugshot, go to the Mugshot Upload tool in the Admin Tools section. Search for the offender by name or inmate number, select them from the results, and then upload the image file. Supported formats include JPG, PNG, and GIF.
+                      To upload a mugshot, go to the Mugshot Upload tool in the Admin Tools section. Search for the
+                      offender by name or inmate number, select them from the results, and then upload the image file.
+                      Supported formats include JPG, PNG, and GIF.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
@@ -51,7 +55,10 @@ export default function HelpPage() {
                       Cases can be created in two ways:
                       <ol className="list-decimal ml-5 mt-2 space-y-1">
                         <li>Manually through the Cases page by clicking "Add Case" and filling out the form</li>
-                        <li>By uploading case files through the Case Upload tool in Admin Tools, which will automatically extract case information</li>
+                        <li>
+                          By uploading case files through the Case Upload tool in Admin Tools, which will automatically
+                          extract case information
+                        </li>
                       </ol>
                     </p>
                   </AccordionContent>
@@ -61,7 +68,9 @@ export default function HelpPage() {
                   <AccordionTrigger>How do I reset the database?</AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
-                      Database reset is a destructive action that should only be performed in development environments or when setting up a new instance. To reset the database, go to the Database Management tool in Admin Tools, select the "Database Reset" tab, and follow the confirmation steps.
+                      Database reset is a destructive action that should only be performed in development environments
+                      or when setting up a new instance. To reset the database, go to the Database Management tool in
+                      Admin Tools, select the "Database Reset" tab, and follow the confirmation steps.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
@@ -70,7 +79,9 @@ export default function HelpPage() {
                   <AccordionTrigger>How do offenders access the system?</AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
-                      Offenders can access the system by logging in with their inmate number. They will only be able to view their own information, cases, and notifications. They cannot see other offenders' data or administrative functions.
+                      Offenders can access the system by logging in with their inmate number. They will only be able to
+                      view their own information, cases, and notifications. They cannot see other offenders' data or
+                      administrative functions.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
@@ -190,3 +201,4 @@ export default function HelpPage() {
     </div>
   )
 }
+

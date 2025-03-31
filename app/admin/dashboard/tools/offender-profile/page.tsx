@@ -4,14 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select"
-import { Select } from "react-day-picker"
+import { Select } from "@/components/ui/select"
 
 interface OffenderFormData {
   inmateNumber: string
@@ -180,9 +173,11 @@ export default function OffenderProfilePage() {
                           Status <span className="text-destructive">*</span>
                         </Label>
                         <Select value={formData.status}>
-                          <SelectTrigger 
-                            id="status" 
-                            onChange={(event) => handleSelectChange("status", (event.target as HTMLSelectElement).value)}
+                          <SelectTrigger
+                            id="status"
+                            onChange={(event) =>
+                              handleSelectChange("status", (event.target as HTMLSelectElement).value)
+                            }
                           >
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
@@ -264,7 +259,7 @@ export default function OffenderProfilePage() {
                         <Input
                           id="height"
                           name="height"
-                          placeholder="e.g., 6\'0"
+                          placeholder="e.g., 6'0"
                           value={formData.height}
                           onChange={handleInputChange}
                         />
@@ -284,7 +279,7 @@ export default function OffenderProfilePage() {
                         <Label htmlFor="eyeColor">Eye Color</Label>
                         <Select
                           value={formData.eyeColor}
-                          onChange={(event) => handleSelectChange("eyeColor", event.target.value)}
+                          onValueChange={(value: string) => handleSelectChange("eyeColor", value)}
                         >
                           <SelectTrigger id="eyeColor">
                             <SelectValue placeholder="Select eye color" />
@@ -300,7 +295,12 @@ export default function OffenderProfilePage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="hair">Hair Color</Label>
-                        <Select value={formData.hair} onChange={(event) => handleSelectChange("hair", event.target.value)}>                          <SelectTrigger id="hair">
+                        <Select
+                          value={formData.hair}
+                          onValueChange={(value: string) => handleSelectChange("hair", value)}
+                          >
+                          {" "}
+                          <SelectTrigger id="hair">
                             <SelectValue placeholder="Select hair color" />
                           </SelectTrigger>
                           <SelectContent>
@@ -315,19 +315,22 @@ export default function OffenderProfilePage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="ethnicity">Ethnicity</Label>
-                      <Select value={formData.ethnicity} onChange={(event) => handleSelectChange("ethnicity", event.target.value)}>
-                        <SelectTrigger id="ethnicity">
-                          <SelectValue placeholder="Select ethnicity" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="caucasian">Caucasian</SelectItem>
-                          <SelectItem value="african_american">African American</SelectItem>
-                          <SelectItem value="hispanic">Hispanic</SelectItem>
-                          <SelectItem value="asian">Asian</SelectItem>
-                          <SelectItem value="native_american">Native American</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <Select
+                          value={formData.ethnicity}
+                          onValueChange={(value: string) => handleSelectChange("ethnicity", value)}
+                        >
+                          <SelectTrigger id="ethnicity">
+                            <SelectValue placeholder="Select ethnicity" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="caucasian">Caucasian</SelectItem>
+                            <SelectItem value="african_american">African American</SelectItem>
+                            <SelectItem value="hispanic">Hispanic</SelectItem>
+                            <SelectItem value="asian">Asian</SelectItem>
+                            <SelectItem value="native_american">Native American</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
@@ -365,3 +368,4 @@ export default function OffenderProfilePage() {
     </div>
   )
 }
+

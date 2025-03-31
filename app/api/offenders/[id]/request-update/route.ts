@@ -17,9 +17,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { id } = params;
-  
-    
+    const { id } = params
+
     // Check if offender exists
     const offenderResult = await query("SELECT id, first_name, last_name, inmate_number FROM offenders WHERE id = $1", [
       id,

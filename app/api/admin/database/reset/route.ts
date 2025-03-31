@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (!pool) {
-    throw new Error("Pool is not initialized");
+    throw new Error("Pool is not initialized")
   }
-  
+
   try {
     // Get a client from the pool
     const client = await pool.connect()

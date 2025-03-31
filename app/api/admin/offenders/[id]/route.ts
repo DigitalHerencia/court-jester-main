@@ -123,7 +123,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       inmate_number,
       id,
     ])
-    
+
     if (duplicateCheck && duplicateCheck.rowCount !== null && duplicateCheck.rowCount > 0) {
       return NextResponse.json({ error: "Another offender with this inmate number already exists" }, { status: 409 })
     }

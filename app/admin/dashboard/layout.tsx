@@ -22,9 +22,8 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
       {/* Header and tabs with updated styling */}
       <DashboardHeader />
       <DashboardTabs role="admin" />
-      <div className="space-y-4 h-[calc(100vh-180px)] overflow-y-auto hide-scrollbar">
-        {children}
-      </div>
+      <div className="space-y-4 h-[calc(100vh-180px)] overflow-y-auto hide-scrollbar">{children}</div>
     </div>
   )
 }
+

@@ -1,65 +1,59 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { FileText } from "lucide-react";
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
+import { FileText } from "lucide-react"
 
 interface Motion {
-  id: number;
-  title: string;
-  status: string;
-  created_at: string;
-  case_number: string;
-  has_pdf: boolean;
+  id: number
+  title: string
+  status: string
+  created_at: string
+  case_number: string
+  has_pdf: boolean
 }
 
 export default function OffenderMotionsPage({ params }: { params: { id: string } }) {
-  const [motions, setMotions] = useState<Motion[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [motions, setMotions] = useState<Motion[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchMotions() {
       try {
-        const response = await fetch(`/api/offenders/${params.id}/motions`);
+        const response = await fetch(`/api/offenders/${params.id}/motions`)
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || "Failed to fetch motions");
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || "Failed to fetch motions")
         }
-        const data = await response.json();
-        setMotions(data.motions || []);
+        const data = await response.json()
+        setMotions(data.motions || [])
       } catch (error) {
-        console.error("Error fetching motions:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load motions. Please try again later."
-        );
+        console.error("Error fetching motions:", error)
+        setError(error instanceof Error ? error.message : "Failed to load motions. Please try again later.")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-    fetchMotions();
-  }, [params.id]);
+    fetchMotions()
+  }, [params.id])
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+    return new Date(dateString).toLocaleDateString()
+  }
 
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
           <div className="mb-4 text-2xl font-bold">Loading motions...</div>
-          <div className="text-foreground/60">
-            Please wait while we fetch your motion data.
-          </div>
+          <div className="text-foreground/60">Please wait while we fetch your motion data.</div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -73,7 +67,7 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
           </Button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -122,5 +116,6 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
         </div>
       )}
     </div>
-  );
+  )
 }
+

@@ -1,110 +1,185 @@
-"use client";
-import { useParams } from "next/navigation";
+"use client"
+import { useParams } from "next/navigation"
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
+import { useState, useEffect } from "react"
+import { Calendar } from "@/components/ui/calendar"
 
 interface CourtDate {
-  id: number;
-  case_id: number;
-  case_number: string;
-  date: string;
-  time: string;
-  location: string;
-  type: string;
-  notes?: string;
+  id: number
+  case_id: number
+  case_number: string
+  date: string
+  time: string
+  location: string
+  type: string
+  notes?: string
 }
 
 export default function CourtDatesPage() {
-  const { id } = useParams<{ id: string }>();
-  const [courtDates, setCourtDates] = useState<CourtDate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [filteredDates, setFilteredDates] = useState<CourtDate[]>([]);
+  const { id } = useParams<{ id: string }>()
+  const [courtDates, setCourtDates] = useState<CourtDate[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [filteredDates, setFilteredDates] = useState<CourtDate[]>([])
+  const [displayedDates, setDisplayedDates] = useState<CourtDate[]>([])
 
   useEffect(() => {
     async function fetchCourtDates() {
       try {
-        const response = await fetch(`/api/offenders/${id}/court-dates`);
+        const response = await fetch(`/api/offenders/${id}/court-dates`)
         if (!response.ok) {
-          throw new Error("Failed to fetch court dates");
+          throw new Error("Failed to fetch court dates")
         }
-        const data = await response.json();
-        setCourtDates(data.courtDates || []);
+        const data = await response.json()
+        setCourtDates(data.courtDates || [])
+        
+         // Filter upcoming court dates (dates after today)
+         const today = new Date()
+         today.setHours(0, 0, 0, 0)
+         const upcoming = (data.courtDates || []).filter((courtDate: { date: string | number | Date }) => {
+           const dateObj = new Date(courtDate.date)
+           return dateObj >= today
+         })
+ 
+         // Sort by date (earliest first)
+         upcoming.sort((a: { date: string | number | Date }, b: { date: string | number | Date }) => new Date(a.date).getTime() - new Date(b.date).getTime())
+ 
+         // Set upcoming dates as the default displayed dates
+         setDisplayedDates(upcoming)
+        
       } catch (error) {
-        console.error("Error fetching court dates:", error);
-        setError("Failed to load court dates. Please try again later.");
+        console.error("Error fetching court dates:", error)
+        setError("Failed to load court dates. Please try again later.")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
     if (id) {
-      fetchCourtDates();
+      fetchCourtDates()
     }
-  }, [id]);
+  }, [id])
 
   useEffect(() => {
     if (!selectedDate) {
-      setFilteredDates([]);
-      return;
+      // If no date is selected, show upcoming court dates
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const upcoming = courtDates.filter((courtDate) => {
+        const dateObj = new Date(courtDate.date)
+        return dateObj >= today
+      })
+      upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      setDisplayedDates(upcoming)
+      setFilteredDates([])
+      return
     }
-    const selected = new Date(selectedDate);
-    selected.setHours(0, 0, 0, 0);
+
+    const selected = new Date(selectedDate)
+    selected.setHours(0, 0, 0, 0)
     const filtered = courtDates.filter((courtDate) => {
-      const dateObj = new Date(courtDate.date);
-      dateObj.setHours(0, 0, 0, 0);
-      return dateObj.getTime() === selected.getTime();
-    });
-    setFilteredDates(filtered);
-  }, [selectedDate, courtDates]);
+      const dateObj = new Date(courtDate.date)
+      dateObj.setHours(0, 0, 0, 0)
+      return dateObj.getTime() === selected.getTime()
+    })
+    setFilteredDates(filtered)
+    
+     // Update displayed dates based on selection
+     if (filtered.length > 0) {
+      setDisplayedDates(filtered)
+    } else {
+      // If no dates match the selection, revert to upcoming dates
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const upcoming = courtDates.filter((courtDate) => {
+        const dateObj = new Date(courtDate.date)
+        return dateObj >= today
+      })
+      upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      setDisplayedDates(upcoming)
+    }
+    
+  }, [selectedDate, courtDates])
 
   // Dates with court appearances (for calendar highlights)
-  const getCourtDateHighlights = () => courtDates.map((courtDate) => new Date(courtDate.date));
+  const getCourtDateHighlights = () => courtDates.map((courtDate) => new Date(courtDate.date))
 
   if (isLoading) {
-    return <div>Loading court dates...</div>;
+    return (
+      <div className="flex h-[calc(100vh-120px)] items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 text-2xl font-bold font-kings">Loading court dates...</div>
+          <div className="text-foreground/60">Please wait while we fetch your court dates.</div>
+        </div>
+      </div>
+    )
   }
+
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="flex h-[calc(100vh-120px)] items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 text-2xl font-bold text-destructive font-kings">Error</div>
+          <div className="mb-4 text-foreground/60">{error}</div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Court Dates</h1>
+    <div className="card-secondary space-y-2">
+      <h1 className="text-3xl font-bold">Court Dates</h1>
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-1/2">
+        <div className="md:w-1/2 card-content">
           <Calendar
-            autoFocus
+            initialFocus
             mode="single"
             modifiers={{ highlighted: getCourtDateHighlights() }}
+            modifiersClassNames={{
+              highlighted: "day-highlighted",
+            }}
             selected={selectedDate}
             onSelect={setSelectedDate}
           />
         </div>
-        <div className="md:w-1/2 space-y-4">
-          <h2 className="text-xl font-semibold">Scheduled Appearances</h2>
-          {filteredDates.length === 0 ? (
-            <p>No court dates on this day.</p>
+        
+        <div >
+          <h3 className="font-kings mb-3 text-2xl">
+            {filteredDates.length > 0
+              ? `Scheduled Appearances (${new Date(filteredDates[0].date).toLocaleDateString()})`
+              : "All Scheduled Appearances"}
+          </h3>
+          {displayedDates.length === 0 ? (
+            <p className="text-lg font-kings">No court dates scheduled.</p>
           ) : (
-            filteredDates.map((courtDate) => (
-              <Card key={courtDate.id}>
-                <CardHeader>
-                  <CardTitle>{new Date(courtDate.date).toLocaleDateString()}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p><strong>Case:</strong> {courtDate.case_number}</p>
-                  <p><strong>Time:</strong> {courtDate.time}</p>
-                  <p><strong>Location:</strong> {courtDate.location}</p>
-                  <p><strong>Type:</strong> {courtDate.type}</p>
-                  {courtDate.notes && <p><strong>Notes:</strong> {courtDate.notes}</p>}
-                </CardContent>
-              </Card>
-            ))
+            <div className="card-content pb-2 text-lg font-kings">
+              {displayedDates.map((courtDate) => (
+                <div key={courtDate.id} >
+                    <div  className="font-bold text-xl">
+                      {new Date(courtDate.date).toLocaleDateString()}
+                    </div>
+                    <div>
+                      <strong>Case:</strong> {courtDate.case_number}
+                    </div>
+                    <div>
+                      <strong>Time:</strong> {courtDate.time}
+                    </div>
+                    <div>
+                      <strong>Location:</strong> {courtDate.location}
+                      </div>
+                      <div>
+                      <strong>Type:</strong> {courtDate.type}
+                    </div>
+                    <div>
+                      <strong>Notes:</strong> {courtDate.notes}
+                    </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }
+

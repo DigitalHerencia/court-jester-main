@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     // If no settings exist, return default values
     const settings =
-      result.rowCount ?? 0 > 0
+      (result.rowCount ?? 0 > 0)
         ? result.rows[0]
         : {
             smtp_host: "",

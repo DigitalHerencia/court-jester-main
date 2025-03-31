@@ -66,9 +66,7 @@ export default function CasesPage() {
                   <p>Case #{caseItem.case_number}</p>
                   {/* ...other case details here... */}
                   <Link href={`/admin/dashboard/cases/${caseItem.id}`}>
-                    <Button className="bg-foreground text-background hover:bg-foreground/90 mt-2">
-                      View Details
-                    </Button>
+                    <Button className="bg-foreground text-background hover:bg-foreground/90 mt-2">View Details</Button>
                   </Link>
                 </div>
               ))}
@@ -79,3 +77,4 @@ export default function CasesPage() {
     </div>
   )
 }
+
