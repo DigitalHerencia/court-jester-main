@@ -1,6 +1,5 @@
 import { Pool, type PoolClient } from "pg"
 
-// Create a singleton pool instance
 export let pool: Pool | null = null
 
 // Get or create the database pool
@@ -21,20 +20,19 @@ function getPool(): Pool {
       connectionTimeoutMillis: 5000,
     })
 
-    // Set up event handlers
+    // Log pool events
     pool.on("connect", () => {
-      console.log("New client connected to PostgreSQL database")
+      console.log("Database client connected")
     })
 
     pool.on("error", (err) => {
-      console.error("PostgreSQL pool error:", err)
+      console.error("Unexpected database error on idle client:", err)
     })
   }
 
   return pool
 }
 
-// Helper function to execute queries with better error handling
 export async function query(text: string, params?: unknown[]) {
   const pool = getPool()
   const client = await pool.connect()
@@ -60,20 +58,6 @@ export async function query(text: string, params?: unknown[]) {
   }
 }
 
-// Helper function to check database connection
-export async function checkConnection() {
-  try {
-    console.log("Checking database connection")
-    const result = await query("SELECT NOW()")
-    console.log("Database connection successful:", result.rows[0])
-    return result.rows[0]
-  } catch (error) {
-    console.error("Database connection check failed:", error)
-    throw error
-  }
-}
-
-// Helper function to execute transactions with better error handling
 export async function transaction<T>(cb: (client: PoolClient) => Promise<T>) {
   const pool = getPool()
   const client = await pool.connect()
@@ -94,16 +78,6 @@ export async function transaction<T>(cb: (client: PoolClient) => Promise<T>) {
   } finally {
     client.release()
     console.log("Database client released")
-  }
-}
-
-// Function to close the pool (useful for tests and graceful shutdown)
-export async function closePool() {
-  if (pool) {
-    console.log("Closing database connection pool")
-    await pool.end()
-    pool = null
-    console.log("Database connection pool closed")
   }
 }
 

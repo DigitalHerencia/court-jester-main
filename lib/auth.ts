@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken"
 
-interface TokenPayload {
-  id: string
-  offenderId?: number
+export interface TokenPayload {
   role: "admin" | "offender"
+  offenderId?: number
   createdAt: string
+  id: string
 }
 
 export async function generateToken(payload: TokenPayload): Promise<string> {
@@ -26,31 +26,35 @@ export async function generateToken(payload: TokenPayload): Promise<string> {
 export async function verifyToken(token?: string): Promise<TokenPayload | null> {
   if (!token) return null
 
-  try {
-    return await new Promise((resolve, reject) => {
-      jwt.verify(token, process.env.JWT_SECRET || "fallback-secret", (err, decoded) => {
-        if (err) return reject(err)
-        resolve(decoded as TokenPayload)
-      })
+  return new Promise((resolve) => {
+    jwt.verify(token, process.env.JWT_SECRET || "fallback-secret", (err, decoded) => {
+      if (err) {
+        console.error("Token verification error:", err)
+        return resolve(null)
+      }
+      resolve(decoded as TokenPayload)
     })
-  } catch (error) {
-    console.error("Token verification error:", error)
-    return null
-  }
+  })
 }
 
 export async function requireAdmin(token?: string): Promise<TokenPayload | null> {
+  if (!token) return null
+
   const payload = await verifyToken(token)
-  if (!payload || payload.role !== "admin") return null
+  if (!payload || payload.role !== "admin") {
+    return null
+  }
+
   return payload
 }
 
 export async function requireOffender(token?: string, offenderId?: number): Promise<TokenPayload | null> {
-  const payload = await verifyToken(token)
-  if (!payload || payload.role !== "offender") return null
+  if (!token) return null
 
-  // If offenderId is provided, ensure the token belongs to that offender
-  if (offenderId && payload.offenderId !== offenderId) return null
+  const payload = await verifyToken(token)
+  if (!payload || payload.role !== "offender" || (offenderId && payload.offenderId !== offenderId)) {
+    return null
+  }
 
   return payload
 }

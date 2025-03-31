@@ -84,7 +84,7 @@ export default function NotificationsPage() {
     <div className="space-y-2">
       {/* Main content block */}
       <div className="rounded-md border border-background/20 p-2 bg-foreground text-background">
-          <h2 className="font-kings mb-2 text-xl">Notifications</h2>
+        <h2 className="font-kings mb-2 text-xl">Notifications</h2>
         <p>View and manage your system notifications.</p>
         <div className="flex justify-between items-center mb-4">
           {notifications.some((n) => !n.read) && (
@@ -112,22 +112,22 @@ export default function NotificationsPage() {
                   key={notification.id}
                   className={`notification-item ${!notification.read ? "border-l-4 border-l-primary" : ""}`}
                 >
-                    <div>
-                      <h3 className="font-medium">{notification.title}</h3>
-                      <p className="mt-1">{notification.message}</p>
-                      <p className="text-sm text-foreground/70 mt-2">
-                        {new Date(notification.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                    {!notification.read && (
-                      <Button
-                        className="border-foreground/20 hover:bg-background hover:text-foreground"
-                        variant="outline"
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        Mark as Read
-                      </Button>
-                    )}
+                  <div>
+                    <h3 className="font-medium">{notification.title}</h3>
+                    <p className="mt-1">{notification.message}</p>
+                    <p className="text-sm text-foreground/70 mt-2">
+                      {new Date(notification.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  {!notification.read && (
+                    <Button
+                      className="border-foreground/20 hover:bg-background hover:text-foreground"
+                      variant="outline"
+                      onClick={() => markAsRead(notification.id)}
+                    >
+                      Mark as Read
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

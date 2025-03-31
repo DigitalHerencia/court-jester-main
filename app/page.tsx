@@ -1,70 +1,70 @@
-"use client";
+"use client"
 
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { toast } from "sonner";
+import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import Image from "next/image"
+import { toast } from "sonner"
 
 type FormData = {
-  username: string;
-};
+  username: string
+}
 
 export default function LoginPage() {
   const {
     register,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<FormData>();
-  const router = useRouter();
+  } = useForm<FormData>()
+  const router = useRouter()
 
   const onSubmit = async (data: FormData) => {
-    const username = data.username;
+    const username = data.username
     if (!username.trim()) {
       // Show dismissible toast error instead of form error
       toast.error("Ingrese un número de preso válido", {
         dismissible: true, // Make toast dismissible
         duration: 5000, // 5 seconds duration
-      });
-      return;
+      })
+      return
     }
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: username }),
-      });
-      const responseText = await response.text();
-      const result = JSON.parse(responseText);
+      })
+      const responseText = await response.text()
+      const result = JSON.parse(responseText)
       if (!response.ok) {
-        const errorMessage = result.error || "Login failed";
+        const errorMessage = result.error || "Login failed"
         toast.error(errorMessage, {
           dismissible: true,
           duration: 5000,
-        });
-        return;
+        })
+        return
       }
       if (result.success) {
-        const { role, newUser, offenderId } = result;
+        const { role, newUser, offenderId } = result
         if (role === "admin") {
-          router.push("/admin/dashboard");
+          router.push("/admin/dashboard")
         } else if (role === "offender") {
-          router.push(newUser ? "/confirmation" : `/offender/dashboard/${offenderId}`);
+          router.push(newUser ? "/confirmation" : `/offender/dashboard/${offenderId}`)
         }
       } else {
         toast.error("Unknown error occurred", {
           dismissible: true,
           duration: 5000,
-        });
+        })
       }
     } catch (error: unknown) {
-      const errorMessage = (error as Error).message || "An error occurred during login";
+      const errorMessage = (error as Error).message || "An error occurred during login"
       toast.error(errorMessage, {
         dismissible: true,
         duration: 5000,
-      });
+      })
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground">
@@ -107,5 +107,6 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-  );
+  )
 }
+

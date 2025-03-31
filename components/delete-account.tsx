@@ -73,7 +73,7 @@ export function DeleteAccount({ offenderId }: DeleteAccountProps) {
       <CardFooter>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button variant="destructive" className="w-full font-kings">
+            <Button className="bg-foreground text-background  w-full font-kings" variant="destructive">
               DELETE ACCOUNT
             </Button>
           </DialogTrigger>

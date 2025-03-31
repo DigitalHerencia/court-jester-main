@@ -298,7 +298,7 @@ export default function OffenderProfilePage() {
                         <Select
                           value={formData.hair}
                           onValueChange={(value: string) => handleSelectChange("hair", value)}
-                          >
+                        >
                           {" "}
                           <SelectTrigger id="hair">
                             <SelectValue placeholder="Select hair color" />

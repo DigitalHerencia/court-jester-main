@@ -23,9 +23,9 @@ export function DateRangePicker({
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className={cn("w-full justify-start text-left font-normal", !dateRange && "text-muted-foreground")}
             id="date"
             variant={"outline"}
+            className={cn("w-full justify-start text-left font-normal", !dateRange && "text-muted-foreground")}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {dateRange?.from ? (
@@ -41,17 +41,18 @@ export function DateRangePicker({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-0">
+        <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             initialFocus
-            defaultMonth={dateRange?.from}
             mode="range"
-            numberOfMonths={2}
+            defaultMonth={dateRange?.from}
             selected={dateRange}
             onSelect={setDateRange}
+            numberOfMonths={2}
           />
         </PopoverContent>
       </Popover>
     </div>
   )
 }
+

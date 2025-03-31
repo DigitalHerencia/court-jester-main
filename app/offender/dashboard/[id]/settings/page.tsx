@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent,  CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { DeleteAccount } from "@/components/shared/delete-account"
 import { NotificationPermission } from "@/components/shared/notification-permission"
@@ -120,62 +120,62 @@ export default function OffenderSettingsPage() {
         </CardHeader>
         <CardContent className="card-content space-y-4">
           <div className="border border-border rounded-lg p-4">
-          <div className="mb-4">
-          <h2 className="text-lg font-bold mb-2" >
-            <Settings className="mr-2 inline-block h-5 w-5" />
-          Manage your contact information and preferences.</h2>
+            <div className="mb-4">
+              <h2 className="text-lg font-bold mb-2">
+                <Settings className="mr-2 inline-block h-5 w-5" />
+                Manage your contact information and preferences.
+              </h2>
+            </div>
+            <div className="mb-4">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={settings.email || ""}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={settings.phone || ""}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <Switch
+                checked={settings.notification_preferences.motion_updates}
+                id="profile_enabled"
+                onCheckedChange={(checked) => handleNotificationChange("motion_updates", checked)}
+              />
+              <Label htmlFor="profile_enabled">Notify me about motion status updates</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={settings.notification_preferences.new_cases}
+                id="new_cases"
+                onCheckedChange={(checked) => handleNotificationChange("new_cases", checked)}
+              />
+              <Label htmlFor="new_cases">Notify me about new cases added</Label>
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <Switch
+                checked={settings.notification_preferences.system_alerts}
+                id="system_alerts"
+                onCheckedChange={(checked) => handleNotificationChange("system_alerts", checked)}
+              />
+              <Label htmlFor="system_alerts">Receive system alerts and updates</Label>
+            </div>
+            <Button className="bg-foreground text-background w-full" disabled={isSaving} onClick={saveSettings}>
+              {isSaving ? "Saving..." : "Save Settings"}
+            </Button>
           </div>
-          <div className="mb-4">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={settings.email || ""}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={settings.phone || ""}
-              onChange={(e) => handleInputChange("phone", e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2 mt-4">
-            <Switch
-              checked={settings.notification_preferences.motion_updates}
-              id="profile_enabled"
-              onCheckedChange={(checked) => handleNotificationChange("motion_updates", checked)}
-            />
-            <Label htmlFor="profile_enabled">Notify me about motion status updates</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={settings.notification_preferences.new_cases}
-              id="new_cases"
-              onCheckedChange={(checked) => handleNotificationChange("new_cases", checked)}
-            />
-            <Label htmlFor="new_cases">Notify me about new cases added</Label>
-          </div>
-          <div className="flex items-center gap-2 mb-4">
-            <Switch
-              checked={settings.notification_preferences.system_alerts}
-              id="system_alerts"
-              onCheckedChange={(checked) => handleNotificationChange("system_alerts", checked)}
-            />
-            <Label htmlFor="system_alerts">Receive system alerts and updates</Label>
-          </div>
-          <Button className="bg-foreground text-background w-full" disabled={isSaving} onClick={saveSettings}>
-            {isSaving ? "Saving..." : "Save Settings"}
-          </Button>
-          </div>
-            <NotificationPermission />
-      <DeleteAccount offenderId={id} />
+          <NotificationPermission />
+          <DeleteAccount offenderId={id} />
         </CardContent>
-        <CardFooter className="flex justify-end">
-        </CardFooter>
+        <CardFooter className="flex justify-end"></CardFooter>
       </Card>
     </div>
   )

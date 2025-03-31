@@ -1,65 +1,45 @@
 "use client"
-
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils/utils"
-
-interface TabItem {
-  label: string
-  href: string
-  count?: number
-}
+import { cn } from "@/lib/utils"
 
 interface DashboardTabsProps {
-  role: "admin" | "offender"
-  offenderId?: string
+  offenderId: string
 }
 
-export function DashboardTabs({ role, offenderId }: DashboardTabsProps) {
+export default function DashboardTabs({ offenderId }: DashboardTabsProps) {
   const pathname = usePathname()
 
-  // Define tabs based on role; if offenderId is undefined, the offender-specific tabs won't work correctly.
-  const tabs: TabItem[] =
-    role === "admin"
-      ? [
-          { label: "Notifications", href: "/admin/dashboard/notifications", count: 3 },
-          { label: "Offenders", href: "/admin/dashboard/offenders" },
-          { label: "Cases", href: "/admin/dashboard/cases" },
-          { label: "Motions", href: "/admin/dashboard/motions" },
-          { label: "Database", href: "/admin/dashboard/tools/database-reset" },
-          { label: "Settings", href: "/admin/dashboard/settings" },
-          { label: "Tools", href: "/admin/dashboard/tools" },
-        ]
-      : [
-          { label: "Profile", href: `/offender/dashboard/${offenderId}/profile` },
-          { label: "Cases", href: `/offender/dashboard/${offenderId}/cases` },
-          { label: "Court Dates", href: `/offender/dashboard/${offenderId}/court-dates` },
-          { label: "Settings", href: `/offender/dashboard/${offenderId}/settings` },
-        ]
+  const tabs = [
+    { name: "Dashboard", href: `/offender/dashboard/${offenderId}` },
+    { name: "Profile", href: `/offender/dashboard/${offenderId}/profile` },
+    { name: "Cases", href: `/offender/dashboard/${offenderId}/cases` },
+    { name: "Court Dates", href: `/offender/dashboard/${offenderId}/court-dates` },
+    { name: "Motions", href: `/offender/dashboard/${offenderId}/motions` },
+    { name: "Settings", href: `/offender/dashboard/${offenderId}/settings` },
+  ]
 
   return (
-    <div className="mb-8">
-      <div className="flex w-full rounded-md border-2 border-foreground overflow-hidden">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.href}
-            className={cn(
-              "relative flex-1 px-4 py-2 text-center transition-colors font-kings",
-              pathname === tab.href || pathname.startsWith(tab.href.replace(/\/$/, ""))
-                ? "font-medium bg-background text-foreground"
-                : "bg-foreground text-background hover:bg-foreground/90",
-            )}
-            href={tab.href}
-          >
-            <span>{tab.label}</span>
-            {tab.count && (
-              <span className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
-                {tab.count}
-              </span>
-            )}
-          </Link>
-        ))}
-      </div>
+    <div className="mb-6 border-b border-foreground/10">
+      <nav className="-mb-px flex space-x-4 overflow-x-auto hide-scrollbar">
+        {tabs.map((tab) => {
+          const isActive = pathname === tab.href || pathname.startsWith(`${tab.href}/`)
+          return (
+            <Link
+              key={tab.name}
+              href={tab.href}
+              className={cn(
+                "whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium",
+                isActive
+                  ? "border-foreground text-foreground"
+                  : "border-transparent text-foreground/60 hover:border-foreground/30 hover:text-foreground/80",
+              )}
+            >
+              {tab.name}
+            </Link>
+          )
+        })}
+      </nav>
     </div>
   )
 }
