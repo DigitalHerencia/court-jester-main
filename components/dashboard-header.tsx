@@ -1,38 +1,55 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Bell } from "lucide-react"
+"use client"
 
-interface DashboardHeaderProps {
-  role: "admin" | "offender"
-  offenderId?: string
-  unreadCount?: number
+import { usePathname } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+
+// Client-side logout function
+async function logout() {
+  const res = await fetch("/api/auth/logout", { method: "GET" })
+  if (res.ok) {
+    window.location.href = "/"
+  } else {
+    console.error("Failed to logout")
+  }
 }
 
-export default function DashboardHeader({ role, offenderId, unreadCount = 0 }: DashboardHeaderProps) {
-  const notificationsLink =
-    role === "admin" ? "/admin/dashboard/notifications" : `/offender/dashboard/${offenderId}/notifications`
-
+export function AdminDashboardHeader() {
   return (
     <header className="flex justify-between items-center py-4 border-b border-foreground/10 mb-6">
-      <Link
-        href={role === "admin" ? "/admin/dashboard" : `/offender/dashboard/${offenderId}`}
-        className="font-jacquard text-2xl sm:text-3xl"
-      >
+      <Link className="font-jacquard text-2xl sm:text-3xl" href="/admin/dashboard">
         Court Jester
       </Link>
-      <div className="flex items-center space-x-4">
-        <Link href={notificationsLink}>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </Button>
-        </Link>
-      </div>
+      <Button
+        className="bg-foreground text-background hover:bg-foreground/90 font-kings px-4 py-2 rounded-md"
+        onClick={logout}
+      >
+        Logout
+      </Button>
     </header>
   )
+}
+
+export function OffenderDashboardHeader() {
+  return (
+    <header className="flex justify-between items-center py-4 border-b border-foreground/10 mb-6">
+      <Link className="font-jacquard text-2xl sm:text-3xl" href="/offender/dashboard">
+        Court Jester
+      </Link>
+      <Button
+        className="bg-foreground text-background hover:bg-foreground/90 font-kings px-4 py-2 rounded-md"
+        onClick={logout}
+      >
+        Logout
+      </Button>
+    </header>
+  )
+}
+
+export function DashboardHeader() {
+  const pathname = usePathname()
+  const isAdmin = pathname.includes("/admin/")
+
+  return isAdmin ? <AdminDashboardHeader /> : <OffenderDashboardHeader />
 }
 

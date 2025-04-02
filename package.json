@@ -63,7 +63,6 @@
     "pdfjs-dist": "^5.0.375",
     "pg": "^8.14.1",
     "prettier-eslint": "^16.3.0",
-    "puppeteer-core": "^24.4.0",
     "react": "^19.0.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "^19.0.0",

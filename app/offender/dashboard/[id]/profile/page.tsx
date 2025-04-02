@@ -68,7 +68,7 @@ export default function OffenderProfilePage() {
       </div>
     )
   }
-
+  
   if (error || !offender) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
@@ -90,12 +90,7 @@ export default function OffenderProfilePage() {
           <div className="flex items-center gap-4">
             <div className="relative h-40 w-32 border border-foreground/20 rounded-md overflow-hidden">
               {offender.mugshot_url ? (
-                <Image
-                  fill
-                  alt="Mugshot"
-                  src={offender.mugshot_url || "/placeholder.svg"}
-                  style={{ objectFit: "cover" }}
-                />
+                <Image fill alt="Mugshot" src={offender.mugshot_url || "/placeholder.svg"} style={{ objectFit: "cover" }} />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
                   No mugshot available
@@ -138,10 +133,7 @@ export default function OffenderProfilePage() {
           </p>
         </div>
       </div>
-      <Button className="font-kings" onClick={handlePrintProfile}>
-        Print Profile
-      </Button>
+      <Button className="font-kings" onClick={handlePrintProfile}>Print Profile</Button>
     </div>
   )
 }
-

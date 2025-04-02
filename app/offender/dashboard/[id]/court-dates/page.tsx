@@ -33,23 +33,21 @@ export default function CourtDatesPage() {
         }
         const data = await response.json()
         setCourtDates(data.courtDates || [])
-
-        // Filter upcoming court dates (dates after today)
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const upcoming = (data.courtDates || []).filter((courtDate: { date: string | number | Date }) => {
-          const dateObj = new Date(courtDate.date)
-          return dateObj >= today
-        })
-
-        // Sort by date (earliest first)
-        upcoming.sort(
-          (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
-            new Date(a.date).getTime() - new Date(b.date).getTime(),
-        )
-
-        // Set upcoming dates as the default displayed dates
-        setDisplayedDates(upcoming)
+        
+         // Filter upcoming court dates (dates after today)
+         const today = new Date()
+         today.setHours(0, 0, 0, 0)
+         const upcoming = (data.courtDates || []).filter((courtDate: { date: string | number | Date }) => {
+           const dateObj = new Date(courtDate.date)
+           return dateObj >= today
+         })
+ 
+         // Sort by date (earliest first)
+         upcoming.sort((a: { date: string | number | Date }, b: { date: string | number | Date }) => new Date(a.date).getTime() - new Date(b.date).getTime())
+ 
+         // Set upcoming dates as the default displayed dates
+         setDisplayedDates(upcoming)
+        
       } catch (error) {
         console.error("Error fetching court dates:", error)
         setError("Failed to load court dates. Please try again later.")
@@ -85,9 +83,9 @@ export default function CourtDatesPage() {
       return dateObj.getTime() === selected.getTime()
     })
     setFilteredDates(filtered)
-
-    // Update displayed dates based on selection
-    if (filtered.length > 0) {
+    
+     // Update displayed dates based on selection
+     if (filtered.length > 0) {
       setDisplayedDates(filtered)
     } else {
       // If no dates match the selection, revert to upcoming dates
@@ -100,6 +98,7 @@ export default function CourtDatesPage() {
       upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       setDisplayedDates(upcoming)
     }
+    
   }, [selectedDate, courtDates])
 
   // Dates with court appearances (for calendar highlights)
@@ -143,8 +142,8 @@ export default function CourtDatesPage() {
             onSelect={setSelectedDate}
           />
         </div>
-
-        <div>
+        
+        <div >
           <h3 className="font-kings mb-3 text-2xl">
             {filteredDates.length > 0
               ? `Scheduled Appearances (${new Date(filteredDates[0].date).toLocaleDateString()})`
@@ -155,23 +154,25 @@ export default function CourtDatesPage() {
           ) : (
             <div className="card-content pb-2 text-lg font-kings">
               {displayedDates.map((courtDate) => (
-                <div key={courtDate.id}>
-                  <div className="font-bold text-xl">{new Date(courtDate.date).toLocaleDateString()}</div>
-                  <div>
-                    <strong>Case:</strong> {courtDate.case_number}
-                  </div>
-                  <div>
-                    <strong>Time:</strong> {courtDate.time}
-                  </div>
-                  <div>
-                    <strong>Location:</strong> {courtDate.location}
-                  </div>
-                  <div>
-                    <strong>Type:</strong> {courtDate.type}
-                  </div>
-                  <div>
-                    <strong>Notes:</strong> {courtDate.notes}
-                  </div>
+                <div key={courtDate.id} >
+                    <div  className="font-bold text-xl">
+                      {new Date(courtDate.date).toLocaleDateString()}
+                    </div>
+                    <div>
+                      <strong>Case:</strong> {courtDate.case_number}
+                    </div>
+                    <div>
+                      <strong>Time:</strong> {courtDate.time}
+                    </div>
+                    <div>
+                      <strong>Location:</strong> {courtDate.location}
+                      </div>
+                      <div>
+                      <strong>Type:</strong> {courtDate.type}
+                    </div>
+                    <div>
+                      <strong>Notes:</strong> {courtDate.notes}
+                    </div>
                 </div>
               ))}
             </div>

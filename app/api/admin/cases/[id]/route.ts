@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Get related charges, hearings, motions
     const chargesResult = await query(
-      `SELECT id, description, statute, disposition FROM charges WHERE case_id = $1`,
+      `SELECT id, description, statute, severity, disposition FROM charges WHERE case_id = $1`,
       [id],
     )
     const hearingsResult = await query(

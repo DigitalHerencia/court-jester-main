@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       offenderId: payload.offenderId,
       role: "offender",
       createdAt: new Date().toISOString(),
-      id: "",
+      id: ""
     })
 
     const response = NextResponse.json({
