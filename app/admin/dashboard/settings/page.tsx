@@ -118,13 +118,11 @@ export default function SettingsPage() {
   return (
     <div className="space-y-2">
       {/* Title block */}
-      <div className="rounded-md border border-background/20 p-2 bg-primary text-background">
-        <h2 className="font-kings mb-2 text-xl">System Settings</h2>
-        <p>Configure system-wide settings and preferences.</p>
-      </div>
-
+      <div className="card-secondary">
+        <h2 className="font-kings mb-2 text-3xl">System Settings</h2>
+        <p className="font-kings text-background mb-2 text-sm">Configure system-wide settings and preferences.</p>
       {/* Main content block */}
-      <div className="rounded-md border border-background/20 p-2 bg-foreground text-background">
+      <div className="rounded-md p-2 bg-foreground text-background">
         <div className="space-y-4">
           {/* Email Notifications */}
           <div className="rounded-md border border-background/20 p-4 bg-background text-foreground">
@@ -139,10 +137,10 @@ export default function SettingsPage() {
                   onCheckedChange={(checked) => updateSetting("email_notifications", checked)}
                 />
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={testEmailNotifications}
                   disabled={!settings.email_notifications}
+                  size="sm"
+                  variant="default"
+                  onClick={testEmailNotifications}
                 >
                   Test
                 </Button>
@@ -171,12 +169,12 @@ export default function SettingsPage() {
               <p className="text-sm">Code required for new admin registration</p>
               <div className="flex gap-2 mt-2">
                 <Input
+                  className="border-foreground/20 bg-background text-foreground"
                   value={settings.admin_code}
                   onChange={(e) => updateSetting("admin_code", e.target.value)}
-                  className="border-foreground/20 bg-background text-foreground"
                 />
                 <Button
-                  variant="outline"
+                  variant="default"
                   onClick={() => updateSetting("admin_code", Math.random().toString(36).substring(2, 10).toUpperCase())}
                 >
                   Generate
@@ -192,22 +190,23 @@ export default function SettingsPage() {
                 <h3 className="font-medium">System Version</h3>
                 <p className="text-sm mt-1">Current version of the Court Jester system</p>
               </div>
-              <div className="text-sm font-mono bg-foreground/10 px-3 py-1 rounded">{settings.version}</div>
+              <div className="text-sm  bg-foreground px-3 py-1 ">{settings.version}</div>
             </div>
           </div>
 
           {/* Save Button */}
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-end mt-6 text-foreground">
             <Button
-              className="bg-foreground text-background hover:bg-foreground/90"
-              onClick={saveSettings}
               disabled={isSaving}
+              variant="outline"
+              onClick={saveSettings}
             >
               {isSaving ? "Saving..." : "Save Settings"}
             </Button>
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }

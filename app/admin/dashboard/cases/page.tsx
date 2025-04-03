@@ -1,11 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { toast } from "sonner"
 
 interface CaseItem {
+  offender_name: ReactNode
+  status: ReactNode
+  next_hearing: any
   id: number
   case_number: string
   // Add any other fields needed, e.g. offender_name, status, etc.
@@ -40,16 +43,10 @@ export default function CasesPage() {
 
   return (
     <div className="space-y-2">
-      {/* Title block */}
-      <div className="rounded-md border border-background/20 p-2 bg-primary text-background">
-        <h2 className="font-kings mb-2 text-xl">Cases</h2>
-        <p>Manage all cases in the system.</p>
-      </div>
-
       {/* Main content block */}
-      <div className="rounded-md border border-background/20 p-2 bg-foreground text-background">
-        <h3 className="font-kings mb-2 text-lg">Case List</h3>
-        <div className="rounded-md border border-background/20 p-2 bg-background text-foreground">
+      <div className="card-secondary">
+        <h3 className="font-kings text-3xl  ">Case List</h3>
+        <p className="font-kings text-background mb-2 text-sm">Manage all cases in the system.</p>
           {isLoading ? (
             <p className="text-center py-4">Loading cases...</p>
           ) : error ? (
@@ -57,14 +54,16 @@ export default function CasesPage() {
           ) : cases.length === 0 ? (
             <p className="text-center py-4">No cases found.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="card-secondary space-y-2">
               {cases.map((caseItem) => (
                 <div
                   key={caseItem.id}
-                  className="rounded-md border border-background/20 p-2 bg-background text-foreground"
+                  className="card-content hover:shadow-md transition-shadow"
                 >
                   <p>Case #{caseItem.case_number}</p>
-                  {/* ...other case details here... */}
+                  <p>Offender: {caseItem.offender_name}</p>
+                  <p>Status: {caseItem.status}</p>
+                  <p>Next Hearing: {caseItem.next_hearing ? new Date(caseItem.next_hearing).toLocaleDateString() : "N/A"}</p>
                   <Link href={`/admin/dashboard/cases/${caseItem.id}`}>
                     <Button className="bg-foreground text-background hover:bg-foreground/90 mt-2">View Details</Button>
                   </Link>
@@ -74,7 +73,6 @@ export default function CasesPage() {
           )}
         </div>
       </div>
-    </div>
   )
 }
 

@@ -119,12 +119,11 @@ export default function MotionsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Header Block */}
-      <div className="rounded-md border border-background/20 p-2 bg-primary text-background">
-        <h1 className="font-kings text-2xl mb-2">Motion Templates</h1>
-        <p>Manage all motion templates and custom motions in the system.</p>
-      </div>
+      <div className="card-secondary space-y-3">
+        <h2 className="font-kings text-3xl ">Motion Templates</h2>
+        <p className="font-kings text-background mb-2 text-sm">Manage all motion templates and custom motions in the system.</p>
 
       {/* Search and Create Template */}
       <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
@@ -134,9 +133,9 @@ export default function MotionsPage() {
           type="text"
           value={searchTerm}
           onChange={handleSearch}
-        />
+          />
         <Link href="/admin/dashboard/tools/motions-editor">
-          <Button className="bg-foreground text-background">Create Template</Button>
+          <Button className="w-full sm:w-64 bg-background text-foreground">Create Template</Button>
         </Link>
       </div>
 
@@ -152,7 +151,7 @@ export default function MotionsPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-md border border-foreground/20">
-          <table className="w-full border-collapse">
+          <table className="card-content w-full border-collapse">
             <thead className="bg-foreground/10">
               <tr>
                 <th className="px-4 py-2 text-left font-medium">Title</th>
@@ -184,14 +183,14 @@ export default function MotionsPage() {
                   <td className="px-4 py-2">
                     <div className="flex gap-2">
                       <Link href={`/admin/dashboard/tools/motions-editor?id=${template.id}`}>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="default">
                           Edit
                         </Button>
                       </Link>
                       <Button
-                        className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                        className="text-red-500 hover:bg-red-50 hover:text-red-600 text-background"
                         size="sm"
-                        variant="outline"
+                        variant="default"
                         onClick={() => handleDeleteTemplate(template.id)}
                       >
                         Delete
@@ -205,6 +204,7 @@ export default function MotionsPage() {
         </div>
       )}
     </div>
+   </div>
   )
 }
 

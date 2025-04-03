@@ -42,16 +42,10 @@ export default function OffendersPage() {
 
   return (
     <div className="space-y-2">
-      {/* Title block */}
-      <div className="rounded-md border border-background/20 p-2 bg-primary text-background">
-        <h2 className="font-kings mb-2 text-xl">Offenders</h2>
-        <p>Manage all offenders in the system.</p>
-      </div>
-
       {/* Main content block */}
-      <div className="rounded-md border border-background/20 p-2 bg-foreground text-background">
-        <h3 className="font-kings mb-2 text-lg">Offender List</h3>
-        <div className="rounded-md border border-background/20 p-2 bg-background text-foreground">
+      <div className="card-secondary">
+        <h2 className="font-kings text-3xl">Offender List</h2>
+        <p className="font-kings text-background mb-2 text-sm">Manage all offenders in the system.</p>
           {isLoading ? (
             <p className="text-center py-4">Loading offenders...</p>
           ) : error ? (
@@ -59,16 +53,14 @@ export default function OffendersPage() {
           ) : offenders.length === 0 ? (
             <p className="text-center py-4">No offenders found.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="card-secondary space-y-2">
               {offenders.map((offender) => (
                 <div
                   key={offender.id}
-                  className="rounded-md border border-background/20 p-4 bg-background text-foreground"
+                  className="card-content hover:shadow-md transition-shadow"
                 >
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                     <div>
-                      <h3 className="font-medium text-lg">{offender.name}</h3>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
+                      <h3>{offender.name}</h3>
                         <p className="text-sm">
                           <span className="font-medium">Number:</span> {offender.inmate_number}
                         </p>
@@ -78,21 +70,20 @@ export default function OffendersPage() {
                         <p className="text-sm">
                           <span className="font-medium">Facility:</span> {offender.facility}
                         </p>
-                      </div>
+                    
                     </div>
                     <div className="flex gap-2 mt-4 md:mt-0">
                       <Link href={`/admin/dashboard/offenders/${offender.id}`}>
-                        <Button className="bg-foreground text-background hover:bg-foreground/90">View Details</Button>
+                        <Button className="bg-foreground text-background hover:bg-foreground/90">View Details
+                        </Button>
                       </Link>
                     </div>
                   </div>
-                </div>
               ))}
-            </div>
+              </div>
           )}
+          </div>
         </div>
-      </div>
-    </div>
   )
 }
 

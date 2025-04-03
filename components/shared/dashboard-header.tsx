@@ -17,7 +17,7 @@ async function logout() {
 export function AdminDashboardHeader() {
   return (
     <header className="flex justify-between items-center py-4 mb-2.5">
-      <Link className="font-jacquard text-2xl sm:text-3xl" href="/admin/dashboard">
+      <Link className="font-jacquard text-5xl sm:text-5xl" href="/admin/dashboard">
         Court Jester
       </Link>
       <Button

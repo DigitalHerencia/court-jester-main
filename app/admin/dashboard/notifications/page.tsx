@@ -83,13 +83,13 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-2">
       {/* Main content block */}
-      <div className="rounded-md border border-background/20 p-2 bg-foreground text-background">
-          <h2 className="font-kings mb-2 text-xl">Notifications</h2>
-        <p>View and manage your system notifications.</p>
+      <div className="card-secondary">
+          <h2 className="font-kings text-3xl">Notifications</h2>
+        <p className="font-kings text-background mb-2 text-sm">View and manage your system notifications.</p>
         <div className="flex justify-between items-center mb-4">
           {notifications.some((n) => !n.read) && (
             <Button
-              className="border-background/20 hover:bg-foreground hover:text-background"
+              className="bg-background text-foreground hover:bg-foreground hover:text-background"
               variant="outline"
               onClick={markAllAsRead}
             >
@@ -97,8 +97,6 @@ export default function NotificationsPage() {
             </Button>
           )}
         </div>
-
-        <div className="rounded-md border border-background/20 p-2 bg-background text-foreground">
           {isLoading ? (
             <p className="text-center py-4">Loading notifications...</p>
           ) : error ? (
@@ -106,22 +104,22 @@ export default function NotificationsPage() {
           ) : notifications.length === 0 ? (
             <p className="text-center py-4">No notifications found.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="card-secondary space-y-2">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`notification-item ${!notification.read ? "border-l-4 border-l-primary" : ""}`}
+                  className="card-content hover:shadow-md transition-shadow"
                 >
                     <div>
-                      <h3 className="font-medium">{notification.title}</h3>
+                      <h3 className="font-medium text-lg">{notification.title}</h3>
                       <p className="mt-1">{notification.message}</p>
-                      <p className="text-sm text-foreground/70 mt-2">
+                      <p className="text-sm text-foreground mt-2">
                         {new Date(notification.created_at).toLocaleString()}
                       </p>
                     </div>
                     {!notification.read && (
                       <Button
-                        className="border-foreground/20 hover:bg-background hover:text-foreground"
+                        className="border-foreground hover:bg-background hover:text-foreground"
                         variant="outline"
                         onClick={() => markAsRead(notification.id)}
                       >
@@ -134,7 +132,6 @@ export default function NotificationsPage() {
           )}
         </div>
       </div>
-    </div>
   )
 }
 

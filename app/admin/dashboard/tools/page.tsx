@@ -4,12 +4,12 @@ import { FileUp, Database, Camera, UserPlus, FileEdit, HelpCircle, ArrowRight } 
 
 export default function AdminToolsPage() {
   return (
-    <div className="container mx-auto p-4">
+    <div className="container card-secondary">
       <h1 className="text-3xl font-bold mb-6">Administrative Tools</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Case Upload Tool */}
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="card-content hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <FileUp className="h-5 w-5" />
@@ -22,8 +22,8 @@ export default function AdminToolsPage() {
               Import case files in PDF format to automatically extract and create case records.
             </p>
             <Link
-              href="/admin/dashboard/tools/case-upload"
               className="flex items-center text-sm font-medium text-primary hover:underline"
+              href="/admin/dashboard/tools/case-upload"
             >
               Go to Case Upload
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -32,7 +32,7 @@ export default function AdminToolsPage() {
         </Card>
 
         {/* Database Reset Tool */}
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="card-content hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
@@ -45,8 +45,8 @@ export default function AdminToolsPage() {
               Reset database, run migrations, or perform maintenance operations.
             </p>
             <Link
-              href="/admin/dashboard/tools/database-reset"
               className="flex items-center text-sm font-medium text-primary hover:underline"
+              href="/admin/dashboard/tools/database-reset"
             >
               Go to Database Management
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -55,7 +55,7 @@ export default function AdminToolsPage() {
         </Card>
 
         {/* Mugshot Upload Tool */}
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="card-content hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Camera className="h-5 w-5" />
@@ -66,8 +66,8 @@ export default function AdminToolsPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">Upload and manage offender mugshot images.</p>
             <Link
-              href="/admin/dashboard/tools/mugshot-upload"
               className="flex items-center text-sm font-medium text-primary hover:underline"
+              href="/admin/dashboard/tools/mugshot-upload"
             >
               Go to Mugshot Upload
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -76,7 +76,7 @@ export default function AdminToolsPage() {
         </Card>
 
         {/* Offender Profile Tool */}
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="card-content hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
@@ -87,8 +87,8 @@ export default function AdminToolsPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">Create new offender profiles or edit existing ones.</p>
             <Link
-              href="/admin/dashboard/tools/offender-profile"
               className="flex items-center text-sm font-medium text-primary hover:underline"
+              href="/admin/dashboard/tools/offender-profile"
             >
               Go to Offender Profile
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -97,7 +97,7 @@ export default function AdminToolsPage() {
         </Card>
 
         {/* Motions Editor Tool */}
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="card-content hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <FileEdit className="h-5 w-5" />
@@ -110,8 +110,8 @@ export default function AdminToolsPage() {
               Create, edit, and manage motion templates for offenders.
             </p>
             <Link
-              href="/admin/dashboard/tools/motions-editor"
               className="flex items-center text-sm font-medium text-primary hover:underline"
+              href="/admin/dashboard/tools/motions-editor"
             >
               Go to Motions Editor
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -120,7 +120,7 @@ export default function AdminToolsPage() {
         </Card>
 
         {/* Help Tool */}
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="card-content hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <HelpCircle className="h-5 w-5" />
@@ -133,8 +133,8 @@ export default function AdminToolsPage() {
               View documentation and help resources for administrators.
             </p>
             <Link
-              href="/admin/dashboard/tools/help"
               className="flex items-center text-sm font-medium text-primary hover:underline"
+              href="/admin/dashboard/tools/help"
             >
               Go to Help
               <ArrowRight className="ml-1 h-4 w-4" />
