@@ -26,7 +26,6 @@ export function DashboardTabs({ role, offenderId }: DashboardTabsProps) {
           { label: "Offenders", href: "/admin/dashboard/offenders" },
           { label: "Cases", href: "/admin/dashboard/cases" },
           { label: "Motions", href: "/admin/dashboard/motions" },
-          { label: "Database", href: "/admin/dashboard/tools/database-reset" },
           { label: "Settings", href: "/admin/dashboard/settings" },
           { label: "Tools", href: "/admin/dashboard/tools" },
         ]
