@@ -2,11 +2,24 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -187,17 +200,24 @@ export default function MotionsEditorPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Motions Editor</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-3xl text-background mb-6">Motions Editor</h1>
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-1">
+        {/* Left Column: Template List */}
+        <Card className="card-content md:col-span-1">
           <CardHeader>
-            <CardTitle>Motion Templates</CardTitle>
-            <CardDescription>Select a template to edit or create a new one</CardDescription>
+            <CardTitle className="font-kings text-foreground">Motion Templates</CardTitle>
+            <CardDescription className="text-foreground">
+              Select a template to edit or create a new one
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-foreground">
             <div className="space-y-2">
-              <Button className="w-full justify-start" variant="outline" onClick={handleCreateNew}>
+              <Button
+                className="w-full justify-start button-link"
+                variant="outline"
+                onClick={handleCreateNew}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Create New Template
               </Button>
@@ -205,7 +225,7 @@ export default function MotionsEditorPage() {
                 {templates.map((template) => (
                   <Button
                     key={template.id}
-                    className="w-full justify-start"
+                    className="w-full justify-start button-link"
                     variant={selectedTemplate?.id === template.id ? "default" : "ghost"}
                     onClick={() => handleSelectTemplate(template)}
                   >
@@ -217,31 +237,46 @@ export default function MotionsEditorPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="md:col-span-2">
+
+        {/* Right Column: Template Editor / Details */}
+        <Card className="card-content md:col-span-2">
           {isEditing ? (
             <>
               <CardHeader>
-                <CardTitle>{editedTemplate.id ? "Edit Template" : "Create New Template"}</CardTitle>
-                <CardDescription>
-                  {editedTemplate.id ? "Modify the existing template" : "Create a new motion template"}
+                <CardTitle className="font-kings text-background">
+                  {editedTemplate.id ? "Edit Template" : "Create New Template"}
+                </CardTitle>
+                <CardDescription className="text-background">
+                  {editedTemplate.id
+                    ? "Modify the existing template"
+                    : "Create a new motion template"}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-foreground">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Template Title</Label>
+                    <Label className="text-background" htmlFor="title">
+                      Template Title
+                    </Label>
                     <Input
+                      className="bg-background text-foreground"
                       id="title"
                       placeholder="e.g., Motion for Discovery"
                       value={editedTemplate.title}
-                      onChange={(e) => setEditedTemplate((prev) => ({ ...prev, title: e.target.value }))}
+                      onChange={(e) =>
+                        setEditedTemplate((prev) => ({ ...prev, title: e.target.value }))
+                      }
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label className="text-background" htmlFor="category">
+                      Category
+                    </Label>
                     <Select
                       value={editedTemplate.category}
-                      onValueChange={(value) => setEditedTemplate((prev) => ({ ...prev, category: value }))}
+                      onValueChange={(value) =>
+                        setEditedTemplate((prev) => ({ ...prev, category: value }))
+                      }
                     >
                       <SelectTrigger id="category">
                         <SelectValue placeholder="Select a category" />
@@ -256,25 +291,29 @@ export default function MotionsEditorPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="content">Template Content</Label>
+                    <Label className="text-background" htmlFor="content">
+                      Template Content
+                    </Label>
                     <p className="text-xs text-muted-foreground mb-2">
                       Use {"{variable_name}"} for dynamic content (e.g., {"{defendant_name}"})
                     </p>
                     <Textarea
-                      className="min-h-[300px] font-mono"
+                      className="min-h-[300px] bg-background text-foreground font-mono"
                       id="content"
                       placeholder="Enter the motion template content..."
                       value={editedTemplate.content}
-                      onChange={(e) => setEditedTemplate((prev) => ({ ...prev, content: e.target.value }))}
+                      onChange={(e) =>
+                        setEditedTemplate((prev) => ({ ...prev, content: e.target.value }))
+                      }
                     />
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button variant="outline" onClick={handleCancelEdit}>
+                <Button className="button-link" variant="outline" onClick={handleCancelEdit}>
                   Cancel
                 </Button>
-                <Button disabled={isSaving} onClick={handleSaveTemplate}>
+                <Button className="button-link" disabled={isSaving} onClick={handleSaveTemplate}>
                   <Save className="mr-2 h-4 w-4" />
                   {isSaving ? "Saving..." : "Save Template"}
                 </Button>
@@ -285,18 +324,26 @@ export default function MotionsEditorPage() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle>{selectedTemplate.title}</CardTitle>
-                    <CardDescription>
-                      Category: {selectedTemplate.category.charAt(0).toUpperCase() + selectedTemplate.category.slice(1)}
+                    <CardTitle className="font-kings text-background">
+                      {selectedTemplate.title}
+                    </CardTitle>
+                    <CardDescription className="text-background">
+                      Category: {selectedTemplate.category.charAt(0).toUpperCase() +
+                        selectedTemplate.category.slice(1)}
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={handleEditTemplate}>
+                    <Button
+                      className="button-link"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleEditTemplate}
+                    >
                       Edit
                     </Button>
                     <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button size="sm" variant="destructive">
+                        <Button className="button-link" size="sm" variant="destructive">
                           Delete
                         </Button>
                       </DialogTrigger>
@@ -309,10 +356,10 @@ export default function MotionsEditorPage() {
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                          <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                          <Button className="button-link" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                             Cancel
                           </Button>
-                          <Button variant="destructive" onClick={handleDeleteTemplate}>
+                          <Button className="button-link" variant="destructive" onClick={handleDeleteTemplate}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Template
                           </Button>
@@ -322,7 +369,7 @@ export default function MotionsEditorPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-foreground">
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Template Information</h3>
@@ -334,7 +381,7 @@ export default function MotionsEditorPage() {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium mb-2">Template Content</h3>
-                    <div className="whitespace-pre-wrap border rounded-md p-4 bg-muted/30 text-sm">
+                    <div className="whitespace-pre-wrap border rounded-md p-4 bg-muted/30 text-sm text-foreground">
                       {selectedTemplate.content}
                     </div>
                   </div>
@@ -344,9 +391,11 @@ export default function MotionsEditorPage() {
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
               <FileEdit className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Template Selected</h3>
-              <p className="text-sm text-muted-foreground mb-4">Select a template from the list or create a new one</p>
-              <Button onClick={handleCreateNew}>
+              <h3 className="text-lg font-medium mb-2 text-background">No Template Selected</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Select a template from the list or create a new one
+              </p>
+              <Button className="button-link" onClick={handleCreateNew}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create New Template
               </Button>
@@ -357,4 +406,3 @@ export default function MotionsEditorPage() {
     </div>
   )
 }
-

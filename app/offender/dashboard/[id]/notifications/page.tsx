@@ -1,6 +1,5 @@
 "use client"
 import { useParams } from "next/navigation"
-
 import { useState, useEffect } from "react"
 import { Bell, Calendar, FileText, Info, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -44,7 +43,10 @@ export default function OffenderNotificationsPage() {
 
   const markAsRead = async (notificationId: number) => {
     try {
-      const response = await fetch(`/api/offenders/${id}/notifications/${notificationId}/read`, { method: "POST" })
+      const response = await fetch(
+        `/api/offenders/${id}/notifications/${notificationId}/read`,
+        { method: "POST" },
+      )
       if (!response.ok) {
         throw new Error("Failed to mark notification as read")
       }
@@ -89,8 +91,12 @@ export default function OffenderNotificationsPage() {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 text-2xl font-bold">Loading notifications...</div>
-          <div className="text-foreground/60">Please wait while we fetch your notifications.</div>
+          <div className="mb-4 text-2xl font-bold text-background">
+            Loading notifications...
+          </div>
+          <div className="text-sm text-background/60">
+            Please wait while we fetch your notifications.
+          </div>
         </div>
       </div>
     )
@@ -100,8 +106,8 @@ export default function OffenderNotificationsPage() {
   const readNotifications = notifications.filter((notification) => notification.read)
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Notifications</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-background text-2xl font-bold">Notifications</h1>
       <Tabs defaultValue="unread">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="unread">Unread</TabsTrigger>
@@ -109,24 +115,26 @@ export default function OffenderNotificationsPage() {
         </TabsList>
         <TabsContent value="unread">
           {unreadNotifications.length === 0 ? (
-            <p>No unread notifications.</p>
+            <p className="text-background">No unread notifications.</p>
           ) : (
             unreadNotifications.map((notification) => (
-              <Card key={notification.id}>
+              <Card key={notification.id} className="card-secondary">
                 <CardHeader className="flex justify-between">
                   <div className="flex items-center gap-2">
                     {getNotificationIcon(notification.type)}
-                    <span className="font-medium capitalize">{notification.type.replace("_", " ")}</span>
+                    <span className="font-medium text-background capitalize">
+                      {notification.type.replace("_", " ")}
+                    </span>
                   </div>
                   {!notification.read && (
-                    <Button size="sm" variant="outline" onClick={() => markAsRead(notification.id)}>
+                    <Button className="button-link" size="sm" variant="outline" onClick={() => markAsRead(notification.id)}>
                       Mark as Read
                     </Button>
                   )}
                 </CardHeader>
-                <CardContent>
-                  <p>{notification.message}</p>
-                  <p className="text-sm text-gray-500 mt-2">{formatDate(notification.created_at)}</p>
+                <CardContent className="card-content">
+                  <p className="text-background">{notification.message}</p>
+                  <p className="mt-2 text-sm text-background/60">{formatDate(notification.created_at)}</p>
                 </CardContent>
               </Card>
             ))
@@ -134,17 +142,19 @@ export default function OffenderNotificationsPage() {
         </TabsContent>
         <TabsContent value="read">
           {readNotifications.length === 0 ? (
-            <p>No read notifications.</p>
+            <p className="text-background">No read notifications.</p>
           ) : (
             readNotifications.map((notification) => (
-              <Card key={notification.id}>
+              <Card key={notification.id} className="card-secondary">
                 <CardHeader className="flex items-center gap-2">
                   {getNotificationIcon(notification.type)}
-                  <span className="font-medium capitalize">{notification.type.replace("_", " ")}</span>
+                  <span className="font-medium text-background capitalize">
+                    {notification.type.replace("_", " ")}
+                  </span>
                 </CardHeader>
-                <CardContent>
-                  <p>{notification.message}</p>
-                  <p className="text-sm text-gray-500 mt-2">{formatDate(notification.created_at)}</p>
+                <CardContent className="card-content">
+                  <p className="text-background">{notification.message}</p>
+                  <p className="mt-2 text-sm text-background/60">{formatDate(notification.created_at)}</p>
                 </CardContent>
               </Card>
             ))
@@ -154,4 +164,3 @@ export default function OffenderNotificationsPage() {
     </div>
   )
 }
-

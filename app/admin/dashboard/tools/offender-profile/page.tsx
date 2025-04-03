@@ -4,15 +4,21 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select"
-import { Select } from "@/components/ui/select"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 
 interface OffenderFormData {
   inmateNumber: string
@@ -53,7 +59,7 @@ export default function OffenderProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // If editing, load offender data from the production API
+  // If editing, load offender data from the API
   useEffect(() => {
     if (editId) {
       setIsLoading(true)
@@ -96,9 +102,6 @@ export default function OffenderProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Real API call for searching offenders
-
-  // Submit form: use POST for create, PUT for update
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -134,26 +137,34 @@ export default function OffenderProfilePage() {
     return <div className="flex items-center justify-center py-32">Loading...</div>
   }
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">{editId ? "Edit Offender Profile" : "Create Offender Profile"}</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-3xl text-background mb-6">
+        {editId ? "Edit Offender Profile" : "Create Offender Profile"}
+      </h1>
 
       <Tabs className="w-full" defaultValue={editId ? "edit" : "create"}>
         <TabsList className="mb-4">
-          <TabsTrigger value="create">Create New</TabsTrigger>
-          <TabsTrigger value="edit">Edit Existing</TabsTrigger>
+          <TabsTrigger className="font-kings text-background" value="create">
+            Create New
+          </TabsTrigger>
+          <TabsTrigger className="font-kings text-background" value="edit">
+            Edit Existing
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="create">
-          <Card>
+          <Card className="card-content">
             <form onSubmit={handleSubmit}>
               <CardHeader>
-                <CardTitle>New Offender Profile</CardTitle>
-                <CardDescription>Create a new offender profile in the system</CardDescription>
+                <CardTitle className="font-kings text-foreground">New Offender Profile</CardTitle>
+                <CardDescription className="text-foreground">
+                  Create a new offender profile in the system
+                </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-foreground">
                 <div className="space-y-6">
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Basic Information</h3>
+                    <h3 className="text-lg font-medium text-foreground">Basic Information</h3>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="inmateNumber">
@@ -172,16 +183,11 @@ export default function OffenderProfilePage() {
                         <Label htmlFor="status">
                           Status <span className="text-destructive">*</span>
                         </Label>
-                        <Select value={formData.status}>
-                          <SelectTrigger
-                            id="status"
-                            onChange={(event) =>
-                              handleSelectChange("status", (event.target as HTMLSelectElement).value)
-                            }
-                          >
+                        <Select value={formData.status} onValueChange={(value: string) => handleSelectChange("status", value)}>
+                          <SelectTrigger id="status">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background">
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="inactive">Inactive</SelectItem>
                             <SelectItem value="pending">Pending</SelectItem>
@@ -241,7 +247,7 @@ export default function OffenderProfilePage() {
                   <Separator />
 
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Physical Characteristics</h3>
+                    <h3 className="text-lg font-medium text-background">Physical Characteristics</h3>
                     <div className="grid gap-4 md:grid-cols-3">
                       <div className="space-y-2">
                         <Label htmlFor="age">Age</Label>
@@ -277,14 +283,11 @@ export default function OffenderProfilePage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="eyeColor">Eye Color</Label>
-                        <Select
-                          value={formData.eyeColor}
-                          onValueChange={(value: string) => handleSelectChange("eyeColor", value)}
-                        >
+                        <Select value={formData.eyeColor} onValueChange={(value: string) => handleSelectChange("eyeColor", value)}>
                           <SelectTrigger id="eyeColor">
                             <SelectValue placeholder="Select eye color" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background">
                             <SelectItem value="brown">Brown</SelectItem>
                             <SelectItem value="blue">Blue</SelectItem>
                             <SelectItem value="green">Green</SelectItem>
@@ -295,15 +298,11 @@ export default function OffenderProfilePage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="hair">Hair Color</Label>
-                        <Select
-                          value={formData.hair}
-                          onValueChange={(value: string) => handleSelectChange("hair", value)}
-                          >
-                          {" "}
+                        <Select value={formData.hair} onValueChange={(value: string) => handleSelectChange("hair", value)}>
                           <SelectTrigger id="hair">
                             <SelectValue placeholder="Select hair color" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background">
                             <SelectItem value="black">Black</SelectItem>
                             <SelectItem value="brown">Brown</SelectItem>
                             <SelectItem value="blonde">Blonde</SelectItem>
@@ -315,14 +314,11 @@ export default function OffenderProfilePage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="ethnicity">Ethnicity</Label>
-                        <Select
-                          value={formData.ethnicity}
-                          onValueChange={(value: string) => handleSelectChange("ethnicity", value)}
-                        >
+                        <Select value={formData.ethnicity} onValueChange={(value: string) => handleSelectChange("ethnicity", value)}>
                           <SelectTrigger id="ethnicity">
                             <SelectValue placeholder="Select ethnicity" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background">
                             <SelectItem value="caucasian">Caucasian</SelectItem>
                             <SelectItem value="african_american">African American</SelectItem>
                             <SelectItem value="hispanic">Hispanic</SelectItem>
@@ -338,7 +334,7 @@ export default function OffenderProfilePage() {
                   <Separator />
 
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Additional Information</h3>
+                    <h3 className="text-lg font-medium text-background">Additional Information</h3>
                     <div className="space-y-2">
                       <Label htmlFor="notes">Notes</Label>
                       <Textarea
@@ -354,10 +350,15 @@ export default function OffenderProfilePage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button type="button" variant="outline" onClick={() => router.push("/admin/dashboard/offenders")}>
+                <Button
+                  className="button-link"
+                  type="button"
+                  variant="default"
+                  onClick={() => router.push("/admin/dashboard/offenders")}
+                >
                   Cancel
                 </Button>
-                <Button disabled={isSubmitting} type="submit">
+                <Button className="button-link" disabled={isSubmitting} type="submit">
                   {isSubmitting ? "Saving..." : "Update Offender"}
                 </Button>
               </CardFooter>
@@ -368,4 +369,3 @@ export default function OffenderProfilePage() {
     </div>
   )
 }
-

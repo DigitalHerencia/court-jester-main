@@ -76,32 +76,32 @@ export default function DatabaseDashboardPage() {
   }
 
   return (
-    <div className="space-y-6 p-4">
-      <h1 className="text-3xl font-bold mb-6">Database Dashboard</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-3xl text-background mb-6">Database Dashboard</h1>
       {isLoading ? (
-        <p>Loading database information...</p>
+        <p className="text-background">Loading database information...</p>
       ) : (
         <>
           {/* Connection Status Card */}
-          <Card>
+          <Card className="card-content">
             <CardHeader>
-              <CardTitle>Connection Status</CardTitle>
+              <CardTitle className="font-kings text-foreground">Connection Status</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>{connectionStatus}</p>
+              <p className="text-foreground">{connectionStatus}</p>
             </CardContent>
           </Card>
 
           {/* Table Statistics Card */}
-          <Card>
+          <Card className="card-content">
             <CardHeader>
-              <CardTitle>Table Statistics</CardTitle>
+              <CardTitle className="font-kings text-foreground">Table Statistics</CardTitle>
             </CardHeader>
             <CardContent>
               {tables.length === 0 ? (
-                <p>No table data available.</p>
+                <p className="text-foreground">No table data available.</p>
               ) : (
-                <table className="w-full table-auto">
+                <table className="w-full table-auto text-foreground">
                   <thead>
                     <tr>
                       <th className="px-4 py-2">Table Name</th>
@@ -113,10 +113,10 @@ export default function DatabaseDashboardPage() {
                   <tbody>
                     {tables.map((table) => (
                       <tr key={table.table_name}>
-                        <td className="border px-4 py-2">{table.table_name}</td>
-                        <td className="border px-4 py-2">{table.column_count}</td>
-                        <td className="border px-4 py-2">{table.row_count}</td>
-                        <td className="border px-4 py-2">{table.size_bytes}</td>
+                        <td className="border px-4 py-2 text-foreground">{table.table_name}</td>
+                        <td className="border px-4 py-2 text-foreground">{table.column_count}</td>
+                        <td className="border px-4 py-2 text-foreground">{table.row_count}</td>
+                        <td className="border px-4 py-2 text-foreground">{table.size_bytes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -126,23 +126,24 @@ export default function DatabaseDashboardPage() {
           </Card>
 
           {/* Reset Database Card */}
-          <Card>
+          <Card className="card-content">
             <CardHeader>
-              <CardTitle>Reset Database</CardTitle>
+              <CardTitle className="font-kings text-foreground">Reset Database</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="mb-2 text-sm text-red-600">
                 Warning: This action is destructive. It will drop all tables and recreate them.
               </p>
-              <p className="mb-4">
+              <p className="mb-4 text-foreground">
                 Type <strong>RESET DATABASE</strong> to confirm.
               </p>
               <Input
+                className="bg-background text-foreground"
                 placeholder='Type "RESET DATABASE" here'
                 value={resetConfirmation}
                 onChange={(e) => setResetConfirmation(e.target.value)}
               />
-              <Button className="mt-4" disabled={isResetting} onClick={handleResetDatabase}>
+              <Button className="mt-4 button-link" disabled={isResetting} onClick={handleResetDatabase}>
                 {isResetting ? "Resetting..." : "Reset Database"}
               </Button>
             </CardContent>

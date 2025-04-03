@@ -41,49 +41,47 @@ export default function OffendersPage() {
   }, [])
 
   return (
-    <div className="space-y-2">
-      {/* Main content block */}
-      <div className="card-secondary">
-        <h2 className="font-kings text-3xl">Offender List</h2>
-        <p className="font-kings text-background mb-2 text-sm">Manage all offenders in the system.</p>
-          {isLoading ? (
-            <p className="text-center py-4">Loading offenders...</p>
-          ) : error ? (
-            <p className="text-center py-4 text-red-500">{error}</p>
-          ) : offenders.length === 0 ? (
-            <p className="text-center py-4">No offenders found.</p>
-          ) : (
-            <div className="card-secondary space-y-2">
-              {offenders.map((offender) => (
-                <div
-                  key={offender.id}
-                  className="card-content hover:shadow-md transition-shadow"
-                >
-                    <div>
-                      <h3>{offender.name}</h3>
-                        <p className="text-sm">
-                          <span className="font-medium">Number:</span> {offender.inmate_number}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Status:</span> {offender.status}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Facility:</span> {offender.facility}
-                        </p>
-                    
-                    </div>
-                    <div className="flex gap-2 mt-4 md:mt-0">
-                      <Link href={`/admin/dashboard/offenders/${offender.id}`}>
-                        <Button className="bg-foreground text-background hover:bg-foreground/90">View Details
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-              ))}
+    <div className="card-secondary space-y-4 p-4">
+      <h2 className="font-kings text-background text-3xl">Offender List</h2>
+      <p className="font-kings text-background mb-2 text-sm">
+        Manage all offenders in the system.
+      </p>
+      {isLoading ? (
+        <p className="text-center py-4 text-background">Loading offenders...</p>
+      ) : error ? (
+        <p className="text-center py-4 text-red-500">{error}</p>
+      ) : offenders.length === 0 ? (
+        <p className="text-center py-4 text-background">No offenders found.</p>
+      ) : (
+        <div className="space-y-2">
+          {offenders.map((offender) => (
+            <div
+              key={offender.id}
+              className="card-content hover:shadow-md transition-shadow flex justify-between items-center"
+            >
+              <div>
+                <h3 className="font-medium text-lg">{offender.name}</h3>
+                <p className="text-sm">
+                  <span className="font-medium">Number:</span> {offender.inmate_number}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Status:</span> {offender.status}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Facility:</span> {offender.facility}
+                </p>
               </div>
-          )}
-          </div>
+              <div className="flex gap-2 mt-4 md:mt-0">
+                <Link href={`/admin/dashboard/offenders/${offender.id}`}>
+                  <Button className="button-link" variant="outline">
+                    View Details
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
+      )}
+    </div>
   )
 }
-

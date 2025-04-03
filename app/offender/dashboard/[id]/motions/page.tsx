@@ -33,7 +33,11 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
         setMotions(data.motions || [])
       } catch (error) {
         console.error("Error fetching motions:", error)
-        setError(error instanceof Error ? error.message : "Failed to load motions. Please try again later.")
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load motions. Please try again later."
+        )
       } finally {
         setIsLoading(false)
       }
@@ -49,8 +53,12 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 text-2xl font-bold">Loading motions...</div>
-          <div className="text-foreground/60">Please wait while we fetch your motion data.</div>
+          <div className="mb-4 text-2xl font-bold text-background">
+            Loading motions...
+          </div>
+          <div className="text-sm text-background/60">
+            Please wait while we fetch your motion data.
+          </div>
         </div>
       </div>
     )
@@ -61,8 +69,8 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
           <div className="mb-4 text-2xl font-bold text-red-500">Error</div>
-          <div className="mb-4 text-foreground/60">{error}</div>
-          <Button className="bg-foreground text-background" onClick={() => window.location.reload()}>
+          <div className="mb-4 text-sm text-background/60">{error}</div>
+          <Button className="button-link" onClick={() => window.location.reload()}>
             Try Again
           </Button>
         </div>
@@ -71,32 +79,38 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">My Motions</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-background text-2xl font-bold">My Motions</h1>
       {motions.length === 0 ? (
-        <div className="rounded-md border border-foreground/20 p-8 text-center">
-          <div className="mb-2 text-xl font-semibold">No motions found</div>
-          <p className="text-foreground/60">You don&apos;t have any motions in the system yet.</p>
+        <div className="rounded-md border border-background/20 p-8 text-center">
+          <div className="mb-2 text-xl font-semibold text-background">No motions found</div>
+          <p className="text-background/60">
+            You don&apos;t have any motions in the system yet.
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {motions.map((motion) => (
-            <Card key={motion.id}>
+            <Card key={motion.id} className="card-secondary">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{motion.title}</CardTitle>
+                  <CardTitle className="font-kings text-background text-lg">
+                    {motion.title}
+                  </CardTitle>
                   <Badge variant={motion.status === "approved" ? "default" : "outline"}>
                     {motion.status.charAt(0).toUpperCase() + motion.status.slice(1)}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="card-content">
                 <div className="mb-4 space-y-1 text-sm">
                   <div>
-                    <span className="font-medium">Case:</span> {motion.case_number}
+                    <span className="font-medium text-background">Case:</span>{" "}
+                    {motion.case_number}
                   </div>
                   <div>
-                    <span className="font-medium">Filed:</span> {formatDate(motion.created_at)}
+                    <span className="font-medium text-background">Filed:</span>{" "}
+                    {formatDate(motion.created_at)}
                   </div>
                   {motion.has_pdf && (
                     <div className="text-green-600">
@@ -106,7 +120,7 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
                   )}
                 </div>
                 <Link href={`/offender/dashboard/${params.id}/motions/${motion.id}`}>
-                  <Button className="w-full" variant="outline">
+                  <Button className="button-link w-full" variant="outline">
                     View Details
                   </Button>
                 </Link>
@@ -118,4 +132,3 @@ export default function OffenderMotionsPage({ params }: { params: { id: string }
     </div>
   )
 }
-

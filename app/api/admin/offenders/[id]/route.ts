@@ -72,8 +72,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           message, 
           read, 
           created_at
-        FROM offender_notifications
-        WHERE offender_id = $1
+        FROM notifications
+        WHERE user_id = $1
         ORDER BY created_at DESC
         LIMIT 10
       `,

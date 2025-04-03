@@ -8,7 +8,7 @@ import { toast } from "sonner"
 interface CaseItem {
   offender_name: ReactNode
   status: ReactNode
-  next_hearing: any
+  next_hearing: Date | null 
   id: number
   case_number: string
   // Add any other fields needed, e.g. offender_name, status, etc.

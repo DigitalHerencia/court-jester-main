@@ -2,9 +2,16 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -13,11 +20,20 @@ import { Progress } from "@/components/ui/progress"
 import { FileUp, AlertCircle, CheckCircle2, File } from "lucide-react"
 import { toast } from "sonner"
 
+interface CaseItem {
+  offender_name: ReactNode
+  status: ReactNode
+  next_hearing: Date | null 
+  id: number
+  case_number: string
+  // Add any other fields needed, e.g. offender_name, status, etc.
+}
+
 interface UploadResult {
   success: boolean
   message: string
   details?: string
-  cases?: any[]
+  cases?: CaseItem[]
 }
 
 interface RecentUpload {
@@ -103,13 +119,15 @@ export default function CaseUploadPage() {
       } else {
         throw new Error(result.error || "Failed to upload case file")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearInterval(progressInterval)
       setUploadProgress(0)
       setUploadResult({
         success: false,
         message: "Failed to upload case file",
-        details: error.message || "There was an error processing your file. Please check the format and try again.",
+        details:
+          (error as Error).message ||
+          "There was an error processing your file. Please check the format and try again.",
       })
 
       // Add to recent uploads
@@ -134,40 +152,55 @@ export default function CaseUploadPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Case Upload Tool</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-3xl text-background mb-6">
+        Case Upload Tool
+      </h1>
 
-      <Tabs defaultValue="upload" className="w-full">
+      <Tabs className="w-full" defaultValue="upload">
         <TabsList className="mb-4">
-          <TabsTrigger value="upload">Upload</TabsTrigger>
-          <TabsTrigger value="history">Upload History</TabsTrigger>
+          <TabsTrigger className="font-kings text-background" value="upload">
+            Upload
+          </TabsTrigger>
+          <TabsTrigger className="font-kings text-background" value="history">
+            Upload History
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="upload">
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+            <Card className="card-content">
               <CardHeader>
-                <CardTitle>Upload Case File</CardTitle>
-                <CardDescription>Upload a PDF case file to extract and create case records.</CardDescription>
+                <CardTitle className="font-kings text-background">
+                  Upload Case File
+                </CardTitle>
+                <CardDescription className="text-background">
+                  Upload a PDF case file to extract and create case records.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="caseFile">Case File (PDF)</Label>
+                    <Label className="text-background" htmlFor="caseFile">
+                      Case File (PDF)
+                    </Label>
                     <Input
+                      ref={fileInputRef}
+                      accept=".pdf"
+                      className="bg-background text-foreground"
+                      disabled={isUploading}
                       id="caseFile"
                       type="file"
-                      accept=".pdf"
-                      ref={fileInputRef}
                       onChange={handleFileChange}
-                      disabled={isUploading}
                     />
-                    <p className="text-sm text-muted-foreground">Accepted format: PDF. Maximum size: 10MB.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Accepted format: PDF. Maximum size: 10MB.
+                    </p>
                   </div>
 
                   {isUploading && (
                     <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm text-background">
                         <span>Uploading...</span>
                         <span>{Math.round(uploadProgress)}%</span>
                       </div>
@@ -186,24 +219,34 @@ export default function CaseUploadPage() {
                         <AlertTitle>{uploadResult.message}</AlertTitle>
                       </div>
                       {uploadResult.details && (
-                        <AlertDescription className="mt-2">{uploadResult.details}</AlertDescription>
+                        <AlertDescription className="mt-2">
+                          {uploadResult.details}
+                        </AlertDescription>
                       )}
                     </Alert>
                   )}
                 </div>
               </CardContent>
               <CardFooter>
-                <Button onClick={handleUpload} disabled={!selectedFile || isUploading} className="w-full">
+                <Button
+                  className="w-full button-link"
+                  disabled={!selectedFile || isUploading}
+                  onClick={handleUpload}
+                >
                   <FileUp className="mr-2 h-4 w-4" />
                   {isUploading ? "Uploading..." : "Upload Case File"}
                 </Button>
               </CardFooter>
             </Card>
 
-            <Card>
+            <Card className="card-content">
               <CardHeader>
-                <CardTitle>Recent Uploads</CardTitle>
-                <CardDescription>Your 5 most recent case file uploads</CardDescription>
+                <CardTitle className="font-kings text-background">
+                  Recent Uploads
+                </CardTitle>
+                <CardDescription className="text-background">
+                  Your 5 most recent case file uploads
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {recentUploads.length === 0 ? (
@@ -213,11 +256,18 @@ export default function CaseUploadPage() {
                 ) : (
                   <div className="space-y-4">
                     {recentUploads.map((upload) => (
-                      <div key={upload.id} className="flex items-start gap-3 p-3 rounded-md border">
+                      <div
+                        key={upload.id}
+                        className="flex items-start gap-3 p-3 rounded-md border card-content"
+                      >
                         <File className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{upload.filename}</p>
-                          <p className="text-sm text-muted-foreground">{formatDate(upload.timestamp)}</p>
+                          <p className="font-medium truncate text-background">
+                            {upload.filename}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDate(upload.timestamp)}
+                          </p>
                         </div>
                         <div
                           className={`text-xs px-2 py-1 rounded-full ${
@@ -238,10 +288,14 @@ export default function CaseUploadPage() {
         </TabsContent>
 
         <TabsContent value="history">
-          <Card>
+          <Card className="card-content">
             <CardHeader>
-              <CardTitle>Upload History</CardTitle>
-              <CardDescription>Complete history of case file uploads</CardDescription>
+              <CardTitle className="font-kings text-background">
+                Upload History
+              </CardTitle>
+              <CardDescription className="text-background">
+                Complete history of case file uploads
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-12 text-muted-foreground">
@@ -254,4 +308,3 @@ export default function CaseUploadPage() {
     </div>
   )
 }
-

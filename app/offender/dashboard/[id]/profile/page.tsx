@@ -1,4 +1,5 @@
 "use client"
+
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import Image from "next/image"
@@ -62,35 +63,42 @@ export default function OffenderProfilePage() {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 text-2xl font-bold font-kings">Loading profile...</div>
+          <div className="mb-4 text-2xl font-bold font-kings text-background">Loading profile...</div>
           <div className="text-foreground/60">Please wait while we fetch your profile data.</div>
         </div>
       </div>
     )
   }
-  
+
   if (error || !offender) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
           <div className="mb-4 text-2xl font-bold text-destructive font-kings">Error</div>
           <div className="mb-4 text-foreground/60">{error || "Failed to load profile data"}</div>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
+          <Button className="button-link" onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="card-secondary space-y-6">
-      <h1 className="text-2xl font-bold font-kings">Offender Profile</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="text-2xl font-bold font-kings text-background">Offender Profile</h1>
       <div className="grid md:grid-cols-2 gap-6">
         {/* Mugshot and Basic Info */}
-        <div className="card-content">
+        <div className="card-content p-4">
           <div className="flex items-center gap-4">
             <div className="relative h-40 w-32 border border-foreground/20 rounded-md overflow-hidden">
               {offender.mugshot_url ? (
-                <Image fill alt="Mugshot" src={offender.mugshot_url || "/placeholder.svg"} style={{ objectFit: "cover" }} />
+                <Image
+                  fill
+                  alt="Mugshot"
+                  src={offender.mugshot_url || "/placeholder.svg"}
+                  style={{ objectFit: "cover" }}
+                />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
                   No mugshot available
@@ -98,21 +106,22 @@ export default function OffenderProfilePage() {
               )}
             </div>
             <div>
-              <h2 className="text-2xl font-semibold font-kings">
+              <h2 className="text-2xl font-semibold font-kings text-foreground">
                 {offender.last_name}, {offender.first_name} {offender.middle_name || ""}
               </h2>
               <p>
                 <strong>Inmate #:</strong> {offender.inmate_number}
               </p>
               <p>
-                <strong>Custody:</strong> {offender.custody_status === "in_custody" ? "In Custody" : "Released"}
+                <strong>Custody:</strong>{" "}
+                {offender.custody_status === "in_custody" ? "In Custody" : "Released"}
               </p>
             </div>
           </div>
         </div>
         {/* Additional Information */}
-        <div className="card-content">
-          <h2 className="text-xl font-semibold font-kings">Additional Information</h2>
+        <div className="card-content p-4">
+          <h2 className="text-xl font-semibold font-kings text-foreground">Additional Information</h2>
           <p>
             <strong>Status:</strong> {offender.status}
           </p>
@@ -133,7 +142,9 @@ export default function OffenderProfilePage() {
           </p>
         </div>
       </div>
-      <Button className="font-kings" onClick={handlePrintProfile}>Print Profile</Button>
+      <Button className="font-kings button-link" variant="outline" onClick={handlePrintProfile}>
+        Print Profile
+      </Button>
     </div>
   )
 }

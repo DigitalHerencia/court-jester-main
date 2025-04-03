@@ -1,6 +1,6 @@
 "use client"
-import { useParams } from "next/navigation"
 
+import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,7 @@ interface Case {
 
 export default function OffenderCasesPage() {
   const { id } = useParams<{ id: string }>()
+  const router = useRouter()
   const [cases, setCases] = useState<Case[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -48,26 +49,42 @@ export default function OffenderCasesPage() {
     }
   }, [id])
 
-  if (isLoading) return <div>Loading cases...</div>
-  if (error) return <div>Error: {error}</div>
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center py-32 text-background">
+        Loading cases...
+      </div>
+    )
+  if (error)
+    return (
+      <div className="flex items-center justify-center py-32 text-destructive">
+        Error: {error}
+      </div>
+    )
 
   return (
-    <div className="card-secondary space-y-2">
-      <h1 className="text-2xl font-bold">My Cases</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-2xl text-background mb-6">My Cases</h1>
       {cases.length === 0 ? (
-        <div>No cases found.</div>
+        <div className="text-background">No cases found.</div>
       ) : (
         cases.map((c) => (
-          <Card key={c.id} className="card-content mb-2">
+          <Card key={c.id} className="card-content mb-4">
             <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-2xl">Case #{c.case_number}</CardTitle>
+              <CardTitle className="font-kings text-2xl text-foreground">
+                Case #{c.case_number}
+              </CardTitle>
               <span
-                className={`px-2 py-1 text-lrg rounded ${c.status === "Active" ? "bg-[#34C759] text-[#1A202C]" : "bg-[#FEE2E2] text-[#B91C1C]"}`}
+                className={`px-2 py-1 rounded text-sm font-semibold ${
+                  c.status === "Active"
+                    ? "bg-[#34C759] text-[#1A202C]"
+                    : "bg-[#FEE2E2] text-[#B91C1C]"
+                }`}
               >
                 {c.status === "Active" ? "Open" : "Closed"}
               </span>
             </CardHeader>
-            <CardContent className="text-lg">
+            <CardContent className="text-lg text-foreground">
               <p>
                 <strong>Court:</strong> {c.court}
               </p>
@@ -75,15 +92,17 @@ export default function OffenderCasesPage() {
                 <strong>Judge:</strong> {c.judge || "Not assigned"}
               </p>
               <p>
-                <strong>Filing Date:</strong> {new Date(c.filing_date).toLocaleString()}
+                <strong>Filing Date:</strong>{" "}
+                {new Date(c.filing_date).toLocaleString()}
               </p>
               <p>
-                <strong>Next Date:</strong> {c.next_date ? new Date(c.next_date).toLocaleString() : "None scheduled"}
+                <strong>Next Date:</strong>{" "}
+                {c.next_date ? new Date(c.next_date).toLocaleString() : "None scheduled"}
               </p>
               <Button
-                className="mt-2 hover:bg-background hover:text-foreground bg-foreground text-background "
-                variant="outline"
-                onClick={() => (window.location.href = `/offender/dashboard/${id}/cases/${c.id}`)}
+                className="mt-4 button-link"
+                variant="default"
+                onClick={() => router.push(`/offender/dashboard/${id}/cases/${c.id}`)}
               >
                 View Details
               </Button>
@@ -94,4 +113,3 @@ export default function OffenderCasesPage() {
     </div>
   )
 }
-

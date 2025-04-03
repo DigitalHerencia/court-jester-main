@@ -5,40 +5,52 @@ import { Book, FileQuestion, MessageSquareIcon as MessageSquareHelp } from "luci
 
 export default function HelpPage() {
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Help & Documentation</h1>
+    <div className="card-secondary space-y-6 p-4">
+      <h1 className="font-kings text-3xl text-background mb-6">Help & Documentation</h1>
 
-      <Tabs defaultValue="faq" className="w-full">
+      <Tabs className="w-full" defaultValue="faq">
         <TabsList className="mb-4">
-          <TabsTrigger value="faq">FAQ</TabsTrigger>
-          <TabsTrigger value="guides">Guides</TabsTrigger>
-          <TabsTrigger value="support">Support</TabsTrigger>
+          <TabsTrigger className="font-kings text-background" value="faq">
+            FAQ
+          </TabsTrigger>
+          <TabsTrigger className="font-kings text-background" value="guides">
+            Guides
+          </TabsTrigger>
+          <TabsTrigger className="font-kings text-background" value="support">
+            Support
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="faq">
-          <Card>
+          <Card className="card-content">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-kings text-foreground">
                 <FileQuestion className="h-5 w-5" />
                 Frequently Asked Questions
               </CardTitle>
-              <CardDescription>Common questions and answers about the Court Jester system</CardDescription>
+              <CardDescription className="text-foreground">
+                Common questions and answers about the Court Jester system
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion collapsible className="w-full" type="single">
                 <AccordionItem value="item-1">
-                  <AccordionTrigger>How do I add a new offender?</AccordionTrigger>
+                  <AccordionTrigger className="font-kings text-foreground">
+                    How do I add a new offender?
+                  </AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
                       You can add a new offender by going to the Offender Profile tool in the Admin Tools section. Click
-                      on "Create New Offender" and fill out the required information. Alternatively, you can go to the
-                      Offenders page and click the "Add Offender" button.
+                      on &quot;Create New Offender&quot; and fill out the required information. Alternatively, you can go to the
+                      Offenders page and click the &quot;Add Offender&quot; button.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
-                  <AccordionTrigger>How do I upload a mugshot?</AccordionTrigger>
+                  <AccordionTrigger className="font-kings text-foreground">
+                    How do I upload a mugshot?
+                  </AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
                       To upload a mugshot, go to the Mugshot Upload tool in the Admin Tools section. Search for the
@@ -49,12 +61,16 @@ export default function HelpPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-3">
-                  <AccordionTrigger>How do I create a new case?</AccordionTrigger>
+                  <AccordionTrigger className="font-kings text-foreground">
+                    How do I create a new case?
+                  </AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
                       Cases can be created in two ways:
                       <ol className="list-decimal ml-5 mt-2 space-y-1">
-                        <li>Manually through the Cases page by clicking "Add Case" and filling out the form</li>
+                        <li>
+                          Manually through the Cases page by clicking &quot;Add Case&quot; and filling out the form
+                        </li>
                         <li>
                           By uploading case files through the Case Upload tool in Admin Tools, which will automatically
                           extract case information
@@ -65,22 +81,26 @@ export default function HelpPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-4">
-                  <AccordionTrigger>How do I reset the database?</AccordionTrigger>
+                  <AccordionTrigger className="font-kings text-foreground">
+                    How do I reset the database?
+                  </AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
                       Database reset is a destructive action that should only be performed in development environments
                       or when setting up a new instance. To reset the database, go to the Database Management tool in
-                      Admin Tools, select the "Database Reset" tab, and follow the confirmation steps.
+                      Admin Tools, select the &quot;Database Reset&quot; tab, and follow the confirmation steps.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-5">
-                  <AccordionTrigger>How do offenders access the system?</AccordionTrigger>
+                  <AccordionTrigger className="font-kings text-foreground">
+                    How do offenders access the system?
+                  </AccordionTrigger>
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
                       Offenders can access the system by logging in with their inmate number. They will only be able to
-                      view their own information, cases, and notifications. They cannot see other offenders' data or
+                      view their own information, cases, and notifications. They cannot see other offenders&apos; data or
                       administrative functions.
                     </p>
                   </AccordionContent>
@@ -91,18 +111,20 @@ export default function HelpPage() {
         </TabsContent>
 
         <TabsContent value="guides">
-          <Card>
+          <Card className="card-content">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-kings text-foreground">
                 <Book className="h-5 w-5" />
                 User Guides
               </CardTitle>
-              <CardDescription>Step-by-step guides for common tasks</CardDescription>
+              <CardDescription className="text-foreground">
+                Step-by-step guides for common tasks
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Case Management Guide</h3>
+                  <h3 className="text-lg font-kings mb-2 text-foreground">Case Management Guide</h3>
                   <p className="text-sm text-muted-foreground mb-2">
                     Learn how to effectively manage cases in the Court Jester system.
                   </p>
@@ -110,19 +132,19 @@ export default function HelpPage() {
                     <li>Navigate to the Cases page from the main dashboard</li>
                     <li>Use the search function to find specific cases</li>
                     <li>Click on a case to view its details</li>
-                    <li>Use the "Edit" button to modify case information</li>
-                    <li>Use the "Add Motion" button to create a new motion for the case</li>
+                    <li>Use the &quot;Edit&quot; button to modify case information</li>
+                    <li>Use the &quot;Add Motion&quot; button to create a new motion for the case</li>
                   </ol>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Offender Profile Management</h3>
+                  <h3 className="text-lg font-kings mb-2 text-foreground">Offender Profile Management</h3>
                   <p className="text-sm text-muted-foreground mb-2">
                     Learn how to create and manage offender profiles.
                   </p>
                   <ol className="list-decimal ml-5 space-y-2 text-sm">
                     <li>Go to the Offender Profile tool in Admin Tools</li>
-                    <li>Click "Create New Offender" to add a new profile</li>
+                    <li>Click &quot;Create New Offender&quot; to add a new profile</li>
                     <li>Fill out all required fields (inmate number, name, status)</li>
                     <li>Add optional information as available</li>
                     <li>Upload a mugshot using the Mugshot Upload tool</li>
@@ -131,11 +153,13 @@ export default function HelpPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Motion Templates</h3>
-                  <p className="text-sm text-muted-foreground mb-2">Learn how to create and use motion templates.</p>
+                  <h3 className="text-lg font-kings mb-2 text-foreground">Motion Templates</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Learn how to create and use motion templates.
+                  </p>
                   <ol className="list-decimal ml-5 space-y-2 text-sm">
                     <li>Navigate to the Motions Editor tool in Admin Tools</li>
-                    <li>Click "Create Template" to start a new template</li>
+                    <li>Click &quot;Create Template&quot; to start a new template</li>
                     <li>Use the rich text editor to create the motion content</li>
                     <li>Add placeholders for dynamic content using the format {"{placeholder}"} </li>
                     <li>Save the template and assign it to appropriate case types</li>
@@ -148,18 +172,20 @@ export default function HelpPage() {
         </TabsContent>
 
         <TabsContent value="support">
-          <Card>
+          <Card className="card-content">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-kings text-foreground">
                 <MessageSquareHelp className="h-5 w-5" />
                 Support Resources
               </CardTitle>
-              <CardDescription>Get help with the Court Jester system</CardDescription>
+              <CardDescription className="text-foreground">
+                Get help with the Court Jester system
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Contact Support</h3>
+                  <h3 className="text-lg font-kings mb-2 text-foreground">Contact Support</h3>
                   <p className="text-sm text-muted-foreground">
                     For technical issues or questions, please contact the support team:
                   </p>
@@ -171,7 +197,7 @@ export default function HelpPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-2">System Requirements</h3>
+                  <h3 className="text-lg font-kings mb-2 text-foreground">System Requirements</h3>
                   <p className="text-sm text-muted-foreground">
                     Court Jester is a web-based application that works best with:
                   </p>
@@ -184,8 +210,10 @@ export default function HelpPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Training Resources</h3>
-                  <p className="text-sm text-muted-foreground">Additional training resources are available:</p>
+                  <h3 className="text-lg font-kings mb-2 text-foreground">Training Resources</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Additional training resources are available:
+                  </p>
                   <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
                     <li>Video tutorials (coming soon)</li>
                     <li>Monthly webinars for administrators</li>
@@ -201,4 +229,3 @@ export default function HelpPage() {
     </div>
   )
 }
-
