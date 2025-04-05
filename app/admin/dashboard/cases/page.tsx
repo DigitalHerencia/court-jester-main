@@ -11,7 +11,9 @@ interface CaseItem {
   next_hearing: Date | null 
   id: number
   case_number: string
-  // Add any other fields needed, e.g. offender_name, status, etc.
+  case_type?: string | null
+  plaintiff?: string | null
+  defendant?: string | null
 }
 
 export default function CasesPage() {
@@ -43,36 +45,37 @@ export default function CasesPage() {
 
   return (
     <div className="space-y-2">
-      {/* Main content block */}
       <div className="card-secondary">
-        <h3 className="font-kings text-3xl  ">Case List</h3>
+        <h3 className="font-kings text-3xl">Case List</h3>
         <p className="font-kings text-background mb-2 text-sm">Manage all cases in the system.</p>
-          {isLoading ? (
-            <p className="text-center py-4">Loading cases...</p>
-          ) : error ? (
-            <p className="text-center py-4 text-red-500">{error}</p>
-          ) : cases.length === 0 ? (
-            <p className="text-center py-4">No cases found.</p>
-          ) : (
-            <div className="card-secondary space-y-2">
-              {cases.map((caseItem) => (
-                <div
-                  key={caseItem.id}
-                  className="card-content hover:shadow-md transition-shadow"
-                >
-                  <p>Case #{caseItem.case_number}</p>
-                  <p>Offender: {caseItem.offender_name}</p>
-                  <p>Status: {caseItem.status}</p>
-                  <p>Next Hearing: {caseItem.next_hearing ? new Date(caseItem.next_hearing).toLocaleDateString() : "N/A"}</p>
-                  <Link href={`/admin/dashboard/cases/${caseItem.id}`}>
-                    <Button className="bg-foreground text-background hover:bg-foreground/90 mt-2">View Details</Button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {isLoading ? (
+          <p className="text-center py-4">Loading cases...</p>
+        ) : error ? (
+          <p className="text-center py-4 text-red-500">{error}</p>
+        ) : cases.length === 0 ? (
+          <p className="text-center py-4">No cases found.</p>
+        ) : (
+          <div className="card-secondary space-y-2">
+            {cases.map((caseItem) => (
+              <div
+                key={caseItem.id}
+                className="card-content hover:shadow-md transition-shadow"
+              >
+                <p>Case #{caseItem.case_number}</p>
+                <p>Offender: {caseItem.offender_name}</p>
+                <p>Status: {caseItem.status}</p>
+                {caseItem.case_type && <p>Type: {caseItem.case_type}</p>}
+                {caseItem.plaintiff && <p>Plaintiff: {caseItem.plaintiff}</p>}
+                {caseItem.defendant && <p>Defendant: {caseItem.defendant}</p>}
+                <p>Next Hearing: {caseItem.next_hearing ? new Date(caseItem.next_hearing).toLocaleDateString() : "N/A"}</p>
+                <Link href={`/admin/dashboard/cases/${caseItem.id}`}>
+                  <Button className="bg-foreground text-background hover:bg-foreground/90 mt-2">View Details</Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+    </div>
   )
 }
-

@@ -20,6 +20,9 @@ interface CaseData {
     next_date: string | null
     created_at: string
     updated_at: string
+    case_type?: string | null
+    plaintiff?: string | null
+    defendant?: string | null
   }
   charges: Array<{
     id: number
@@ -123,7 +126,6 @@ export default function CaseDetailPage() {
 
   return (
     <div className="space-y-4">
-      {/* Case Overview */}
       <div className="rounded-lg bg-card shadow-sm">
         <div className="p-6">
           <div className="flex items-start justify-between">
@@ -186,11 +188,28 @@ export default function CaseDetailPage() {
                 {caseInfo.next_date ? formatDate(caseInfo.next_date) : "None scheduled"}
               </p>
             </div>
+            {caseInfo.case_type && (
+              <div>
+                <h3 className="font-medium text-foreground mb-1">Case Type</h3>
+                <p className="text-muted-foreground">{caseInfo.case_type}</p>
+              </div>
+            )}
+            {caseInfo.plaintiff && (
+              <div>
+                <h3 className="font-medium text-foreground mb-1">Plaintiff</h3>
+                <p className="text-muted-foreground">{caseInfo.plaintiff}</p>
+              </div>
+            )}
+            {caseInfo.defendant && (
+              <div>
+                <h3 className="font-medium text-foreground mb-1">Defendant</h3>
+                <p className="text-muted-foreground">{caseInfo.defendant}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
       <Tabs className="w-full" defaultValue="charges">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="charges">
@@ -204,7 +223,6 @@ export default function CaseDetailPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Charges Tab */}
         <TabsContent value="charges">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -262,7 +280,6 @@ export default function CaseDetailPage() {
           </Card>
         </TabsContent>
 
-        {/* Hearings Tab */}
         <TabsContent value="hearings">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -320,7 +337,6 @@ export default function CaseDetailPage() {
           </Card>
         </TabsContent>
 
-        {/* Motions Tab */}
         <TabsContent value="motions">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -394,4 +410,3 @@ export default function CaseDetailPage() {
     </div>
   )
 }
-

@@ -4,7 +4,6 @@ import { verifyToken } from "@/lib/auth"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // First verify the token and check if they have access to this offender's data
     const token = request.cookies.get("token")?.value
     const session = await verifyToken(token)
 
@@ -12,12 +11,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // If not admin, verify the user is accessing their own cases
     if (session.role !== "admin" && session.offenderId !== parseInt(params.id)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Fetch cases with counts of charges and upcoming hearings
+    // Fetch cases with counts of charges and upcoming hearings.
+    // All columns from cases (including new fields) are returned via c.*
     const casesResult = await query(
       `SELECT 
         c.*,
@@ -39,9 +38,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     })
   } catch (error) {
     console.error("Error fetching offender cases:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch cases" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch cases" }, { status: 500 })
   }
 }

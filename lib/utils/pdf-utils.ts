@@ -62,7 +62,6 @@ export async function generateMotionPDF(
 ): Promise<Buffer> {
   // Create a formatted HTML document for the motion
   const html = `
-    <!DOCTYPE html>
     <html>
     <head>
       <title>${motionTitle}</title>

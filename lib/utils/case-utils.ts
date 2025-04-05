@@ -70,8 +70,6 @@ export function getChargeDispositionInfo(disposition: string): { label: string; 
 export function formatCaseNumber(caseNumber: string): string {
   if (!caseNumber) return "N/A"
 
-  // Example formatting logic - adjust based on your case number format
-  // This example assumes case numbers like "12345" and formats to "Case #12345"
   if (!caseNumber.toLowerCase().startsWith("case")) {
     return `Case #${caseNumber}`
   }
@@ -88,26 +86,34 @@ export function parseCaseInfoFromDocument(text: string): any | null {
   if (!text) return null
 
   try {
-    // This is a simplified example of parsing case information from text
-    // In a real application, you would use more sophisticated parsing techniques
-
-    // Extract case number (example format: "Case Number: ABC-12345")
+    // Extract case number (e.g., "Case Number: ABC-12345")
     const caseNumberMatch = text.match(/Case Number:?\s*([A-Za-z0-9-]+)/i)
     const caseNumber = caseNumberMatch ? caseNumberMatch[1] : null
 
-    // Extract court (example format: "Court: Superior Court of California")
+    // Extract court (e.g., "Court: Superior Court of California")
     const courtMatch = text.match(/Court:?\s*([^\n]+)/i)
     const court = courtMatch ? courtMatch[1].trim() : null
 
-    // Extract judge (example format: "Judge: John Smith")
+    // Extract judge (e.g., "Judge: John Smith")
     const judgeMatch = text.match(/Judge:?\s*([^\n]+)/i)
     const judge = judgeMatch ? judgeMatch[1].trim() : null
 
-    // Extract charges (example format: "Charges: Assault, Battery")
+    // Extract case type (e.g., "Case Type: Civil")
+    const caseTypeMatch = text.match(/Case Type:?\s*([^\n]+)/i)
+    const caseType = caseTypeMatch ? caseTypeMatch[1].trim() : null
+
+    // Extract plaintiff (e.g., "Plaintiff: John Doe")
+    const plaintiffMatch = text.match(/Plaintiff:?\s*([^\n]+)/i)
+    const plaintiff = plaintiffMatch ? plaintiffMatch[1].trim() : null
+
+    // Extract defendant (e.g., "Defendant: Jane Doe")
+    const defendantMatch = text.match(/Defendant:?\s*([^\n]+)/i)
+    const defendant = defendantMatch ? defendantMatch[1].trim() : null
+
+    // Extract charges (e.g., "Charges: Assault, Battery")
     const chargesMatch = text.match(/Charges:?\s*([^\n]+)/i)
     const chargesText = chargesMatch ? chargesMatch[1].trim() : null
 
-    // Parse charges into an array
     const charges = chargesText
       ? chargesText.split(",").map((charge) => ({
           description: charge.trim(),
@@ -116,7 +122,6 @@ export function parseCaseInfoFromDocument(text: string): any | null {
         }))
       : []
 
-    // If we couldn't extract the basic information, return null
     if (!caseNumber && !court) {
       return null
     }
@@ -125,6 +130,9 @@ export function parseCaseInfoFromDocument(text: string): any | null {
       case_number: caseNumber,
       court,
       judge,
+      case_type: caseType,
+      plaintiff,
+      defendant,
       charges,
     }
   } catch (error) {
@@ -132,4 +140,3 @@ export function parseCaseInfoFromDocument(text: string): any | null {
     return null
   }
 }
-

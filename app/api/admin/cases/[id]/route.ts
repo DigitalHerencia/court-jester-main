@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get case details along with offender information
+    // Get case details along with offender information (including new fields)
     const caseResult = await query(
       `
         SELECT 
@@ -26,7 +26,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           c.status, 
           c.next_date, 
           c.created_at,
-          c.updated_at
+          c.updated_at,
+          c.case_type,
+          c.plaintiff,
+          c.defendant
         FROM cases c
         JOIN offenders o ON c.offender_id = o.id
         WHERE c.id = $1
@@ -77,21 +80,27 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const caseData = await request.json();
     
-    // Update case details
+    // Update case details including new fields: case_type, plaintiff, defendant
     await query(
       `UPDATE cases 
        SET court = $1,
            judge = $2,
            status = $3,
            filing_date = $4,
+           case_type = $5,
+           plaintiff = $6,
+           defendant = $7,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5 AND offender_id = $6
+       WHERE id = $8 AND offender_id = $9
        RETURNING id`,
       [
         caseData.court,
         caseData.judge,
         caseData.status,
         caseData.filing_date ? new Date(caseData.filing_date) : null,
+        caseData.case_type,
+        caseData.plaintiff,
+        caseData.defendant,
         id,
         caseData.offender_id
       ]

@@ -1,10 +1,9 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db/db";
 import { verifyToken } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin authorization
     const token = request.cookies.get("token")?.value;
     const session = await verifyToken(token);
 
@@ -12,7 +11,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get search query from URL parameters
     const searchParams = request.nextUrl.searchParams;
     const searchQuery = searchParams.get("q");
 
@@ -20,7 +18,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Search query is required" }, { status: 400 });
     }
 
-    // Search cases with matching fields
     const result = await query(
       `
         SELECT 
@@ -32,7 +29,10 @@ export async function GET(request: NextRequest) {
           c.judge, 
           c.status, 
           c.next_date, 
-          c.created_at
+          c.created_at,
+          c.case_type,
+          c.plaintiff,
+          c.defendant
         FROM cases c
         JOIN offenders o ON c.offender_id = o.id
         WHERE 

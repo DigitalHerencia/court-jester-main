@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db/db"
 import { verifyToken } from "@/lib/auth"
 
-
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string; caseId: string } }
 ) {
   try {
-    // Verify authorization
     const token = request.cookies.get("token")?.value
     const session = await verifyToken(token)
 
@@ -16,12 +14,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // If not admin, verify the user is accessing their own case
     if (session.role !== "admin" && session.offenderId !== parseInt(params.id)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Fetch case details with related data
     const caseResult = await query(
       `SELECT c.*, 
               o.first_name, 
@@ -35,7 +31,7 @@ export async function GET(
                     'statute', ch.statute,
                     'class', ch.class,
                     'charge_date', ch.charge_date,
-                    'citation', ch.citation,
+                    'citation', ch.citation_number,
                     'disposition', ch.disposition,
                     'disposition_date', ch.disposition_date
                   )
@@ -52,9 +48,7 @@ export async function GET(
                     'time', h.hearing_time,
                     'type', h.hearing_type,
                     'judge', h.hearing_judge,
-                    'location', h.court || CASE WHEN h.court_room IS NOT NULL THEN ' - Room ' || h.court_room ELSE '' END,
-                    'notes', h.notes,
-                    'status', h.status
+                    'location', h.court || CASE WHEN h.court_room IS NOT NULL THEN ' - Room ' || h.court_room ELSE '' END
                   )
                   ORDER BY h.hearing_date, h.hearing_time
                 )
@@ -73,7 +67,6 @@ export async function GET(
 
     const caseData = caseResult.rows[0]
 
-
     return NextResponse.json({
       case: {
         id: caseData.id,
@@ -83,6 +76,9 @@ export async function GET(
         status: caseData.status,
         filing_date: caseData.filing_date,
         next_date: caseData.next_date,
+        case_type: caseData.case_type,
+        plaintiff: caseData.plaintiff,
+        defendant: caseData.defendant,
         created_at: caseData.created_at,
         updated_at: caseData.updated_at,
         offender: {

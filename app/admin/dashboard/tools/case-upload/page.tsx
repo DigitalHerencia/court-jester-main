@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,12 +21,11 @@ import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface CaseItem {
-  offender_name: React.ReactNode
-  status: React.ReactNode
+  offender_name: string
+  status: string
   next_hearing: Date | null 
   id: number
   case_number: string
-  // Add any other fields needed, e.g. offender_name, status, etc.
 }
 
 interface UploadResult {
@@ -45,22 +43,38 @@ interface RecentUpload {
   caseNumber?: string
 }
 
-interface ParsedCase {
+export interface ParsedCase {
   case_number: string;
+  judge: string;
+  filing_date: string;
   court: string;
-  judge: string | null;
-  filing_date: string | null;
+  case_type: string;
+  plaintiff: string;
+  defendant: string;
   charges: Array<{
-    description: string;
+    count_number: number;
     statute: string;
+    description: string;
     class: string;
-    citation: string | null;
+    charge_date: string;
+    citation_number: string;
+    plea: string;
+    disposition: string;
+    disposition_date: string;
   }>;
   hearings: Array<{
-    date: string;
-    time: string;
-    type: string;
-    location: string;
+    hearing_date: string;
+    hearing_time: string;
+    hearing_type: string;
+    hearing_judge: string;
+    court: string;
+    court_room: string;
+  }>;
+  motions: Array<{
+    filing_date: string;
+    title: string;
+    content: string;
+    status: string;
   }>;
 }
 
@@ -77,9 +91,7 @@ export default function CaseUploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [recentUploads, setRecentUploads] = useState<RecentUpload[]>([]);
-  const [offenders, setOffenders] = useState<Array<{ id: number; name: string }>>(
-    []
-  );
+  const [offenders, setOffenders] = useState<Array<{ id: number; name: string }>>([]);
   const [parsedCase, setParsedCase] = useState<ParsedCase | null>(null);
   const [warnings, setWarnings] = useState<UploadWarnings[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -116,7 +128,6 @@ export default function CaseUploadPage() {
       return;
     }
 
-    // Validate file type
     if (file.type !== "application/pdf") {
       toast.error("Only PDF files are supported");
       if (fileInputRef.current) {
@@ -125,7 +136,6 @@ export default function CaseUploadPage() {
       return;
     }
 
-    // Validate file size (10MB limit)
     if (file.size > 10 * 1024 * 1024) {
       toast.error("File size must be less than 10MB");
       if (fileInputRef.current) {
@@ -162,7 +172,7 @@ export default function CaseUploadPage() {
       formData.append("caseFile", selectedFile);
       formData.append("offenderId", selectedOffenderId);
 
-      const response = await fetch("/api/admin/cases/upload", {
+      const response = await fetch(`/api/admin/cases/upload`, {
         method: "POST",
         body: formData,
       });
@@ -177,12 +187,9 @@ export default function CaseUploadPage() {
         setUploadResult({
           success: true,
           message: "Case file uploaded and processed successfully",
-          details: `Case #${result.case.case_number} has been created with ${
-            result.case.charges?.length || 0
-          } charges and ${result.case.hearings?.length || 0} hearings.`,
+          details: `Case #${result.case.case_number} has been created with ${result.case.charges?.length || 0} charges and ${result.case.hearings?.length || 0} hearings.`,
         });
 
-        // Add any warnings from the processing
         if (result.warnings?.length > 0) {
           setWarnings([
             {
@@ -193,7 +200,6 @@ export default function CaseUploadPage() {
           ])
         }
 
-        // Add to recent uploads
         setRecentUploads((prev) => [
           {
             id: Date.now().toString(),
@@ -205,15 +211,13 @@ export default function CaseUploadPage() {
           ...prev.slice(0, 4),
         ]);
 
-        // Clear file selection
         setSelectedFile(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
 
-        // Create a notification for the offender
         try {
-          await fetch(`/api/admin/notifications`, {
+          await fetch("/api/admin/dashboard/notifications", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -230,7 +234,6 @@ export default function CaseUploadPage() {
           });
         } catch (notificationError) {
           console.error("Failed to create notification:", notificationError);
-          // Don't fail the upload if notification creation fails
         }
 
         toast.success("Case file processed successfully");
@@ -247,7 +250,6 @@ export default function CaseUploadPage() {
       });
 
       if (error instanceof Error && error.message.includes("Invalid case file content")) {
-        // Add validation errors as warnings
         setWarnings([
           {
             message: "The following validation errors were found:",
@@ -396,19 +398,23 @@ export default function CaseUploadPage() {
                       <div className="space-y-2 text-sm">
                         <p><strong>Case Number:</strong> {parsedCase.case_number}</p>
                         <p><strong>Court:</strong> {parsedCase.court}</p>
-                        {parsedCase.judge && (
-                          <p><strong>Judge:</strong> {parsedCase.judge}</p>
+                        <p><strong>Judge:</strong> {parsedCase.judge || 'Not assigned'}</p>
+                        <p><strong>Filing Date:</strong> {new Date(parsedCase.filing_date).toLocaleDateString()}</p>
+                        <p><strong>Case Type:</strong> {parsedCase.case_type}</p>
+                        {parsedCase.plaintiff && (
+                          <p><strong>Plaintiff:</strong> {parsedCase.plaintiff}</p>
                         )}
-                        {parsedCase.filing_date && (
-                          <p><strong>Filing Date:</strong> {new Date(parsedCase.filing_date).toLocaleDateString()}</p>
+                        {parsedCase.defendant && (
+                          <p><strong>Defendant:</strong> {parsedCase.defendant}</p>
                         )}
                         <div className="mt-2">
                           <p><strong>Charges ({parsedCase.charges.length}):</strong></p>
                           <ul className="list-disc pl-4 mt-1">
                             {parsedCase.charges.map((charge, i) => (
                               <li key={i}>
-                                {charge.description} ({charge.statute})
-                                {charge.class && ` - ${charge.class}`}
+                                Count {charge.count_number}: {charge.description} ({charge.statute})
+                                {charge.class && ` - Class ${charge.class}`}
+                                {charge.disposition && ` - ${charge.disposition}`}
                               </li>
                             ))}
                           </ul>
@@ -419,9 +425,22 @@ export default function CaseUploadPage() {
                             <ul className="list-disc pl-4 mt-1">
                               {parsedCase.hearings.map((hearing, i) => (
                                 <li key={i}>
-                                  {new Date(hearing.date).toLocaleDateString()} at {hearing.time}
-                                  {hearing.type && ` - ${hearing.type}`}
-                                  {hearing.location && ` (${hearing.location})`}
+                                  {new Date(hearing.hearing_date).toLocaleDateString()} at {hearing.hearing_time}
+                                  {hearing.hearing_type && ` - ${hearing.hearing_type}`}
+                                  {hearing.court_room && ` (${hearing.court} - Room ${hearing.court_room})`}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {parsedCase.motions.length > 0 && (
+                          <div className="mt-2">
+                            <p><strong>Motions ({parsedCase.motions.length}):</strong></p>
+                            <ul className="list-disc pl-4 mt-1">
+                              {parsedCase.motions.map((motion, i) => (
+                                <li key={i}>
+                                  {new Date(motion.filing_date).toLocaleDateString()} - {motion.title}
+                                  {motion.status && ` (${motion.status})`}
                                 </li>
                               ))}
                             </ul>

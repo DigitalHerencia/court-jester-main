@@ -24,6 +24,7 @@ interface Case {
   next_date: string | null
   charges_count: number
   upcoming_hearings_count: number
+  case_type?: string | null
 }
 
 export default function CasesListPage() {
@@ -40,7 +41,6 @@ export default function CasesListPage() {
         if (!response.ok) {
           throw new Error("Failed to fetch cases")
         }
-
         const data = await response.json()
         setCases(data.cases || [])
       } catch (err) {
@@ -109,6 +109,9 @@ export default function CasesListPage() {
                     <CardDescription>
                       Filed on {format(new Date(case_.filing_date), "MMMM d, yyyy")}
                     </CardDescription>
+                    {case_.case_type && (
+                      <p className="text-sm text-muted-foreground">Type: {case_.case_type}</p>
+                    )}
                   </div>
                   <Badge variant={case_.status === "Active" ? "default" : "secondary"}>
                     {case_.status}
@@ -130,19 +133,13 @@ export default function CasesListPage() {
                     <dd>{case_.charges_count}</dd>
                   </div>
                   <div>
-                    <dt className="font-medium text-muted-foreground">
-                      Upcoming Hearings
-                    </dt>
+                    <dt className="font-medium text-muted-foreground">Upcoming Hearings</dt>
                     <dd>{case_.upcoming_hearings_count}</dd>
                   </div>
                   {case_.next_date && (
                     <div className="col-span-2 mt-2">
-                      <dt className="font-medium text-muted-foreground">
-                        Next Court Date
-                      </dt>
-                      <dd>
-                        {format(new Date(case_.next_date), "MMMM d, yyyy")}
-                      </dd>
+                      <dt className="font-medium text-muted-foreground">Next Court Date</dt>
+                      <dd>{format(new Date(case_.next_date), "MMMM d, yyyy")}</dd>
                     </div>
                   )}
                 </dl>
