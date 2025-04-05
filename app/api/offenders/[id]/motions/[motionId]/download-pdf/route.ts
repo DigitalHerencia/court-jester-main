@@ -18,11 +18,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // Get motion details
+    // Get motion details using the motion_filings table and the content column
     const motionResult = await query(
       `
-        SELECT m.id, m.pdf_url, c.offender_id
-        FROM motions m
+        SELECT m.id, m.content, c.offender_id
+        FROM motion_filings m
         JOIN cases c ON m.case_id = c.id
         WHERE m.id = $1 AND c.offender_id = $2
       `,
@@ -32,24 +32,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Motion not found" }, { status: 404 })
     }
     const motion = motionResult.rows[0]
-    if (!motion.pdf_url) {
-      return NextResponse.json({ error: "PDF not available for this motion" }, { status: 404 })
+    if (!motion.content) {
+      return NextResponse.json({ error: "Content not available for this motion" }, { status: 404 })
     }
 
-    // Log the download
-    await query(
-      `
-        INSERT INTO motion_downloads (motion_id, offender_id, downloaded_at)
-        VALUES ($1, $2, NOW())
-      `,
-      [motionId, offenderId],
-    )
-
-    // Return the PDF URL
-    return NextResponse.json({ pdfUrl: motion.pdf_url })
+    // Return the motion content as the response (since pdf_url is not part of the schema)
+    return NextResponse.json({ motionContent: motion.content })
   } catch (error) {
-    console.error("Error downloading motion PDF:", error)
-    return NextResponse.json({ error: "Failed to download PDF" }, { status: 500 })
+    console.error("Error downloading motion content:", error)
+    return NextResponse.json({ error: "Failed to download motion content" }, { status: 500 })
   }
 }
-

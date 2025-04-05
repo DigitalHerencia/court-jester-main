@@ -19,13 +19,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Base query for all motion templates
     let queryText = `
       SELECT id, title, category, created_at, updated_at
-      FROM motions
-      WHERE is_template = true
+      FROM motion_templates
     `
     const queryParams: unknown[] = []
 
     if (category) {
-      queryText += " AND category = $1"
+      queryText += " WHERE category = $1"
       queryParams.push(category)
     }
     queryText += " ORDER BY category, title"
@@ -33,7 +32,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const result = await query(queryText, queryParams)
 
     // Get distinct categories for filtering (optional feature)
-    const categoriesResult = await query(`SELECT DISTINCT category FROM motions WHERE is_template = true`)
+    const categoriesResult = await query(`SELECT DISTINCT category FROM motion_templates`)
 
     return NextResponse.json({
       templates: result.rows,
@@ -44,4 +43,3 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "Failed to fetch templates" }, { status: 500 })
   }
 }
-

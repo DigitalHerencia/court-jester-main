@@ -18,24 +18,24 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // Get motion details with case info
+    // Get motion details with case info using the motion_filings table
     const motionResult = await query(
       `
         SELECT 
-          m.id, m.title, m.content, m.status, m.created_at, m.updated_at, m.pdf_url,
+          m.id, m.title, m.content, m.status, m.created_at, m.updated_at,
           c.id as case_id, c.case_number, c.court, c.judge
-        FROM motions m
+        FROM motion_filings m
         JOIN cases c ON m.case_id = c.id
         WHERE m.id = $1 AND c.offender_id = $2
       `,
-      [motionId, offenderId],
+      [motionId, Number.parseInt(offenderId)],
     )
     if (motionResult.rowCount === 0) {
       return NextResponse.json({ error: "Motion not found" }, { status: 404 })
     }
     const motion = motionResult.rows[0]
 
-    // Format response
+    // Format and return response
     return NextResponse.json({
       motion: {
         id: motion.id,
@@ -44,7 +44,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         status: motion.status,
         created_at: motion.created_at,
         updated_at: motion.updated_at,
-        pdf_url: motion.pdf_url,
         case: {
           id: motion.case_id,
           case_number: motion.case_number,
@@ -58,4 +57,3 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "Failed to fetch motion details" }, { status: 500 })
   }
 }
-

@@ -1,10 +1,13 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db/db"
 import { verifyToken } from "@/lib/auth"
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string; caseId: string }> }) {
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string; caseId: string } }
+) {
   try {
-    const { id, caseId } = await params
     // Verify authorization
     const token = request.cookies.get("token")?.value
     const session = await verifyToken(token)
@@ -13,47 +16,89 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check offender access
-    if (session.role === "offender" && session.offenderId !== Number.parseInt(id)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    // If not admin, verify the user is accessing their own case
+    if (session.role !== "admin" && session.offenderId !== parseInt(params.id)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verify the case belongs to the offender
+    // Fetch case details with related data
     const caseResult = await query(
-      `
-        SELECT id, case_number, court, judge, status, next_date, created_at, updated_at
-        FROM cases
-        WHERE id = $1 AND offender_id = $2
-      `,
-      [caseId, id],
+      `SELECT c.*, 
+              o.first_name, 
+              o.last_name,
+              (
+                SELECT json_agg(
+                  json_build_object(
+                    'id', ch.id,
+                    'count_number', ch.count_number,
+                    'description', ch.description,
+                    'statute', ch.statute,
+                    'class', ch.class,
+                    'charge_date', ch.charge_date,
+                    'citation', ch.citation,
+                    'disposition', ch.disposition,
+                    'disposition_date', ch.disposition_date
+                  )
+                  ORDER BY ch.count_number
+                )
+                FROM charges ch 
+                WHERE ch.case_id = c.id
+              ) as charges,
+              (
+                SELECT json_agg(
+                  json_build_object(
+                    'id', h.id,
+                    'date', h.hearing_date,
+                    'time', h.hearing_time,
+                    'type', h.hearing_type,
+                    'judge', h.hearing_judge,
+                    'location', h.court || CASE WHEN h.court_room IS NOT NULL THEN ' - Room ' || h.court_room ELSE '' END,
+                    'notes', h.notes,
+                    'status', h.status
+                  )
+                  ORDER BY h.hearing_date, h.hearing_time
+                )
+                FROM hearings h 
+                WHERE h.case_id = c.id
+              ) as hearings
+       FROM cases c
+       JOIN offenders o ON c.offender_id = o.id
+       WHERE c.id = $1 AND c.offender_id = $2`,
+      [params.caseId, params.id]
     )
-    if (caseResult.rowCount === 0) {
-      return NextResponse.json({ error: "Case not found or does not belong to this offender" }, { status: 404 })
+
+    if (!caseResult.rowCount) {
+      return NextResponse.json({ error: "Case not found" }, { status: 404 })
     }
 
-    // Get charges, hearings, motions for this case
-    const chargesResult = await query(
-      `SELECT id, description, statute, severity, disposition FROM charges WHERE case_id = $1`,
-      [caseId],
-    )
-    const hearingsResult = await query(
-      `SELECT id, date, time, location, type, notes FROM court_dates WHERE case_id = $1 ORDER BY date ASC`,
-      [caseId],
-    )
-    const motionsResult = await query(
-      `SELECT id, title, status, created_at, updated_at FROM motions WHERE case_id = $1 ORDER BY created_at DESC`,
-      [caseId],
-    )
+    const caseData = caseResult.rows[0]
+
 
     return NextResponse.json({
-      case: caseResult.rows[0],
-      charges: chargesResult.rows,
-      hearings: hearingsResult.rows,
-      motions: motionsResult.rows,
+      case: {
+        id: caseData.id,
+        case_number: caseData.case_number,
+        court: caseData.court,
+        judge: caseData.judge,
+        status: caseData.status,
+        filing_date: caseData.filing_date,
+        next_date: caseData.next_date,
+        created_at: caseData.created_at,
+        updated_at: caseData.updated_at,
+        offender: {
+          id: caseData.offender_id,
+          first_name: caseData.first_name,
+          last_name: caseData.last_name
+        }
+      },
+      charges: caseData.charges || [],
+      hearings: caseData.hearings || []
     })
   } catch (error) {
     console.error("Error fetching case details:", error)
-    return NextResponse.json({ error: "Failed to fetch case details" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to fetch case details" },
+      { status: 500 }
+    )
   }
 }
-

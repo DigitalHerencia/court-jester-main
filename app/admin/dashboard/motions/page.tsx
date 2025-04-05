@@ -126,7 +126,7 @@ export default function MotionsPage() {
         <p className="font-kings text-background mb-2 text-sm">Manage all motion templates and custom motions in the system.</p>
 
       {/* Search and Create Template */}
-      <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+      <div className="card-content flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
         <Input
           className="w-full sm:w-64"
           placeholder="Search motion templates..."
@@ -135,13 +135,13 @@ export default function MotionsPage() {
           onChange={handleSearch}
           />
         <Link href="/admin/dashboard/tools/motions-editor">
-          <Button className="w-full sm:w-64 bg-background text-foreground">Create Template</Button>
+          <Button className="w-full sm:w-64 bg-foreground text-background">Create Template</Button>
         </Link>
       </div>
 
       {/* Templates Table */}
       {filteredTemplates.length === 0 ? (
-        <div className="rounded-md border border-foreground/20 p-8 text-center">
+        <div className="card-content rounded-md border border-foreground/20 p-8 text-center">
           <div className="mb-2 text-xl font-semibold">No templates found</div>
           <p className="text-foreground/60">
             {searchTerm

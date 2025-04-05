@@ -8,7 +8,7 @@
 /out/
 
 # production
-/build
+/build/
 
 # debug
 npm-debug.log*
@@ -25,3 +25,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# github
+/.github/
+/.context/

@@ -13,9 +13,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   try {
-    // Fetch template details
+    // Fetch template details from the motion_templates table
     const result = await query(
-      `SELECT id, title, content, category, created_at, updated_at FROM motions WHERE id = $1 AND is_template = true`,
+      `SELECT id, title, content, category, created_at, updated_at, variables FROM motion_templates WHERE id = $1`,
       [templateId],
     )
     if (result.rowCount === 0) {
@@ -27,4 +27,3 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "An error occurred while fetching the template" }, { status: 500 })
   }
 }
-

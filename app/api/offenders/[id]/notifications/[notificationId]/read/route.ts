@@ -12,13 +12,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 
   try {
-    // Mark notification as read, ensuring it belongs to this offender
+    // Mark notification as read, ensuring it belongs to this offender using the correct user_id column
     const result = await query(
       `UPDATE notifications SET 
-        read = true, 
-        updated_at = NOW()
-      WHERE id = $1 AND recipient_type = 'offender' AND recipient_id = $2
-      RETURNING *`,
+         read = true
+       WHERE id = $1 AND user_id = $2
+       RETURNING *`,
       [params.notificationId, params.id],
     )
 
@@ -35,4 +34,3 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: "An error occurred while updating the notification" }, { status: 500 })
   }
 }
-

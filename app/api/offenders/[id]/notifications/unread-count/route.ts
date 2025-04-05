@@ -12,20 +12,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 
   try {
-    // Count unread notifications for this offender
+    // Count unread notifications for this offender using the correct user_id column
     const result = await query(
       `SELECT COUNT(*) as count
-      FROM notifications
-      WHERE recipient_type = 'offender' AND recipient_id = $1 AND read = false`,
+       FROM notifications
+       WHERE user_id = $1 AND read = false`,
       [params.id],
     )
 
     return NextResponse.json({
-      unreadCount: Number.parseInt(result.rows[0].count),
+      unreadCount: Number.parseInt(String(result.rows[0].count)),
     })
   } catch (error) {
     console.error("Error counting unread notifications:", error)
     return NextResponse.json({ error: "An error occurred while counting notifications" }, { status: 500 })
   }
 }
-

@@ -1,114 +1,155 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useParams, useRouter } from "next/navigation"
+import { format } from "date-fns"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { AlertCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface Case {
   id: number
   case_number: string
   court: string
   judge: string
-  filing_date: string
-  case_type: string
-  plaintiff: string
-  defendant: string
   status: string
+  filing_date: string
   next_date: string | null
-  created_at: string
-  updated_at: string
+  charges_count: number
+  upcoming_hearings_count: number
 }
 
-export default function OffenderCasesPage() {
-  const { id } = useParams<{ id: string }>()
+export default function CasesListPage() {
   const router = useRouter()
-  const [cases, setCases] = useState<Case[]>([])
+  const { id } = useParams<{ id: string }>()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [cases, setCases] = useState<Case[]>([])
 
   useEffect(() => {
     async function fetchCases() {
       try {
-        const res = await fetch(`/api/offenders/${id}/cases`)
-        if (!res.ok) {
-          const err = await res.json()
-          throw new Error(err.error || "Failed to fetch cases")
+        const response = await fetch(`/api/offenders/${id}/cases`)
+        if (!response.ok) {
+          throw new Error("Failed to fetch cases")
         }
-        const data = await res.json()
+
+        const data = await response.json()
         setCases(data.cases || [])
-      } catch (err: unknown) {
+      } catch (err) {
         console.error("Error fetching cases:", err)
-        setError((err as Error).message)
+        setError(err instanceof Error ? err.message : "Failed to load cases")
       } finally {
         setIsLoading(false)
       }
     }
+
     if (id) {
       fetchCases()
     }
   }, [id])
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-32 text-background">
-        Loading cases...
+      <div className="flex h-[calc(100vh-120px)] items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 text-2xl font-bold">Loading cases...</div>
+          <div className="text-foreground/60">Please wait while we fetch your cases.</div>
+        </div>
       </div>
     )
-  if (error)
+  }
+
+  if (error) {
     return (
-      <div className="flex items-center justify-center py-32 text-destructive">
-        Error: {error}
+      <div className="p-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </div>
     )
+  }
 
   return (
-    <div className="card-secondary space-y-6 p-4">
-      <h1 className="font-kings text-2xl text-background mb-6">My Cases</h1>
+    <div className="space-y-6 p-4">
+      <div>
+        <h1 className="text-3xl font-bold">My Cases</h1>
+        <p className="text-muted-foreground">
+          View and manage all your court cases
+        </p>
+      </div>
+
       {cases.length === 0 ? (
-        <div className="text-background">No cases found.</div>
+        <Card>
+          <CardContent className="flex h-[200px] items-center justify-center">
+            <p className="text-muted-foreground">No cases found.</p>
+          </CardContent>
+        </Card>
       ) : (
-        cases.map((c) => (
-          <Card key={c.id} className="card-content mb-4">
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle className="font-kings text-2xl text-foreground">
-                Case #{c.case_number}
-              </CardTitle>
-              <span
-                className={`px-2 py-1 rounded text-sm font-semibold ${
-                  c.status === "Active"
-                    ? "bg-[#34C759] text-[#1A202C]"
-                    : "bg-[#FEE2E2] text-[#B91C1C]"
-                }`}
-              >
-                {c.status === "Active" ? "Open" : "Closed"}
-              </span>
-            </CardHeader>
-            <CardContent className="text-lg text-foreground">
-              <p>
-                <strong>Court:</strong> {c.court}
-              </p>
-              <p>
-                <strong>Judge:</strong> {c.judge || "Not assigned"}
-              </p>
-              <p>
-                <strong>Filing Date:</strong>{" "}
-                {new Date(c.filing_date).toLocaleString()}
-              </p>
-              <p>
-                <strong>Next Date:</strong>{" "}
-                {c.next_date ? new Date(c.next_date).toLocaleString() : "None scheduled"}
-              </p>
-              <Button
-                className="mt-4 button-link"
-                variant="default"
-                onClick={() => router.push(`/offender/dashboard/${id}/cases/${c.id}`)}
-              >
-                View Details
-              </Button>
-            </CardContent>
-          </Card>
-        ))
+        <div className="grid gap-6 md:grid-cols-2">
+          {cases.map((case_) => (
+            <Card
+              key={case_.id}
+              className="cursor-pointer transition-shadow hover:shadow-md"
+              onClick={() => router.push(`/offender/dashboard/${id}/cases/${case_.id}`)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle>Case #{case_.case_number}</CardTitle>
+                    <CardDescription>
+                      Filed on {format(new Date(case_.filing_date), "MMMM d, yyyy")}
+                    </CardDescription>
+                  </div>
+                  <Badge variant={case_.status === "Active" ? "default" : "secondary"}>
+                    {case_.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid grid-cols-2 gap-1 text-sm">
+                  <div>
+                    <dt className="font-medium text-muted-foreground">Court</dt>
+                    <dd>{case_.court}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-muted-foreground">Judge</dt>
+                    <dd>{case_.judge || "Not assigned"}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-muted-foreground">Charges</dt>
+                    <dd>{case_.charges_count}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-muted-foreground">
+                      Upcoming Hearings
+                    </dt>
+                    <dd>{case_.upcoming_hearings_count}</dd>
+                  </div>
+                  {case_.next_date && (
+                    <div className="col-span-2 mt-2">
+                      <dt className="font-medium text-muted-foreground">
+                        Next Court Date
+                      </dt>
+                      <dd>
+                        {format(new Date(case_.next_date), "MMMM d, yyyy")}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   )

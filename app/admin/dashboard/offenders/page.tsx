@@ -8,7 +8,9 @@ import { toast } from "sonner"
 interface OffenderItem {
   id: number
   inmate_number: string
-  name: string
+  first_name: string
+  middle_name: string
+  last_name: string
   status: string
   facility: string
 }
@@ -40,6 +42,7 @@ export default function OffendersPage() {
     fetchOffenders()
   }, [])
 
+    
   return (
     <div className="card-secondary space-y-4 p-4">
       <h2 className="font-kings text-background text-3xl">Offender List</h2>
@@ -60,7 +63,7 @@ export default function OffendersPage() {
               className="card-content hover:shadow-md transition-shadow flex justify-between items-center"
             >
               <div>
-                <h3 className="font-medium text-lg">{offender.name}</h3>
+                <h3 className="font-medium text-lg">{offender.first_name} {offender.middle_name} {offender.last_name}</h3>
                 <p className="text-sm">
                   <span className="font-medium">Number:</span> {offender.inmate_number}
                 </p>

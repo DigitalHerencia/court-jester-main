@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils/utils";
 interface TabItem {
   label: string;
   href: string;
-  count?: number;
+  count?: number | string;
 }
 
 interface DashboardTabsProps {
@@ -22,7 +22,7 @@ export function DashboardTabs({ role, offenderId }: DashboardTabsProps) {
   const tabs: TabItem[] =
     role === "admin"
       ? [
-          { label: "Notifications", href: "/admin/dashboard/notifications", count: 3 },
+          { label: "Notifications", href: "/admin/dashboard/notifications", count: "" },
           { label: "Offenders", href: "/admin/dashboard/offenders" },
           { label: "Cases", href: "/admin/dashboard/cases" },
           { label: "Motions", href: "/admin/dashboard/motions" },

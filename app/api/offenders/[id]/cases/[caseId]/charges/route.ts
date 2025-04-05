@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           id, 
           description, 
           statute, 
-          severity, 
+          class, 
           disposition
         FROM charges
         WHERE case_id = $1
@@ -49,4 +49,3 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: "Failed to fetch case charges" }, { status: 500 })
   }
 }
-

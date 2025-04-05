@@ -20,26 +20,27 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { id } = params
 
     // Check if offender exists
-    const offenderResult = await query("SELECT id, first_name, last_name, inmate_number FROM offenders WHERE id = $1", [
-      id,
-    ])
-
+    const offenderResult = await query(
+      "SELECT id, first_name, last_name, inmate_number FROM offenders WHERE id = $1",
+      [id],
+    )
     if (offenderResult.rowCount === 0) {
       return NextResponse.json({ error: "Offender not found" }, { status: 404 })
     }
-
     const offender = offenderResult.rows[0]
 
-    // Create an admin notification for the update request
+    // Create an admin notification for the update request.
+    // We insert into notifications with a NULL user_id to denote an admin notification.
     await query(
       `
-        INSERT INTO admin_notifications (
+        INSERT INTO notifications (
+          user_id,
           type,
           message,
           read,
           created_at
         )
-        VALUES ($1, $2, $3, NOW())
+        VALUES (NULL, $1, $2, $3, NOW())
       `,
       [
         "profile_update_request",
@@ -48,11 +49,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       ],
     )
 
-    // Create a notification for the offender
+    // Create a notification for the offender.
     await query(
       `
-        INSERT INTO offender_notifications (
-          offender_id,
+        INSERT INTO notifications (
+          user_id,
           type,
           message,
           read,
@@ -76,4 +77,3 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: "Failed to submit profile update request" }, { status: 500 })
   }
 }
-

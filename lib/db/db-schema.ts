@@ -7,7 +7,6 @@ import { parse } from "csv-parse/sync"
 
 // SQL statements to create all tables (example)
 const createTablesSQL = `
--- Offenders table (primary user/inmate table)
 CREATE TABLE offenders (
   id SERIAL PRIMARY KEY,
   inmate_number VARCHAR(50) UNIQUE NOT NULL,
@@ -15,7 +14,7 @@ CREATE TABLE offenders (
   last_name VARCHAR(100) NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   middle_name VARCHAR(100),
-  status VARCHAR(20) NOT NULL, -- e.g., "active", "pending"
+  status VARCHAR(20) NOT NULL,
   facility VARCHAR(100),
   age INTEGER,
   height VARCHAR(50),
@@ -32,10 +31,9 @@ CREATE TABLE offenders (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   account_enabled BOOLEAN DEFAULT TRUE,
   profile_enabled BOOLEAN DEFAULT TRUE,
-  custody_status VARCHAR(20) DEFAULT 'in_custody' -- e.g., "in_custody", "released"
+  custody_status VARCHAR(20) DEFAULT 'in_custody'
 );
 
--- Cases table
 CREATE TABLE cases (
   id SERIAL PRIMARY KEY,
   case_number VARCHAR(50) UNIQUE NOT NULL,
@@ -43,16 +41,15 @@ CREATE TABLE cases (
   judge VARCHAR(100),
   filing_date DATE,
   offender_id INTEGER REFERENCES offenders(id) ON DELETE CASCADE,
-  case_type VARCHAR(50),  -- e.g., "Civil", "Criminal"
+  case_type VARCHAR(50),
   plaintiff VARCHAR(100),
   defendant VARCHAR(100),
-  status VARCHAR(20) NOT NULL,  -- e.g., "Active", "Dismissed"
+  status VARCHAR(20) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   next_date TIMESTAMP
 );
 
--- Charges table
 CREATE TABLE charges (
   id SERIAL PRIMARY KEY,
   case_id INTEGER REFERENCES cases(id) ON DELETE CASCADE,
@@ -68,12 +65,11 @@ CREATE TABLE charges (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Hearings table
 CREATE TABLE hearings (
   id SERIAL PRIMARY KEY,
   case_id INTEGER REFERENCES cases(id) ON DELETE CASCADE,
   hearing_date DATE,
-  hearing_time VARCHAR(20),  -- stored as text (e.g., "8:30 AM")
+  hearing_time VARCHAR(20),
   hearing_type VARCHAR(50),
   hearing_judge VARCHAR(100),
   court VARCHAR(100),
@@ -81,17 +77,15 @@ CREATE TABLE hearings (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Login Activity table
 CREATE TABLE login_activity (
   id SERIAL PRIMARY KEY,
   offender_id INTEGER REFERENCES offenders(id) ON DELETE CASCADE,
-  activity_type VARCHAR(20) NOT NULL,  -- e.g., "login", "logout"
+  activity_type VARCHAR(20) NOT NULL,
   ip_address VARCHAR(50),
   user_agent TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Offenses table
 CREATE TABLE offenses (
   id SERIAL PRIMARY KEY,
   offender_id INTEGER REFERENCES offenders(id) ON DELETE CASCADE,
@@ -101,7 +95,6 @@ CREATE TABLE offenses (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tasks table
 CREATE TABLE tasks (
   id SERIAL PRIMARY KEY,
   offender_id INTEGER REFERENCES offenders(id) ON DELETE CASCADE,
@@ -114,7 +107,6 @@ CREATE TABLE tasks (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Configs table
 CREATE TABLE configs (
   id SERIAL PRIMARY KEY,
   key VARCHAR(100) UNIQUE NOT NULL,
@@ -124,7 +116,6 @@ CREATE TABLE configs (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Motion Templates table (for AI-generated motion content)
 CREATE TABLE motion_templates (
   id SERIAL PRIMARY KEY,
   title VARCHAR(150) NOT NULL,
@@ -132,22 +123,20 @@ CREATE TABLE motion_templates (
   category VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  variables TEXT[]  -- an array of variable names (e.g., ["defendant_name", "charges"])
+  variables TEXT[]
 );
 
--- Motion Filings table
 CREATE TABLE motion_filings (
   id SERIAL PRIMARY KEY,
   case_id INTEGER REFERENCES cases(id) ON DELETE CASCADE,
   title VARCHAR(150) NOT NULL,
   content TEXT,
   filing_date DATE,
-  status VARCHAR(50), -- e.g., "Denied", "Moot", etc.
+  status VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Notifications table
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES offenders(id) ON DELETE CASCADE,
@@ -156,7 +145,6 @@ CREATE TABLE notifications (
   read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 `
 
 async function initializeDatabaseSchema() {

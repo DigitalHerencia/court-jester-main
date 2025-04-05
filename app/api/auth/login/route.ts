@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = await generateToken({
-      offenderId: offender.inmate_number,
+      offenderId: Number(offender.inmate_number),
       role: "offender",
       createdAt: new Date().toISOString(),
       id: ""

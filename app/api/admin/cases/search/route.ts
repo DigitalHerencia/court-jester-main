@@ -1,26 +1,26 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { query } from "@/lib/db/db"
-import { verifyToken } from "@/lib/auth"
+import { type NextRequest, NextResponse } from "next/server";
+import { query } from "@/lib/db/db";
+import { verifyToken } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
     // Verify admin authorization
-    const token = request.cookies.get("token")?.value
-    const session = await verifyToken(token)
+    const token = request.cookies.get("token")?.value;
+    const session = await verifyToken(token);
 
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get search query
-    const searchParams = request.nextUrl.searchParams
-    const searchQuery = searchParams.get("q")
+    // Get search query from URL parameters
+    const searchParams = request.nextUrl.searchParams;
+    const searchQuery = searchParams.get("q");
 
     if (!searchQuery) {
-      return NextResponse.json({ error: "Search query is required" }, { status: 400 })
+      return NextResponse.json({ error: "Search query is required" }, { status: 400 });
     }
 
-    // Search cases
+    // Search cases with matching fields
     const result = await query(
       `
         SELECT 
@@ -44,15 +44,14 @@ export async function GET(request: NextRequest) {
           c.status ILIKE $1
         ORDER BY c.created_at DESC
       `,
-      [`%${searchQuery}%`],
-    )
+      [`%${searchQuery}%`]
+    );
 
     return NextResponse.json({
       cases: result.rows,
-    })
+    });
   } catch (error) {
-    console.error("Error searching cases:", error)
-    return NextResponse.json({ error: "Failed to search cases" }, { status: 500 })
+    console.error("Error searching cases:", error);
+    return NextResponse.json({ error: "Failed to search cases" }, { status: 500 });
   }
 }
-

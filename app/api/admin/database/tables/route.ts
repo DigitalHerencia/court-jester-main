@@ -1,13 +1,13 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { requireAdmin } from "@/lib/auth"
-import { query } from "@/lib/db/db"
+import { type NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth";
+import { query } from "@/lib/db/db";
 
 export async function GET(request: NextRequest) {
-  const token = request.cookies.get("token")?.value
-  const session = await requireAdmin(token)
+  const token = request.cookies.get("token")?.value;
+  const session = await requireAdmin(token);
 
   if (!session) {
-    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
           CASE 
             WHEN t.table_name = 'offenders' THEN (SELECT COUNT(*) FROM offenders)
             WHEN t.table_name = 'cases' THEN (SELECT COUNT(*) FROM cases)
-            WHEN t.table_name = 'motions' THEN (SELECT COUNT(*) FROM motions)
+            WHEN t.table_name = 'motion_filings' THEN (SELECT COUNT(*) FROM motion_filings)
             WHEN t.table_name = 'notifications' THEN (SELECT COUNT(*) FROM notifications)
             ELSE 0
           END
@@ -30,15 +30,14 @@ export async function GET(request: NextRequest) {
       WHERE table_schema = 'public'
       AND table_type = 'BASE TABLE'
       ORDER BY table_name
-    `)
+    `);
 
     return NextResponse.json({
       success: true,
       tables: tableStats.rows,
-    })
-  } catch (error: any) {
-    console.error("Error getting database tables:", error)
-    return NextResponse.json({ success: false, error: error.message || "Internal server error" }, { status: 500 })
+    });
+  } catch (error: unknown) {
+    console.error("Error getting database tables:", error);
+    return NextResponse.json({ success: false, error: ( error as Error).message || "Internal server error" }, { status: 500 });
   }
 }
-

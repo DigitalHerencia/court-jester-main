@@ -4,8 +4,8 @@ import { verifyToken } from "@/lib/auth"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Await params to get the inmate number from the URL
-    const { id } = await params // e.g. "468079"
+    // Await params to get the inmate number from the URL (e.g. "468079")
+    const { id } = await params
 
     // Retrieve and verify token from cookies
     const token = request.cookies.get("token")?.value
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
     const offenderInternalId = offenderResult.rows[0].id
 
-    // Query hearings for this offender, including case_number and notes
+    // Query hearings for this offender, including case_number from the cases table
     const hearingsResult = await query(
       `
       SELECT h.id,
@@ -46,6 +46,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       `,
       [offenderInternalId],
     )
+
     return NextResponse.json({ courtDates: hearingsResult.rows })
   } catch (error) {
     console.error("Error fetching court dates:", error)

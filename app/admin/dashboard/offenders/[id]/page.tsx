@@ -1,57 +1,74 @@
-"use client"
-import { useParams } from "next/navigation"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
-import Image from "next/image"
+"use client";
+
+import { useParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import Image from "next/image";
 
 interface OffenderData {
   offender: {
-    id: number
-    inmate_number: string
-    name: string
-    status: string
-    facility: string
-    registered_date: string
-    has_mugshot: boolean
-  }
+    inmateNumber: string;
+    nmcdNumber?: string;
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+    status: string;
+    facility?: string;
+    age?: number;
+    height?: string;
+    weight?: number;
+    eyeColor?: string;
+    hair?: string;
+    religion?: string;
+    education?: string;
+    complexion?: string;
+    ethnicity?: string;
+    alias?: string;
+    mugshotUrl?: string;
+    accountEnabled: boolean;
+    profileEnabled: boolean;
+    custodyStatus: string;
+  };
   cases: Array<{
-    id: number
-    case_number: string
-    court: string
-    status: string
-    next_date: string | null
-  }>
+    id: number;
+    caseNumber: string;
+    court: string;
+    status: string;
+    nextDate?: string;
+  }>;
 }
 
 export default function OffenderDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const [offenderData, setOffenderData] = useState<OffenderData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { id } = useParams<{ id: string }>();
+  const [offenderData, setOffenderData] = useState<OffenderData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchOffenderData() {
       try {
-        const response = await fetch(`/api/admin/offenders/${id}`)
+        const response = await fetch(`/api/admin/offenders/${id}`);
         if (!response.ok) {
-          throw new Error("Failed to fetch offender data")
+          throw new Error("Failed to fetch offender data");
         }
-        const data = await response.json()
-        setOffenderData(data)
+        const data = await response.json();
+        if (!data.offender) {
+          throw new Error("Offender data is missing from the response");
+        }
+        setOffenderData(data);
       } catch (err) {
-        console.error("Error fetching offender data:", err)
-        setError("Failed to load offender data. Please try again later.")
+        console.error("Error fetching offender data:", err);
+        setError("Failed to load offender data. Please try again later.");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
-
     if (id) {
-      fetchOffenderData()
+      fetchOffenderData();
     }
-  }, [id])
+  }, [id]);
 
   if (isLoading) {
     return (
@@ -65,10 +82,10 @@ export default function OffenderDetailPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
-  if (error || !offenderData) {
+  if (error || !offenderData || !offenderData.offender) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
@@ -81,20 +98,21 @@ export default function OffenderDetailPage() {
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
-  const { offender, cases } = offenderData
+  const { offender, cases } = offenderData;
+  const fullName = `${offender.firstName} ${offender.middleName ? offender.middleName + " " : ""}${offender.lastName}`;
 
   return (
     <div className="card-secondary space-y-4 p-4">
       {/* Header Block */}
       <div className="card-primary p-4">
         <h1 className="font-kings text-3xl text-primary-foreground mb-2">
-          Offender: {offender.name}
+          Inmate: {fullName}
         </h1>
         <p className="text-primary-foreground">
-          View and manage all details related to this offender.
+          View and manage all details related to this inmate.
         </p>
       </div>
 
@@ -102,13 +120,13 @@ export default function OffenderDetailPage() {
       <div className="card-content space-y-6">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="w-full md:w-1/3 space-y-4">
-            {offender.has_mugshot ? (
+            {offender.mugshotUrl ? (
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md border border-foreground/20">
                 <Image
                   fill
-                  alt={`Mugshot of ${offender.name}`}
+                  alt={`Mugshot of ${fullName}`}
                   className="object-cover"
-                  src={`/api/admin/offenders/${id}/mugshot`}
+                  src={offender.mugshotUrl}
                 />
               </div>
             ) : (
@@ -117,45 +135,111 @@ export default function OffenderDetailPage() {
               </div>
             )}
             <div>
-              <Link href={`/admin/dashboard/tools/mugshot-upload?offenderId=${id}`}>
-                <Button className="button-link w-full" variant="outline">
-                  {offender.has_mugshot ? "Update Mugshot" : "Upload Mugshot"}
+              <Link href={`/admin/dashboard/tools/mugshot-upload?inmateNumber=${offender.inmateNumber}`}>
+                <Button className="button-link w-full" variant="default">
+                  {offender.mugshotUrl ? "Update Mugshot" : "Upload Mugshot"}
                 </Button>
               </Link>
             </div>
           </div>
           <div className="w-full md:w-2/3 space-y-4">
-            <h2 className="font-kings text-xl text-foreground mb-4">
-              Offender Information
+            <h2 className="font-black text-2xl text-foreground mb-4">
+              Inmate Information
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
               <div className="card-content p-3">
-                <p className="text-sm font-medium">Inmate Number</p>
-                <p className="mt-1">{offender.inmate_number}</p>
+                <p className="text-lg font-bold">Inmate Number:</p>
+                <p className="text-md mt-1">{offender.inmateNumber}</p>
               </div>
+              {offender.nmcdNumber && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">NMCD Number:</p>
+                  <p className="text-md mt-1">{offender.nmcdNumber}</p>
+                </div>
+              )}
               <div className="card-content p-3">
-                <p className="text-sm font-medium">Status</p>
-                <p className="mt-1">{offender.status}</p>
+                <p className="text-lg font-bold">Status:</p>
+                <p className="text-md mt-1">{offender.status}</p>
               </div>
+              {offender.facility && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Facility:</p>
+                  <p className="text-md mt-1">{offender.facility}</p>
+                </div>
+              )}
+              {typeof offender.age === "number" && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Age:</p>
+                  <p className="text-md mt-1">{offender.age}</p>
+                </div>
+              )}
+              {offender.height && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Height:</p>
+                  <p className="text-md mt-1">{offender.height}</p>
+                </div>
+              )}
+              {typeof offender.weight === "number" && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Weight:</p>
+                  <p className="text-md mt-1">{offender.weight}</p>
+                </div>
+              )}
+              {offender.eyeColor && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Eye Color:</p>
+                  <p className="text-md mt-1">{offender.eyeColor}</p>
+                </div>
+              )}
+              {offender.hair && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Hair:</p>
+                  <p className="text-md mt-1">{offender.hair}</p>
+                </div>
+              )}
+              {offender.religion && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Religion:</p>
+                  <p className="text-md mt-1">{offender.religion}</p>
+                </div>
+              )}
+              {offender.education && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Education:</p>
+                  <p className="text-md mt-1">{offender.education}</p>
+                </div>
+              )}
+              {offender.complexion && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Complexion:</p>
+                  <p className="text-md mt-1">{offender.complexion}</p>
+                </div>
+              )}
+              {offender.ethnicity && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Ethnicity:</p>
+                  <p className="text-md mt-1">{offender.ethnicity}</p>
+                </div>
+              )}
+              {offender.alias && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Alias:</p>
+                  <p className="text-md mt-1">{offender.alias}</p>
+                </div>
+              )}
               <div className="card-content p-3">
-                <p className="text-sm font-medium">Facility</p>
-                <p className="mt-1">{offender.facility}</p>
-              </div>
-              <div className="card-content p-3">
-                <p className="text-sm font-medium">Registered Date</p>
-                <p className="mt-1">
-                  {new Date(offender.registered_date).toLocaleDateString()}
-                </p>
+                <p className="text-lg font-bold">Custody Status:</p>
+                <p className="text-md mt-1">{offender.custodyStatus}</p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Link href={`/admin/dashboard/tools/offender-profile?id=${id}`}>
-                <Button className="button-link" variant="outline">
+              <Link href={`/admin/dashboard/tools/offender-profile?inmateNumber=${offender.inmateNumber}`}>
+                <Button className="button-link" variant="default">
                   Edit Profile
                 </Button>
               </Link>
-              <Button className="button-link" variant="outline">
-                Notify Offender
+              <Button className="button-link" variant="default">
+                Notify Inmate
               </Button>
             </div>
           </div>
@@ -165,9 +249,9 @@ export default function OffenderDetailPage() {
       {/* Cases Tab */}
       <Card className="card-content">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="font-kings text-foreground">Cases</CardTitle>
-          <Link href={`/admin/dashboard/tools/case-upload?offenderId=${id}`}>
-            <Button className="button-link" size="sm" variant="outline">
+          <CardTitle className="text-2xl font-kings text-foreground">Cases</CardTitle>
+          <Link href={`/admin/dashboard/tools/case-upload?inmateNumber=${offender.inmateNumber}`}>
+            <Button className="button-link" size="sm" variant="default">
               Add Case
             </Button>
           </Link>
@@ -175,7 +259,7 @@ export default function OffenderDetailPage() {
         <CardContent>
           {cases.length === 0 ? (
             <div className="card-content p-4 text-center">
-              <p className="text-foreground/60">No cases found for this offender.</p>
+              <p className="text-foreground/60">No cases found for this inmate.</p>
             </div>
           ) : (
             <div className="overflow-hidden rounded-md border border-foreground/20">
@@ -191,21 +275,18 @@ export default function OffenderDetailPage() {
                 </thead>
                 <tbody>
                   {cases.map((caseItem) => (
-                    <tr
-                      key={caseItem.id}
-                      className="border-t border-foreground/10 hover:bg-foreground/5"
-                    >
-                      <td className="px-4 py-2">{caseItem.case_number}</td>
+                    <tr key={caseItem.id} className="border-t border-foreground/10 hover:bg-foreground/5">
+                      <td className="px-4 py-2">{caseItem.caseNumber}</td>
                       <td className="px-4 py-2">{caseItem.court}</td>
                       <td className="px-4 py-2">{caseItem.status}</td>
                       <td className="px-4 py-2">
-                        {caseItem.next_date
-                          ? new Date(caseItem.next_date).toLocaleDateString()
+                        {caseItem.nextDate
+                          ? new Date(caseItem.nextDate).toLocaleDateString()
                           : "None"}
                       </td>
                       <td className="px-4 py-2">
                         <Link href={`/admin/dashboard/cases/${caseItem.id}`}>
-                          <Button className="button-link" size="sm" variant="outline">
+                          <Button className="button-link" size="sm" variant="default">
                             View
                           </Button>
                         </Link>
@@ -219,5 +300,5 @@ export default function OffenderDetailPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

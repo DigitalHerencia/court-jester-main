@@ -1,6 +1,6 @@
 import { query } from "./db/db"
 
-interface OffenderProfile {
+export interface OffenderProfile {
   inmateNumber: string
   lastName: string
   firstName: string
@@ -25,7 +25,7 @@ interface OffenderProfile {
 
 export async function parseOffenderProfile(
   text: string,
-): Promise<{ success: boolean; offenderId?: number; error?: any }> {
+): Promise<{ success: boolean; offenderId?: number; error?: unknown }> {
   try {
     // This is a simplified parser for demonstration purposes
 
@@ -73,11 +73,11 @@ export async function parseOffenderProfile(
     // Check if offender already exists
     const existingOffender = await query("SELECT id FROM offenders WHERE inmate_number = $1", [inmateNumber])
 
-    let offenderId
+    let offenderId: number | undefined
 
     if (existingOffender && existingOffender.rowCount !== null && existingOffender.rowCount > 0) {
       // Update existing offender
-      offenderId = existingOffender.rows[0].id
+      offenderId = Number(existingOffender.rows[0].id)
 
       await query(
         `UPDATE offenders SET 

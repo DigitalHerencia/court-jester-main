@@ -1,38 +1,40 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { query } from "@/lib/db/db"
 import { verifyToken } from "@/lib/auth"
+import { query } from "@/lib/db/db"
 
 export async function GET(request: NextRequest) {
   try {
     // Verify admin authorization
     const token = request.cookies.get("token")?.value
     const session = await verifyToken(token)
-
+    
     if (!session || session.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
+    
     // Get query parameters
     const searchParams = request.nextUrl.searchParams
     const search = searchParams.get("search") || ""
-    const limit = Number.parseInt(searchParams.get("limit") || "50")
-    const offset = Number.parseInt(searchParams.get("offset") || "0")
-
+    const limit = Number.parseInt(searchParams.get("limit") || "50", 10)
+    const offset = Number.parseInt(searchParams.get("offset") || "0", 10)
+    
     // Build query based on search parameter
     let sql = `
       SELECT 
         id, 
         inmate_number, 
-        last_name, 
         first_name, 
+        last_name,
+        middle_name,
         status, 
-        facility, 
+        facility,
+        custody_status,
         created_at
       FROM offenders
     `
-
+    
     const queryParams: any[] = []
-
+    
     if (search) {
       sql += `
         WHERE 
@@ -43,28 +45,31 @@ export async function GET(request: NextRequest) {
       `
       queryParams.push(`%${search}%`)
     }
-
+    
     sql += ` ORDER BY created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`
     queryParams.push(limit, offset)
-
+    
     // Execute query
     const result = await query(sql, queryParams)
-
+    
     // Get total count for pagination
     const countResult = await query(
-      `SELECT COUNT(*) FROM offenders ${search ? "WHERE inmate_number ILIKE $1 OR last_name ILIKE $1 OR first_name ILIKE $1 OR facility ILIKE $1" : ""}`,
-      search ? [`%${search}%`] : [],
+      `SELECT COUNT(*) FROM offenders ${
+        search
+          ? "WHERE inmate_number ILIKE $1 OR last_name ILIKE $1 OR first_name ILIKE $1 OR facility ILIKE $1"
+          : ""
+      }`,
+      search ? [`%${search}%`] : []
     )
-
-    const total = Number.parseInt(countResult.rows[0].count)
-
+    
+    const total = Number.parseInt(String(countResult.rows[0].count))
+    
     return NextResponse.json({
       offenders: result.rows,
       pagination: {
         total,
         limit,
         offset,
-        hasMore: offset + limit < total,
       },
     })
   } catch (error) {
@@ -78,94 +83,104 @@ export async function POST(request: NextRequest) {
     // Verify admin authorization
     const token = request.cookies.get("token")?.value
     const session = await verifyToken(token)
-
+    
     if (!session || session.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
-    // Parse request body
+    
     const body = await request.json()
+    const offender = body.offender
 
     // Validate required fields
-    const { inmate_number, first_name, last_name, status } = body
-
-    if (!inmate_number || !first_name || !last_name || !status) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    const requiredFields = ["inmateNumber", "firstName", "lastName", "status", "custodyStatus"]
+    const missingFields = requiredFields.filter(field => !offender[field]?.trim())
+    
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { error: `Missing required fields: ${missingFields.join(", ")}` },
+        { status: 400 }
+      )
     }
 
-    // Check if offender already exists
-    const existingOffender = await query("SELECT id FROM offenders WHERE inmate_number = $1", [inmate_number])
-
+    // Check if offender with this inmate number already exists
+    const existingOffender = await query(
+      "SELECT id FROM offenders WHERE inmate_number = $1",
+      [offender.inmateNumber]
+    )
+    
     if ((existingOffender.rowCount ?? 0) > 0) {
-      return NextResponse.json({ error: "Offender with this inmate number already exists" }, { status: 409 })
+      return NextResponse.json(
+        { error: "Offender with this inmate number already exists" },
+        { status: 409 }
+      )
     }
-
+    
     // Insert new offender
     const result = await query(
       `
-        INSERT INTO offenders (
-          inmate_number, 
-          first_name, 
-          last_name, 
-          middle_name, 
-          status, 
-          facility, 
-          age, 
-          height, 
-          weight, 
-          eye_color, 
-          hair, 
-          ethnicity, 
-          notes,
-          created_at,
-          updated_at
-        ) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
-        RETURNING id
-      `,
-      [
+      INSERT INTO offenders (
         inmate_number,
+        nmcd_number,
         first_name,
         last_name,
-        body.middle_name || null,
+        middle_name,
         status,
-        body.facility || null,
-        body.age || null,
-        body.height || null,
-        body.weight || null,
-        body.eye_color || null,
-        body.hair || null,
-        body.ethnicity || null,
-        body.notes || null,
-      ],
-    )
-
-    const newOffenderId = result.rows[0].id
-
-    // Create notification for new offender registration
-    await query(
-      `
-        INSERT INTO notifications (
-          type,
-          message,
-          read,
-          created_at
-        )
-        VALUES ($1, $2, $3, NOW())
+        facility,
+        age,
+        height,
+        weight,
+        eye_color,
+        hair,
+        religion,
+        education,
+        complexion,
+        ethnicity,
+        alias,
+        mugshot_url,
+        account_enabled,
+        profile_enabled,
+        custody_status,
+        created_at,
+        updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, NOW(), NOW())
+      RETURNING id
       `,
-      ["new_registration", `New offender registration: ${last_name}, ${first_name} (${inmate_number})`, false],
+      [
+        offender.inmateNumber,
+        offender.nmcdNumber || null,
+        offender.firstName,
+        offender.lastName,
+        offender.middleName || null,
+        offender.status,
+        offender.facility || null,
+        offender.age ? parseInt(offender.age) : null,
+        offender.height || null,
+        offender.weight ? parseInt(offender.weight) : null,
+        offender.eyeColor || null,
+        offender.hair || null,
+        offender.religion || null,
+        offender.education || null,
+        offender.complexion || null,
+        offender.ethnicity || null,
+        offender.alias || null,
+        offender.mugshotUrl || null,
+        offender.accountEnabled,
+        offender.profileEnabled,
+        offender.custodyStatus,
+      ]
     )
-
+    
+    const newOffenderId = result.rows[0].id
+    
     return NextResponse.json(
       {
         id: newOffenderId,
-        message: "Offender created successfully",
+        message: "Offender created successfully"
       },
-      { status: 201 },
+      { status: 201 }
     )
   } catch (error) {
     console.error("Error creating offender:", error)
     return NextResponse.json({ error: "Failed to create offender" }, { status: 500 })
   }
 }
-

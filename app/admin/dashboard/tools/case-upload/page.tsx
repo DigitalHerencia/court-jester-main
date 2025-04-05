@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, type ReactNode } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -19,10 +19,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { FileUp, AlertCircle, CheckCircle2, File } from "lucide-react"
 import { toast } from "sonner"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface CaseItem {
-  offender_name: ReactNode
-  status: ReactNode
+  offender_name: React.ReactNode
+  status: React.ReactNode
   next_hearing: Date | null 
   id: number
   case_number: string
@@ -41,96 +42,221 @@ interface RecentUpload {
   filename: string
   timestamp: string
   status: "success" | "error"
+  caseNumber?: string
+}
+
+interface ParsedCase {
+  case_number: string;
+  court: string;
+  judge: string | null;
+  filing_date: string | null;
+  charges: Array<{
+    description: string;
+    statute: string;
+    class: string;
+    citation: string | null;
+  }>;
+  hearings: Array<{
+    date: string;
+    time: string;
+    type: string;
+    location: string;
+  }>;
+}
+
+interface UploadWarnings {
+  message: string;
+  details?: string[];
+  level: "info" | "warning";
 }
 
 export default function CaseUploadPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
-  const [recentUploads, setRecentUploads] = useState<RecentUpload[]>([])
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedOffenderId, setSelectedOffenderId] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
+  const [recentUploads, setRecentUploads] = useState<RecentUpload[]>([]);
+  const [offenders, setOffenders] = useState<Array<{ id: number; name: string }>>(
+    []
+  );
+  const [parsedCase, setParsedCase] = useState<ParsedCase | null>(null);
+  const [warnings, setWarnings] = useState<UploadWarnings[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null
-    setSelectedFile(file)
-    setUploadResult(null)
+  interface Offender {
+    id: number;
+    first_name: string;
+    last_name: string;
   }
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      toast.error("Please select a file to upload")
-      return
+  useEffect(() => {
+    fetch("/api/admin/offenders")
+      .then((res) => res.json())
+      .then((data) => {
+        setOffenders(
+          data.offenders.map((o: Offender) => ({
+            id: o.id,
+            name: `${o.last_name}, ${o.first_name}`,
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching offenders:", error);
+        toast.error("Failed to load offenders list");
+      });
+  }, []);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFile(null);
+      setParsedCase(null);
+      setUploadResult(null);
+      return;
     }
 
-    setIsUploading(true)
-    setUploadProgress(0)
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      toast.error("Only PDF files are supported");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
 
-    // Simulate progress tracking
+    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setSelectedFile(file);
+    setParsedCase(null);
+    setUploadResult(null);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !selectedOffenderId) {
+      toast.error("Please select both a file and an offender");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    setParsedCase(null);
+    setWarnings([]);
+
     const progressInterval = setInterval(() => {
       setUploadProgress((prev) => {
-        const newProgress = prev + 5
-        return newProgress >= 90 ? 90 : newProgress
-      })
-    }, 300)
+        const newProgress = prev + 5;
+        return newProgress >= 90 ? 90 : newProgress;
+      });
+    }, 300);
 
     try {
-      // Create form data
-      const formData = new FormData()
-      formData.append("caseFile", selectedFile)
+      const formData = new FormData();
+      formData.append("caseFile", selectedFile);
+      formData.append("offenderId", selectedOffenderId);
 
-      // Upload the file to the API
-      const response = await fetch("/api/admin/cases", {
+      const response = await fetch("/api/admin/cases/upload", {
         method: "POST",
         body: formData,
-      })
+      });
 
-      clearInterval(progressInterval)
-      setUploadProgress(100)
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
+        setParsedCase(result.case);
         setUploadResult({
           success: true,
-          message: "Case file uploaded successfully",
-          details: `The system extracted ${result.cases?.length || 0} cases and created corresponding records.`,
-          cases: result.cases,
-        })
+          message: "Case file uploaded and processed successfully",
+          details: `Case #${result.case.case_number} has been created with ${
+            result.case.charges?.length || 0
+          } charges and ${result.case.hearings?.length || 0} hearings.`,
+        });
 
-        // Add to recent uploads (limit to 5 most recent)
+        // Add any warnings from the processing
+        if (result.warnings?.length > 0) {
+          setWarnings([
+            {
+              message: "The following issues were found but did not prevent processing:",
+              details: result.warnings,
+              level: "warning"
+            }
+          ])
+        }
+
+        // Add to recent uploads
         setRecentUploads((prev) => [
           {
             id: Date.now().toString(),
             filename: selectedFile.name,
             timestamp: new Date().toISOString(),
             status: "success",
+            caseNumber: result.case.case_number,
           },
           ...prev.slice(0, 4),
-        ])
+        ]);
 
         // Clear file selection
-        setSelectedFile(null)
+        setSelectedFile(null);
         if (fileInputRef.current) {
-          fileInputRef.current.value = ""
+          fileInputRef.current.value = "";
         }
 
-        toast.success("Case file uploaded successfully")
+        // Create a notification for the offender
+        try {
+          await fetch(`/api/admin/notifications`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: selectedOffenderId,
+              type: "case_created",
+              message: `A new case (${result.case.case_number}) has been added to your account.`,
+              data: {
+                caseId: result.case.id,
+                caseNumber: result.case.case_number,
+              },
+            }),
+          });
+        } catch (notificationError) {
+          console.error("Failed to create notification:", notificationError);
+          // Don't fail the upload if notification creation fails
+        }
+
+        toast.success("Case file processed successfully");
       } else {
-        throw new Error(result.error || "Failed to upload case file")
+        throw new Error(result.error || "Failed to process case file");
       }
     } catch (error: unknown) {
-      clearInterval(progressInterval)
-      setUploadProgress(0)
+      clearInterval(progressInterval);
+      setUploadProgress(0);
       setUploadResult({
         success: false,
-        message: "Failed to upload case file",
-        details:
-          (error as Error).message ||
-          "There was an error processing your file. Please check the format and try again.",
-      })
+        message: "Failed to process case file",
+        details: (error as Error).message || "There was an error processing your file.",
+      });
 
-      // Add to recent uploads
+      if (error instanceof Error && error.message.includes("Invalid case file content")) {
+        // Add validation errors as warnings
+        setWarnings([
+          {
+            message: "The following validation errors were found:",
+            details: error.message.split(". "),
+            level: "warning"
+          }
+        ])
+      }
+
       setRecentUploads((prev) => [
         {
           id: Date.now().toString(),
@@ -139,23 +265,17 @@ export default function CaseUploadPage() {
           status: "error",
         },
         ...prev.slice(0, 4),
-      ])
+      ]);
 
-      toast.error("Failed to upload case file")
+      toast.error("Failed to process case file");
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString()
-  }
+  };
 
   return (
     <div className="card-secondary space-y-6 p-4">
-      <h1 className="font-kings text-3xl text-background mb-6">
-        Case Upload Tool
-      </h1>
+      <h1 className="font-kings text-3xl text-background mb-6">Case Upload Tool</h1>
 
       <Tabs className="w-full" defaultValue="upload">
         <TabsList className="mb-4">
@@ -171,15 +291,36 @@ export default function CaseUploadPage() {
           <div className="grid gap-6 md:grid-cols-2">
             <Card className="card-content">
               <CardHeader>
-                <CardTitle className="font-kings text-background">
+                <CardTitle className="font-kings text-foreground">
                   Upload Case File
                 </CardTitle>
-                <CardDescription className="text-background">
+                <CardDescription className="text-foreground">
                   Upload a PDF case file to extract and create case records.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-background" htmlFor="offender">
+                      Select Offender
+                    </Label>
+                    <Select
+                      value={selectedOffenderId}
+                      onValueChange={setSelectedOffenderId}
+                    >
+                      <SelectTrigger className="bg-background text-foreground">
+                        <SelectValue placeholder="Select an offender..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background text-foreground">
+                        {offenders.map((offender) => (
+                          <SelectItem key={offender.id} value={String(offender.id)}>
+                            {offender.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="space-y-2">
                     <Label className="text-background" htmlFor="caseFile">
                       Case File (PDF)
@@ -201,7 +342,7 @@ export default function CaseUploadPage() {
                   {isUploading && (
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm text-background">
-                        <span>Uploading...</span>
+                        <span>Processing...</span>
                         <span>{Math.round(uploadProgress)}%</span>
                       </div>
                       <Progress value={uploadProgress} />
@@ -225,26 +366,90 @@ export default function CaseUploadPage() {
                       )}
                     </Alert>
                   )}
+
+                  {warnings.length > 0 && (
+                    <div className="space-y-2">
+                      {warnings.map((warning, index) => (
+                        <Alert
+                          key={index}
+                          variant={warning.level === "warning" ? "destructive" : "default"}
+                        >
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertTitle>{warning.message}</AlertTitle>
+                          {warning.details && (
+                            <AlertDescription>
+                              <ul className="list-disc pl-4 mt-2">
+                                {warning.details.map((detail, i) => (
+                                  <li key={i}>{detail}</li>
+                                ))}
+                              </ul>
+                            </AlertDescription>
+                          )}
+                        </Alert>
+                      ))}
+                    </div>
+                  )}
+
+                  {parsedCase && (
+                    <div className="mt-4 space-y-4 border rounded-md p-4">
+                      <h3 className="font-medium text-background">Parsed Case Details:</h3>
+                      <div className="space-y-2 text-sm">
+                        <p><strong>Case Number:</strong> {parsedCase.case_number}</p>
+                        <p><strong>Court:</strong> {parsedCase.court}</p>
+                        {parsedCase.judge && (
+                          <p><strong>Judge:</strong> {parsedCase.judge}</p>
+                        )}
+                        {parsedCase.filing_date && (
+                          <p><strong>Filing Date:</strong> {new Date(parsedCase.filing_date).toLocaleDateString()}</p>
+                        )}
+                        <div className="mt-2">
+                          <p><strong>Charges ({parsedCase.charges.length}):</strong></p>
+                          <ul className="list-disc pl-4 mt-1">
+                            {parsedCase.charges.map((charge, i) => (
+                              <li key={i}>
+                                {charge.description} ({charge.statute})
+                                {charge.class && ` - ${charge.class}`}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        {parsedCase.hearings.length > 0 && (
+                          <div className="mt-2">
+                            <p><strong>Hearings ({parsedCase.hearings.length}):</strong></p>
+                            <ul className="list-disc pl-4 mt-1">
+                              {parsedCase.hearings.map((hearing, i) => (
+                                <li key={i}>
+                                  {new Date(hearing.date).toLocaleDateString()} at {hearing.time}
+                                  {hearing.type && ` - ${hearing.type}`}
+                                  {hearing.location && ` (${hearing.location})`}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter>
                 <Button
                   className="w-full button-link"
-                  disabled={!selectedFile || isUploading}
+                  disabled={!selectedFile || !selectedOffenderId || isUploading}
                   onClick={handleUpload}
                 >
                   <FileUp className="mr-2 h-4 w-4" />
-                  {isUploading ? "Uploading..." : "Upload Case File"}
+                  {isUploading ? "Processing..." : "Upload Case File"}
                 </Button>
               </CardFooter>
             </Card>
 
             <Card className="card-content">
               <CardHeader>
-                <CardTitle className="font-kings text-background">
+                <CardTitle className="font-kings text-foreground">
                   Recent Uploads
                 </CardTitle>
-                <CardDescription className="text-background">
+                <CardDescription className="text-foreground">
                   Your 5 most recent case file uploads
                 </CardDescription>
               </CardHeader>
@@ -258,16 +463,23 @@ export default function CaseUploadPage() {
                     {recentUploads.map((upload) => (
                       <div
                         key={upload.id}
-                        className="flex items-start gap-3 p-3 rounded-md border card-content"
+                        className="flex items-center justify-between gap-3 p-3 rounded-md border card-content"
                       >
-                        <File className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate text-background">
-                            {upload.filename}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatDate(upload.timestamp)}
-                          </p>
+                        <div className="flex items-start gap-3">
+                          <File className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate text-background">
+                              {upload.filename}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(upload.timestamp).toLocaleString()}
+                            </p>
+                            {upload.caseNumber && (
+                              <p className="text-sm text-muted-foreground">
+                                Case Number: {upload.caseNumber}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <div
                           className={`text-xs px-2 py-1 rounded-full ${
@@ -298,7 +510,7 @@ export default function CaseUploadPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground">
                 <p>Upload history will be available in a future update.</p>
               </div>
             </CardContent>
@@ -306,5 +518,5 @@ export default function CaseUploadPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

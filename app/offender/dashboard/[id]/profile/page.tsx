@@ -1,87 +1,104 @@
-"use client"
+"use client";
 
-import { useParams } from "next/navigation"
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { useParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 interface Offender {
-  id: number
-  inmate_number: string
-  nmcd_number: string | null
-  first_name: string
-  last_name: string
-  middle_name?: string
-  status: string
-  custody_status: string
-  account_enabled: boolean
-  profile_enabled: boolean
-  facility?: string
-  age?: number
-  gender: string
-  race: string
-  ethnicity: string
-  mugshot_url?: string
+  id: number;
+  inmate_number: string;
+  nmcd_number: string | null;
+  last_name: string;
+  first_name: string;
+  middle_name?: string;
+  status: string;
+  facility?: string;
+  age?: number;
+  height?: string;
+  weight?: number;
+  eye_color?: string;
+  hair?: string;
+  religion?: string;
+  education?: string;
+  complexion?: string;
+  ethnicity?: string;
+  alias?: string;
+  mugshot_url?: string;
+  account_enabled: boolean;
+  profile_enabled: boolean;
+  custody_status: string;
 }
 
 export default function OffenderProfilePage() {
-  const { id } = useParams<{ id: string }>() // id is the inmate number (e.g. "468079")
-  const [offender, setOffender] = useState<Offender | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // id is the inmate number (e.g. "468079")
+  const { id } = useParams<{ id: string }>();
+  const [offender, setOffender] = useState<Offender | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
     async function fetchOffenderData() {
       try {
         // Include credentials so the HTTP‑only token cookie is sent
-        const res = await fetch(`/api/offenders/${id}/profile`, { credentials: "include" })
+        const res = await fetch(`/api/offenders/${id}/profile`, {
+          credentials: "include",
+        });
         if (!res.ok) {
-          const err = await res.json()
-          throw new Error(err.error || "Failed to fetch offender profile data")
+          const err = await res.json();
+          throw new Error(err.error || "Failed to fetch offender profile data");
         }
         // API returns the offender object directly.
-        const data: Offender = await res.json()
-        setOffender(data)
+        const data: Offender = await res.json();
+        setOffender(data);
       } catch (err: unknown) {
-        console.error("Error fetching offender profile data:", err)
-        setError((err as Error).message)
+        console.error("Error fetching offender profile data:", err);
+        setError((err as Error).message);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
-    fetchOffenderData()
-  }, [id])
+    fetchOffenderData();
+  }, [id]);
 
   const handlePrintProfile = () => {
-    window.print()
-    toast.success("Printing profile...")
-  }
+    window.print();
+    toast.success("Printing profile...");
+  };
 
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 text-2xl font-bold font-kings text-background">Loading profile...</div>
-          <div className="text-foreground/60">Please wait while we fetch your profile data.</div>
+          <div className="mb-4 text-2xl font-bold font-kings text-background">
+            Loading profile...
+          </div>
+          <div className="text-foreground/60">
+            Please wait while we fetch your profile data.
+          </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !offender) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 text-2xl font-bold text-destructive font-kings">Error</div>
-          <div className="mb-4 text-foreground/60">{error || "Failed to load profile data"}</div>
+          <div className="mb-4 text-2xl font-bold text-destructive font-kings">
+            Error
+          </div>
+          <div className="mb-4 text-foreground/60">
+            {error || "Failed to load profile data"}
+          </div>
           <Button className="button-link" onClick={() => window.location.reload()}>
             Try Again
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -121,7 +138,9 @@ export default function OffenderProfilePage() {
         </div>
         {/* Additional Information */}
         <div className="card-content p-4">
-          <h2 className="text-xl font-semibold font-kings text-foreground">Additional Information</h2>
+          <h2 className="text-xl font-semibold font-kings text-foreground">
+            Additional Information
+          </h2>
           <p>
             <strong>Status:</strong> {offender.status}
           </p>
@@ -131,20 +150,58 @@ export default function OffenderProfilePage() {
           <p>
             <strong>Age:</strong> {offender.age ?? "N/A"}
           </p>
+          {offender.height && (
+            <p>
+              <strong>Height:</strong> {offender.height}
+            </p>
+          )}
+          {typeof offender.weight === "number" && (
+            <p>
+              <strong>Weight:</strong> {offender.weight}
+            </p>
+          )}
+          {offender.eye_color && (
+            <p>
+              <strong>Eye Color:</strong> {offender.eye_color}
+            </p>
+          )}
+          {offender.hair && (
+            <p>
+              <strong>Hair:</strong> {offender.hair}
+            </p>
+          )}
+          {offender.religion && (
+            <p>
+              <strong>Religion:</strong> {offender.religion}
+            </p>
+          )}
+          {offender.education && (
+            <p>
+              <strong>Education:</strong> {offender.education}
+            </p>
+          )}
+          {offender.complexion && (
+            <p>
+              <strong>Complexion:</strong> {offender.complexion}
+            </p>
+          )}
           <p>
-            <strong>Gender:</strong> {offender.gender}
+            <strong>Ethnicity:</strong> {offender.ethnicity || "N/A"}
           </p>
-          <p>
-            <strong>Race:</strong> {offender.race}
-          </p>
-          <p>
-            <strong>Ethnicity:</strong> {offender.ethnicity}
-          </p>
+          {offender.alias && (
+            <p>
+              <strong>Alias:</strong> {offender.alias}
+            </p>
+          )}
         </div>
       </div>
-      <Button className="font-kings button-link" variant="outline" onClick={handlePrintProfile}>
+      <Button
+        className="font-kings button-link"
+        variant="outline"
+        onClick={handlePrintProfile}
+      >
         Print Profile
       </Button>
     </div>
-  )
+  );
 }

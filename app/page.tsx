@@ -94,7 +94,7 @@ export default function LoginPage() {
           </div>
 
           <Button
-            className="w-full bg-foreground text-background hover:bg-background hover:text-foreground"
+            className="w-full p-4 bg-foreground text-background hover:bg-background hover:text-foreground"
             disabled={isSubmitting}
             type="submit"
           >
