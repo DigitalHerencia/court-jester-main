@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
-import  {query}  from "@/lib/db/db";
+import { query } from "@/lib/db/db";
 import { parseCasePdf } from "@/lib/pdf-parser";
 import { type ParsedCase } from "@/app/admin/dashboard/tools/case-upload/page";
 
@@ -17,8 +17,8 @@ interface UploadResponse {
 }
 
 async function insertCaseData(
-  db: { query: typeof query }, 
-  offenderId: string, 
+  db: { query: typeof query },
+  offenderId: string,
   parsedCase: ParsedCase
 ): Promise<void> {
   // Insert main case record
@@ -142,9 +142,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<UploadRes
       );
     }
 
-    // Parse PDF file
+    // Parse PDF file as an ArrayBuffer
     const pdfData = await file.arrayBuffer();
-    const result = await parseCasePdf(pdfData);
+    // Pass the offenderId as the second parameter (converted to a number)
+    const result = await parseCasePdf(pdfData, parseInt(offenderId));
 
     if (!result.success || !result.case) {
       return NextResponse.json(
