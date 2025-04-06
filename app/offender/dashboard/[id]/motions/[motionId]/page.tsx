@@ -140,7 +140,7 @@ export default function OffenderMotionDetailsPage() {
             <CardTitle className="font-kings text-background text-xl">
               {motion.title}
             </CardTitle>
-            <Badge variant={motion.status === "approved" ? "default" : "outline"}>
+            <Badge variant={motion.status === "approved" ? "secondary" : "outline"}>
               {motion.status.charAt(0).toUpperCase() + motion.status.slice(1)}
             </Badge>
           </div>

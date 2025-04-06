@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress"
 import { FileUp, AlertCircle, CheckCircle2, File } from "lucide-react"
 import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { ParsedCaseData } from "@/lib/case-parser"
 
 interface CaseItem {
   offender_name: string
@@ -43,41 +44,6 @@ interface RecentUpload {
   caseNumber?: string
 }
 
-export interface ParsedCase {
-  case_number: string;
-  judge: string;
-  filing_date: string;
-  court: string;
-  case_type: string;
-  plaintiff: string;
-  defendant: string;
-  charges: Array<{
-    count_number: number;
-    statute: string;
-    description: string;
-    class: string;
-    charge_date: string;
-    citation_number: string;
-    plea: string;
-    disposition: string;
-    disposition_date: string;
-  }>;
-  hearings: Array<{
-    hearing_date: string;
-    hearing_time: string;
-    hearing_type: string;
-    hearing_judge: string;
-    court: string;
-    court_room: string;
-  }>;
-  motions: Array<{
-    filing_date: string;
-    title: string;
-    content: string;
-    status: string;
-  }>;
-}
-
 interface UploadWarnings {
   message: string;
   details?: string[];
@@ -92,7 +58,7 @@ export default function CaseUploadPage() {
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [recentUploads, setRecentUploads] = useState<RecentUpload[]>([]);
   const [offenders, setOffenders] = useState<Array<{ id: number; name: string }>>([]);
-  const [parsedCase, setParsedCase] = useState<ParsedCase | null>(null);
+  const [parsedCase, setParsedCase] = useState<ParsedCaseData | null>(null);
   const [warnings, setWarnings] = useState<UploadWarnings[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -128,8 +94,8 @@ export default function CaseUploadPage() {
       return;
     }
 
-    if (file.type !== "application/pdf") {
-      toast.error("Only PDF files are supported");
+    if (file.type !== "text/csv") {
+      toast.error("Only CSV files are supported");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -183,11 +149,11 @@ export default function CaseUploadPage() {
       const result = await response.json();
 
       if (response.ok) {
-        setParsedCase(result.case);
+        setParsedCase(result.caseData);
         setUploadResult({
           success: true,
           message: "Case file uploaded and processed successfully",
-          details: `Case #${result.case.case_number} has been created with ${result.case.charges?.length || 0} charges and ${result.case.hearings?.length || 0} hearings.`,
+          details: `Case #${result.caseData.caseDetail.case_number} has been created with ${result.caseData.charges?.length || 0} charges and ${result.caseData.hearings?.length || 0} hearings.`,
         });
 
         if (result.warnings?.length > 0) {
@@ -206,7 +172,7 @@ export default function CaseUploadPage() {
             filename: selectedFile.name,
             timestamp: new Date().toISOString(),
             status: "success",
-            caseNumber: result.case.case_number,
+            caseNumber: result.caseData.caseDetail.case_number,
           },
           ...prev.slice(0, 4),
         ]);
@@ -225,10 +191,9 @@ export default function CaseUploadPage() {
             body: JSON.stringify({
               userId: selectedOffenderId,
               type: "case_created",
-              message: `A new case (${result.case.case_number}) has been added to your account.`,
+              message: `A new case (${result.caseData.caseDetail.case_number}) has been added to your account.`,
               data: {
-                caseId: result.case.id,
-                caseNumber: result.case.case_number,
+                caseNumber: result.caseData.caseDetail.case_number,
               },
             }),
           });
@@ -297,7 +262,7 @@ export default function CaseUploadPage() {
                   Upload Case File
                 </CardTitle>
                 <CardDescription className="text-foreground">
-                  Upload a PDF case file to extract and create case records.
+                  Upload a CSV case file to extract and create case records.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -325,11 +290,11 @@ export default function CaseUploadPage() {
 
                   <div className="space-y-2">
                     <Label className="text-background" htmlFor="caseFile">
-                      Case File (PDF)
+                      Case File (CSV)
                     </Label>
                     <Input
                       ref={fileInputRef}
-                      accept=".pdf"
+                      accept=".csv"
                       className="bg-background text-foreground"
                       disabled={isUploading}
                       id="caseFile"
@@ -337,7 +302,7 @@ export default function CaseUploadPage() {
                       onChange={handleFileChange}
                     />
                     <p className="text-sm text-muted-foreground">
-                      Accepted format: PDF. Maximum size: 10MB.
+                      Accepted format: CSV. Maximum size: 10MB.
                     </p>
                   </div>
 
@@ -396,16 +361,16 @@ export default function CaseUploadPage() {
                     <div className="mt-4 space-y-4 border rounded-md p-4">
                       <h3 className="font-medium text-background">Parsed Case Details:</h3>
                       <div className="space-y-2 text-sm">
-                        <p><strong>Case Number:</strong> {parsedCase.case_number}</p>
-                        <p><strong>Court:</strong> {parsedCase.court}</p>
-                        <p><strong>Judge:</strong> {parsedCase.judge || 'Not assigned'}</p>
-                        <p><strong>Filing Date:</strong> {new Date(parsedCase.filing_date).toLocaleDateString()}</p>
-                        <p><strong>Case Type:</strong> {parsedCase.case_type}</p>
-                        {parsedCase.plaintiff && (
-                          <p><strong>Plaintiff:</strong> {parsedCase.plaintiff}</p>
+                        <p><strong>Case Number:</strong> {parsedCase.caseDetail.case_number}</p>
+                        <p><strong>Court:</strong> {parsedCase.caseDetail.court}</p>
+                        <p><strong>Judge:</strong> {parsedCase.caseDetail.judge || 'Not assigned'}</p>
+                        <p><strong>Filing Date:</strong> {parsedCase.caseDetail.filing_date instanceof Date ? parsedCase.caseDetail.filing_date.toLocaleDateString() : 'Invalid date'}</p>
+                        <p><strong>Case Type:</strong> {parsedCase.caseDetail.case_type}</p>
+                        {parsedCase.caseDetail.plaintiff && (
+                          <p><strong>Plaintiff:</strong> {parsedCase.caseDetail.plaintiff}</p>
                         )}
-                        {parsedCase.defendant && (
-                          <p><strong>Defendant:</strong> {parsedCase.defendant}</p>
+                        {parsedCase.caseDetail.defendant && (
+                          <p><strong>Defendant:</strong> {parsedCase.caseDetail.defendant}</p>
                         )}
                         <div className="mt-2">
                           <p><strong>Charges ({parsedCase.charges.length}):</strong></p>
@@ -433,11 +398,11 @@ export default function CaseUploadPage() {
                             </ul>
                           </div>
                         )}
-                        {parsedCase.motions.length > 0 && (
+                        {parsedCase.motionFilings.length > 0 && (
                           <div className="mt-2">
-                            <p><strong>Motions ({parsedCase.motions.length}):</strong></p>
+                            <p><strong>Motions ({parsedCase.motionFilings.length}):</strong></p>
                             <ul className="list-disc pl-4 mt-1">
-                              {parsedCase.motions.map((motion, i) => (
+                              {parsedCase.motionFilings.map((motion, i) => (
                                 <li key={i}>
                                   {new Date(motion.filing_date).toLocaleDateString()} - {motion.title}
                                   {motion.status && ` (${motion.status})`}

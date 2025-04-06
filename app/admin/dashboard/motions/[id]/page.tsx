@@ -132,7 +132,7 @@ export default function MotionDetailsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl">{template.title}</CardTitle>
-            <Badge variant={template.status === "approved" ? "default" : "outline"}>
+            <Badge variant={template.status === "approved" ? "success" : "outline"}>
               {template.status.charAt(0).toUpperCase() + template.status.slice(1)}
             </Badge>
           </div>

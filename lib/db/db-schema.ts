@@ -14,7 +14,7 @@ CREATE TABLE offenders (
   last_name VARCHAR(100) NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   middle_name VARCHAR(100),
-  status VARCHAR(20) NOT NULL,
+  status VARCHAR(50) NOT NULL,
   facility VARCHAR(100),
   age INTEGER,
   height VARCHAR(50),
@@ -36,7 +36,7 @@ CREATE TABLE offenders (
 
 CREATE TABLE cases (
   id SERIAL PRIMARY KEY,
-  case_number VARCHAR(50) UNIQUE NOT NULL,
+  case_number VARCHAR(100) UNIQUE NOT NULL,
   court VARCHAR(100) NOT NULL,
   judge VARCHAR(100),
   filing_date DATE,
@@ -44,7 +44,7 @@ CREATE TABLE cases (
   case_type VARCHAR(50),
   plaintiff VARCHAR(100),
   defendant VARCHAR(100),
-  status VARCHAR(20) NOT NULL,
+  status VARCHAR(50) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   next_date TIMESTAMP
@@ -53,28 +53,31 @@ CREATE TABLE cases (
 CREATE TABLE charges (
   id SERIAL PRIMARY KEY,
   case_id INTEGER REFERENCES cases(id) ON DELETE CASCADE,
-  count_number INTEGER,
-  statute VARCHAR(100),
-  description TEXT,
-  class VARCHAR(20),
-  charge_date DATE,
-  citation_number VARCHAR(50),
-  plea VARCHAR(50),
+  count_number INTEGER NOT NULL DEFAULT 1,
+  statute VARCHAR(100) NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  class VARCHAR(50),
+  charge_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  citation_number VARCHAR(50) NOT NULL DEFAULT '',
+  plea VARCHAR(50) NOT NULL DEFAULT 'Not Entered',
   disposition VARCHAR(100),
   disposition_date DATE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE hearings (
   id SERIAL PRIMARY KEY,
   case_id INTEGER REFERENCES cases(id) ON DELETE CASCADE,
-  hearing_date DATE,
-  hearing_time VARCHAR(20),
-  hearing_type VARCHAR(50),
+  hearing_date DATE NOT NULL,
+  hearing_time VARCHAR(50) NOT NULL DEFAULT '00:00',
+  hearing_type VARCHAR(50) NOT NULL DEFAULT 'Status',
   hearing_judge VARCHAR(100),
-  court VARCHAR(100),
+  court VARCHAR(100) NOT NULL,
   court_room VARCHAR(100),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(50) NOT NULL DEFAULT 'Scheduled'
 );
 
 CREATE TABLE login_activity (

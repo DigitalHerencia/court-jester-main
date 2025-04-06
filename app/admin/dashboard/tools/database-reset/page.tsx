@@ -5,17 +5,29 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 
 interface TableStat {
   table_name: string
   column_count: number
   size_bytes: number
+  size_formatted: string
   row_count: number
+  description: string | null
+  last_activity: string
+}
+
+interface DatabaseMetadata {
+  version: string
+  database: string
+  user: string
+  timezone: string
 }
 
 export default function DatabaseDashboardPage() {
   const [connectionStatus, setConnectionStatus] = useState<string>("Loading...")
   const [tables, setTables] = useState<TableStat[]>([])
+  const [metadata, setMetadata] = useState<DatabaseMetadata | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [resetConfirmation, setResetConfirmation] = useState("")
   const [isResetting, setIsResetting] = useState(false)
@@ -24,19 +36,26 @@ export default function DatabaseDashboardPage() {
     async function fetchDatabaseInfo() {
       setIsLoading(true)
       try {
-        // Fetch connection status
+        // Fetch connection status and metadata
         const connRes = await fetch("/api/admin/database/connection", {
           credentials: "include",
         })
         const connData = await connRes.json()
-        setConnectionStatus(connData.connected ? "Connected" : "Not connected")
+        if (connData.success) {
+          setConnectionStatus("Connected")
+          setMetadata(connData.metadata)
+        } else {
+          setConnectionStatus("Not connected")
+        }
 
         // Fetch table statistics
         const tablesRes = await fetch("/api/admin/database/tables", {
           credentials: "include",
         })
         const tablesData = await tablesRes.json()
-        setTables(tablesData.tables || [])
+        if (tablesData.success) {
+          setTables(tablesData.tables || [])
+        }
       } catch (error) {
         console.error("Error fetching database info:", error)
         toast.error("Failed to fetch database information")
@@ -66,7 +85,8 @@ export default function DatabaseDashboardPage() {
         throw new Error(data.error || "Failed to reset database")
       }
       toast.success("Database reset successfully")
-      // Optionally, refetch the database info after reset
+      // Refetch database info after reset
+      window.location.reload()
     } catch (error) {
       console.error("Error resetting database:", error)
       toast.error("Failed to reset database")
@@ -88,7 +108,33 @@ export default function DatabaseDashboardPage() {
               <CardTitle className="font-kings text-foreground">Connection Status</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-foreground">{connectionStatus}</p>
+              <div className="space-y-4">
+                <div className=" text-xl flex items-center gap-2">
+                  <Badge variant={connectionStatus === "Connected" ? "success" : "error"}>
+                    {connectionStatus}
+                  </Badge>
+                </div>
+                {metadata && (
+                  <div className="grid grid-cols-2 gap-4 text-sm text-foreground">
+                    <div>
+                      <p className="font-semibold">Version:</p>
+                      <p>{metadata.version}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Database:</p>
+                      <p>{metadata.database}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">User:</p>
+                      <p>{metadata.user}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Timezone:</p>
+                      <p>{metadata.timezone}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -101,26 +147,30 @@ export default function DatabaseDashboardPage() {
               {tables.length === 0 ? (
                 <p className="text-foreground">No table data available.</p>
               ) : (
-                <table className="w-full table-auto text-foreground">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2">Table Name</th>
-                      <th className="px-4 py-2">Columns</th>
-                      <th className="px-4 py-2">Rows</th>
-                      <th className="px-4 py-2">Size (bytes)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tables.map((table) => (
-                      <tr key={table.table_name}>
-                        <td className="border px-4 py-2 text-foreground">{table.table_name}</td>
-                        <td className="border px-4 py-2 text-foreground">{table.column_count}</td>
-                        <td className="border px-4 py-2 text-foreground">{table.row_count}</td>
-                        <td className="border px-4 py-2 text-foreground">{table.size_bytes}</td>
+                <div className="space-y-4">
+                  <table className="w-full table-auto text-foreground">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2">Table Name</th>
+                        <th className="px-4 py-2">Columns</th>
+                        <th className="px-4 py-2">Rows</th>
+                        <th className="px-4 py-2">Size</th>
+                        <th className="px-4 py-2">Last Activity</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {tables.map((table) => (
+                        <tr key={table.table_name}>
+                          <td className="border px-4 py-2 text-foreground">{table.table_name}</td>
+                          <td className="border px-4 py-2 text-foreground text-center">{table.column_count}</td>
+                          <td className="border px-4 py-2 text-foreground text-center">{table.row_count}</td>
+                          <td className="border px-4 py-2 text-foreground text-center">{table.size_formatted}</td>
+                          <td className="border px-4 py-2 text-foreground text-center">{table.last_activity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -143,7 +193,12 @@ export default function DatabaseDashboardPage() {
                 value={resetConfirmation}
                 onChange={(e) => setResetConfirmation(e.target.value)}
               />
-              <Button className="mt-4 button-link" disabled={isResetting} onClick={handleResetDatabase}>
+              <Button 
+                className="mt-4 button-link" 
+                disabled={isResetting}
+                variant="destructive"
+                onClick={handleResetDatabase}
+              >
                 {isResetting ? "Resetting..." : "Reset Database"}
               </Button>
             </CardContent>

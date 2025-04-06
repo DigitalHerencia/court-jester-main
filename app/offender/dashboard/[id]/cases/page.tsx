@@ -113,7 +113,7 @@ export default function CasesListPage() {
                       <p className="text-sm text-muted-foreground">Type: {case_.case_type}</p>
                     )}
                   </div>
-                  <Badge variant={case_.status === "Active" ? "default" : "secondary"}>
+                  <Badge variant={case_.status === "Active" ? "secondary" : "secondary"}>
                     {case_.status}
                   </Badge>
                 </div>

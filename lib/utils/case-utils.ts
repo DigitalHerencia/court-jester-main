@@ -1,3 +1,5 @@
+// lib/utils/case-utils.ts
+
 /**
  * Gets the status label and color for a case status
  * @param status The case status
@@ -78,65 +80,50 @@ export function formatCaseNumber(caseNumber: string): string {
 }
 
 /**
- * Parses case information from a document text
- * @param text The document text to parse
+ * Parses case information from a CSV row.
+ * This function assumes the row is from the "Cases Table" of the new CSV format.
+ * @param row A CSV row object with case information
  * @returns Parsed case information or null if parsing fails
  */
-export function parseCaseInfoFromDocument(text: string): any | null {
-  if (!text) return null
+export function parseCaseInfoFromCsvRow(row: Record<string, string>): any | null {
+  if (!row) return null
 
   try {
-    // Extract case number (e.g., "Case Number: ABC-12345")
-    const caseNumberMatch = text.match(/Case Number:?\s*([A-Za-z0-9-]+)/i)
-    const caseNumber = caseNumberMatch ? caseNumberMatch[1] : null
+    // Map CSV columns to case properties based on the new CSV header names.
+    const case_number = row["case_number"] || row["Case Number"] || null;
+    const court = row["court"] || row["Court"] || null;
+    const judge = row["judge"] || row["Judge"] || null;
+    const filing_date = row["filing_date"] || row["Filing Date"] || null;
+    const offender_id = row["offender_id"] || row["Offender ID"] || null;
+    const case_type = row["case_type"] || row["Case Type"] || null;
+    const plaintiff = row["plaintiff"] || row["Plaintiff"] || null;
+    const defendant = row["defendant"] || row["Defendant"] || null;
+    const status = row["status"] || row["Status"] || "Active";
+    const created_at = row["created_at"] || row["Created At"] || null;
+    const updated_at = row["updated_at"] || row["Updated At"] || null;
+    const next_date = row["next_date"] || row["Next Date"] || null;
 
-    // Extract court (e.g., "Court: Superior Court of California")
-    const courtMatch = text.match(/Court:?\s*([^\n]+)/i)
-    const court = courtMatch ? courtMatch[1].trim() : null
-
-    // Extract judge (e.g., "Judge: John Smith")
-    const judgeMatch = text.match(/Judge:?\s*([^\n]+)/i)
-    const judge = judgeMatch ? judgeMatch[1].trim() : null
-
-    // Extract case type (e.g., "Case Type: Civil")
-    const caseTypeMatch = text.match(/Case Type:?\s*([^\n]+)/i)
-    const caseType = caseTypeMatch ? caseTypeMatch[1].trim() : null
-
-    // Extract plaintiff (e.g., "Plaintiff: John Doe")
-    const plaintiffMatch = text.match(/Plaintiff:?\s*([^\n]+)/i)
-    const plaintiff = plaintiffMatch ? plaintiffMatch[1].trim() : null
-
-    // Extract defendant (e.g., "Defendant: Jane Doe")
-    const defendantMatch = text.match(/Defendant:?\s*([^\n]+)/i)
-    const defendant = defendantMatch ? defendantMatch[1].trim() : null
-
-    // Extract charges (e.g., "Charges: Assault, Battery")
-    const chargesMatch = text.match(/Charges:?\s*([^\n]+)/i)
-    const chargesText = chargesMatch ? chargesMatch[1].trim() : null
-
-    const charges = chargesText
-      ? chargesText.split(",").map((charge) => ({
-          description: charge.trim(),
-          statute: null,
-          severity: null,
-        }))
-      : []
-
-    if (!caseNumber && !court) {
-      return null
+    // Ensure that required fields are available.
+    if (!case_number || !court) {
+      return null;
     }
 
     return {
-      case_number: caseNumber,
+      case_number,
       court,
       judge,
-      case_type: caseType,
+      filing_date: filing_date ? new Date(filing_date) : new Date(),
+      offender_id: offender_id ? parseInt(offender_id, 10) : undefined,
+      case_type,
       plaintiff,
       defendant,
-      charges,
+      status,
+      created_at: created_at ? new Date(created_at) : undefined,
+      updated_at: updated_at ? new Date(updated_at) : undefined,
+      next_date: next_date ? new Date(next_date) : undefined,
     }
   } catch (error) {
-    console.error("Error parsing case information:", error)
-    return null
+    console.error("Error parsing case information from CSV row:", error);
+    return null;
   }
 }

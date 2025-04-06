@@ -56,9 +56,7 @@ export async function POST(request: NextRequest) {
     if (!offender.account_enabled || offender.status !== "active") {
       return NextResponse.json({ error: "Account is not active. Please contact administration." }, { status: 403 })
     }
-    if (offender.custody_status !== "in_custody") {
-      return NextResponse.json({ error: "Access denied: offender is not currently in custody." }, { status: 403 })
-    }
+  
 
     const token = await generateToken({
       offenderId: Number(offender.inmate_number),

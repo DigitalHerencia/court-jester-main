@@ -1,8 +1,9 @@
+// app/api/admin/cases/upload/route.ts
+
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 import { query } from "@/lib/db/db";
-import { parseCasePdf } from "@/lib/pdf-parser";
-import { type ParsedCase } from "@/app/admin/dashboard/tools/case-upload/page";
+import { parseCsvBuffer, type ParsedCaseData } from "@/lib/case-parser";
 
 interface DatabaseError extends Error {
   code?: string;
@@ -10,7 +11,7 @@ interface DatabaseError extends Error {
 
 interface UploadResponse {
   message?: string;
-  case?: ParsedCase;
+  caseData?: ParsedCaseData;
   warnings?: string[];
   error?: string;
   details?: string;
@@ -18,10 +19,10 @@ interface UploadResponse {
 
 async function insertCaseData(
   db: { query: typeof query },
-  offenderId: string,
-  parsedCase: ParsedCase
+  offenderId: number,
+  parsedData: ParsedCaseData
 ): Promise<void> {
-  // Insert main case record
+  // Insert main case record with better validation
   const caseResult = await db.query(
     `INSERT INTO cases (
       offender_id, case_number, judge, filing_date, court, 
@@ -30,42 +31,42 @@ async function insertCaseData(
     RETURNING id`,
     [
       offenderId,
-      parsedCase.case_number,
-      parsedCase.judge,
-      parsedCase.filing_date,
-      parsedCase.court,
-      parsedCase.case_type,
-      'Active',
+      parsedData.caseDetail.case_number?.trim() || 'NO_CASE_NUMBER',
+      parsedData.caseDetail.judge?.trim() || null,
+      parsedData.caseDetail.filing_date || new Date(),
+      parsedData.caseDetail.court?.trim() || 'UNKNOWN',
+      parsedData.caseDetail.case_type?.trim() || null,
+      parsedData.caseDetail.status?.trim() || 'Active',
     ]
   );
 
   const caseId = caseResult.rows[0].id;
 
-  // Insert related charges
-  for (const charge of parsedCase.charges) {
+  // Insert related charges with better validation
+  for (const charge of parsedData.charges) {
     await db.query(
       `INSERT INTO charges (
         case_id, count_number, statute, description, class,
         charge_date, citation_number, plea, disposition, 
-        disposition_date, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())`,
+        disposition_date, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
       [
         caseId,
-        charge.count_number,
-        charge.statute,
-        charge.description,
-        charge.class,
-        charge.charge_date,
-        charge.citation_number,
-        charge.plea,
-        charge.disposition,
-        charge.disposition_date,
+        Math.max(1, parseInt(String(charge.count_number)) || 1), // Ensure valid number, minimum 1
+        charge.statute?.trim() || '',
+        charge.description?.trim() || '',
+        charge.class?.trim() || null,
+        charge.charge_date || new Date(),
+        charge.citation_number?.trim() || '',
+        charge.plea?.trim() || '',
+        charge.disposition?.trim() || null,
+        charge.disposition_date || null,
       ]
     );
   }
 
-  // Insert hearings
-  for (const hearing of parsedCase.hearings) {
+  // Insert hearings with validation
+  for (const hearing of parsedData.hearings) {
     await db.query(
       `INSERT INTO hearings (
         case_id, hearing_date, hearing_time, hearing_type,
@@ -73,28 +74,28 @@ async function insertCaseData(
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
       [
         caseId,
-        hearing.hearing_date,
-        hearing.hearing_time,
-        hearing.hearing_type,
-        hearing.hearing_judge,
-        hearing.court,
-        hearing.court_room,
+        hearing.hearing_date || new Date(),
+        hearing.hearing_time?.trim() || '',
+        hearing.hearing_type?.trim() || '',
+        hearing.hearing_judge?.trim() || '',
+        hearing.court?.trim() || '',
+        hearing.court_room?.trim() || '',
       ]
     );
   }
 
-  // Insert motions
-  for (const motion of parsedCase.motions) {
+  // Insert motion filings with validation
+  for (const motion of parsedData.motionFilings) {
     await db.query(
-      `INSERT INTO motions (
+      `INSERT INTO motion_filings (
         case_id, filing_date, title, content, status, created_at, updated_at
       ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
       [
         caseId,
-        motion.filing_date,
-        motion.title,
-        motion.content,
-        motion.status,
+        motion.filing_date || new Date(),
+        motion.title?.trim() || 'Untitled Motion',
+        motion.content?.trim() || '',
+        motion.status?.trim() || 'Draft',
       ]
     );
   }
@@ -106,8 +107,8 @@ async function insertCaseData(
     ) VALUES ($1, $2, $3, $4, NOW())`,
     [
       offenderId,
-      'new_case',
-      `A new case (${parsedCase.case_number}) has been added to your record.`,
+      "new_case",
+      `A new case (${parsedData.caseDetail.case_number}) has been added to your record.`,
       false,
     ]
   );
@@ -126,42 +127,41 @@ export async function POST(request: NextRequest): Promise<NextResponse<UploadRes
     // Parse and validate form data
     const formData = await request.formData();
     const file = formData.get("caseFile") as File | null;
-    const offenderId = formData.get("offenderId") as string | null;
+    const offenderIdStr = formData.get("offenderId") as string | null;
 
-    if (!file || !offenderId) {
+    if (!file || !offenderIdStr) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    if (file.type !== "application/pdf") {
+    if (file.type !== "text/csv") {
       return NextResponse.json(
-        { error: "Only PDF files are supported" },
+        { error: "Only CSV files are supported" },
         { status: 400 }
       );
     }
 
-    // Parse PDF file as an ArrayBuffer
-    const pdfData = await file.arrayBuffer();
-    // Pass the offenderId as the second parameter (converted to a number)
-    const result = await parseCasePdf(pdfData, parseInt(offenderId));
+    // Convert ArrayBuffer to Buffer and parse the CSV file
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const parsedData = await parseCsvBuffer(buffer);
 
-    if (!result.success || !result.case) {
+    if (!parsedData || !parsedData.caseDetail) {
       return NextResponse.json(
-        { error: "Failed to parse case file", details: result.error },
+        { error: "Failed to parse case file" },
         { status: 400 }
       );
     }
 
     // Insert data into database
     try {
-      await insertCaseData({ query }, offenderId, result.case);
+      await insertCaseData({ query }, parseInt(offenderIdStr, 10), parsedData);
 
       return NextResponse.json({
         message: "Case file uploaded and processed successfully",
-        case: result.case,
-        warnings: result.warnings,
+        caseData: parsedData,
       });
     } catch (error) {
       const dbError = error as DatabaseError;
