@@ -1,3 +1,5 @@
+// app/api/auth/login/route.ts
+
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db/db"
 import { generateToken } from "@/lib/auth"

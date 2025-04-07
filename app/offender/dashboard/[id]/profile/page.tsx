@@ -1,97 +1,96 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import Image from "next/image";
 
-interface Offender {
-  id: number;
-  inmate_number: string;
-  nmcd_number: string | null;
-  last_name: string;
-  first_name: string;
-  middle_name?: string;
-  status: string;
-  facility?: string;
-  age?: number;
-  height?: string;
-  weight?: number;
-  eye_color?: string;
-  hair?: string;
-  religion?: string;
-  education?: string;
-  complexion?: string;
-  ethnicity?: string;
-  alias?: string;
-  mugshot_url?: string;
-  account_enabled: boolean;
-  profile_enabled: boolean;
-  custody_status: string;
+export interface OffenderData {
+  offender: {
+    inmateNumber: string;
+    nmcdNumber?: string;
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+    status: string;
+    facility?: string;
+    age?: number;
+    height?: string;
+    weight?: number;
+    eyeColor?: string;
+    hair?: string;
+    religion?: string;
+    education?: string;
+    complexion?: string;
+    ethnicity?: string;
+    alias?: string;
+    mugshotUrl?: string;
+    accountEnabled: boolean;
+    profileEnabled: boolean;
+    custodyStatus: string;
+  };
+  cases: Array<{
+    id: number;
+    caseNumber: string;
+    court: string;
+    status: string;
+    nextDate?: string;
+  }>;
 }
 
-export default function OffenderProfilePage() {
-  // id is the inmate number (e.g. "468079")
-  const { id } = useParams<{ id: string }>();
-  const [offender, setOffender] = useState<Offender | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+export default function OffenderProfilePage({ params }: { params: { id: string } }) {
+  const [data, setData] = useState<OffenderData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const id = params.id 
+  
   useEffect(() => {
-    if (!id) return;
     async function fetchOffenderData() {
       try {
-        // Include credentials so the HTTP‑only token cookie is sent
-        const res = await fetch(`/api/offenders/${id}/profile`, {
-          credentials: "include",
-        });
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || "Failed to fetch offender profile data");
+        const response = await fetch(`/api/offenders/${params.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch offender data");
         }
-        // API returns the offender object directly.
-        const data: Offender = await res.json();
-        setOffender(data);
-      } catch (err: unknown) {
-        console.error("Error fetching offender profile data:", err);
-        setError((err as Error).message);
+        const data = await response.json();
+        if (!data.offender) {
+          throw new Error("Offender data is missing from the response");
+        }
+        setData(data);
+      } catch (err) {
+        console.error("Error fetching offender data:", err);
+        setError("Failed to load offender data. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     }
-    fetchOffenderData();
-  }, [id]);
-
-  const handlePrintProfile = () => {
-    window.print();
-    toast.success("Printing profile...");
-  };
+    if (params.id) {
+      fetchOffenderData();
+    }
+  }, [params.id]);
 
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 text-2xl font-bold font-kings text-background">
-            Loading profile...
+          <div className="mb-4 text-2xl font-bold text-background">
+            Loading offender profile...
           </div>
           <div className="text-foreground/60">
-            Please wait while we fetch your profile data.
+            Please wait while we fetch the profile data.
           </div>
         </div>
       </div>
     );
   }
 
-  if (error || !offender) {
+  if (error ) {
     return (
       <div className="flex h-[calc(100vh-120px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 text-2xl font-bold text-destructive font-kings">
-            Error
-          </div>
+          <div className="mb-4 text-2xl font-bold text-red-500">Error</div>
           <div className="mb-4 text-foreground/60">
-            {error || "Failed to load profile data"}
+            {error || "Failed to load offender data."}
           </div>
           <Button className="button-link" onClick={() => window.location.reload()}>
             Try Again
@@ -101,107 +100,185 @@ export default function OffenderProfilePage() {
     );
   }
 
+  if (data !== null) {
+  
+  const { offender, cases } = data;
+  const fullName = `${offender.firstName} ${offender.middleName ? offender.middleName + " " : ""}${offender.lastName}`;
+
   return (
-    <div className="card-secondary space-y-6 p-4">
-      <h1 className="text-2xl font-bold font-kings text-background">Offender Profile</h1>
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Mugshot and Basic Info */}
-        <div className="card-content p-4">
-          <div className="flex items-center gap-4">
-            <div className="relative h-40 w-32 border border-foreground/20 rounded-md overflow-hidden">
-              {offender.mugshot_url ? (
+    <div className="card-secondary space-y-4 p-4">
+      {/* Header Block */}
+      <div className="card-primary p-4">
+        <h1 className="font-kings text-3xl text-primary-foreground mb-2">
+          Inmate: {fullName}
+        </h1>
+        <p className="text-primary-foreground">
+          View all details related to your account.
+        </p>
+      </div>
+
+      {/* Offender Information */}
+      <div className="card-content space-y-6">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="w-full md:w-1/3 space-y-4">
+            {offender.mugshotUrl ? (
+              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md border border-foreground/20">
                 <Image
                   fill
-                  alt="Mugshot"
-                  src={offender.mugshot_url || "/placeholder.svg"}
-                  style={{ objectFit: "cover" }}
+                  alt={`Mugshot of ${fullName}`}
+                  className="object-cover"
+                  src={offender.mugshotUrl}
                 />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                  No mugshot available
+              </div>
+            ) : (
+              <div className="flex aspect-[3/4] w-full items-center justify-center rounded-md border border-foreground/20 bg-foreground/5">
+                <p className="text-center text-foreground/60">No mugshot available</p>
+              </div>
+            )}
+          </div>
+          <div className="w-full md:w-2/3 space-y-4">
+            <h2 className="font-black text-2xl text-foreground mb-4">
+              Inmate Information
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+              <div className="card-content p-3">
+                <p className="text-lg font-bold">Inmate Number:</p>
+                <p className="text-md mt-1">{offender.inmateNumber}</p>
+              </div>
+              {offender.nmcdNumber && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">NMCD Number:</p>
+                  <p className="text-md mt-1">{offender.nmcdNumber}</p>
                 </div>
               )}
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold font-kings text-foreground">
-                {offender.last_name}, {offender.first_name} {offender.middle_name || ""}
-              </h2>
-              <p>
-                <strong>Inmate #:</strong> {offender.inmate_number}
-              </p>
-              <p>
-                <strong>Custody:</strong>{" "}
-                {offender.custody_status === "in_custody" ? "In Custody" : "Released"}
-              </p>
+              <div className="card-content p-3">
+                <p className="text-lg font-bold">Status:</p>
+                <p className="text-md mt-1">{offender.status}</p>
+              </div>
+              {offender.facility && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Facility:</p>
+                  <p className="text-md mt-1">{offender.facility}</p>
+                </div>
+              )}
+              {typeof offender.age === "number" && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Age:</p>
+                  <p className="text-md mt-1">{offender.age}</p>
+                </div>
+              )}
+              {offender.height && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Height:</p>
+                  <p className="text-md mt-1">{offender.height}</p>
+                </div>
+              )}
+              {typeof offender.weight === "number" && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Weight:</p>
+                  <p className="text-md mt-1">{offender.weight}</p>
+                </div>
+              )}
+              {offender.eyeColor && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Eye Color:</p>
+                  <p className="text-md mt-1">{offender.eyeColor}</p>
+                </div>
+              )}
+              {offender.hair && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Hair:</p>
+                  <p className="text-md mt-1">{offender.hair}</p>
+                </div>
+              )}
+              {offender.religion && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Religion:</p>
+                  <p className="text-md mt-1">{offender.religion}</p>
+                </div>
+              )}
+              {offender.education && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Education:</p>
+                  <p className="text-md mt-1">{offender.education}</p>
+                </div>
+              )}
+              {offender.complexion && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Complexion:</p>
+                  <p className="text-md mt-1">{offender.complexion}</p>
+                </div>
+              )}
+              {offender.ethnicity && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Ethnicity:</p>
+                  <p className="text-md mt-1">{offender.ethnicity}</p>
+                </div>
+              )}
+              {offender.alias && (
+                <div className="card-content p-3">
+                  <p className="text-lg font-bold">Alias:</p>
+                  <p className="text-md mt-1">{offender.alias}</p>
+                </div>
+              )}
+              <div className="card-content p-3">
+                <p className="text-lg font-bold">Custody Status:</p>
+                <p className="text-md mt-1">{offender.custodyStatus}</p>
+              </div>
             </div>
           </div>
         </div>
-        {/* Additional Information */}
-        <div className="card-content p-4">
-          <h2 className="text-xl font-semibold font-kings text-foreground">
-            Additional Information
-          </h2>
-          <p>
-            <strong>Status:</strong> {offender.status}
-          </p>
-          <p>
-            <strong>Facility:</strong> {offender.facility || "N/A"}
-          </p>
-          <p>
-            <strong>Age:</strong> {offender.age ?? "N/A"}
-          </p>
-          {offender.height && (
-            <p>
-              <strong>Height:</strong> {offender.height}
-            </p>
-          )}
-          {typeof offender.weight === "number" && (
-            <p>
-              <strong>Weight:</strong> {offender.weight}
-            </p>
-          )}
-          {offender.eye_color && (
-            <p>
-              <strong>Eye Color:</strong> {offender.eye_color}
-            </p>
-          )}
-          {offender.hair && (
-            <p>
-              <strong>Hair:</strong> {offender.hair}
-            </p>
-          )}
-          {offender.religion && (
-            <p>
-              <strong>Religion:</strong> {offender.religion}
-            </p>
-          )}
-          {offender.education && (
-            <p>
-              <strong>Education:</strong> {offender.education}
-            </p>
-          )}
-          {offender.complexion && (
-            <p>
-              <strong>Complexion:</strong> {offender.complexion}
-            </p>
-          )}
-          <p>
-            <strong>Ethnicity:</strong> {offender.ethnicity || "N/A"}
-          </p>
-          {offender.alias && (
-            <p>
-              <strong>Alias:</strong> {offender.alias}
-            </p>
-          )}
-        </div>
       </div>
-      <Button
-        className="font-kings button-link"
-        variant="outline"
-        onClick={handlePrintProfile}
-      >
-        Print Profile
-      </Button>
+
+      {/* Cases Tab */}
+      <Card className="card-content">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-2xl font-kings text-foreground">Cases</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {cases.length === 0 ? (
+            <div className="card-content p-4 text-center">
+              <p className="text-foreground/60">No cases found for this inmate.</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-md border border-foreground/20">
+              <table className="w-full border-collapse">
+                <thead className="bg-foreground/10">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium">Case Number</th>
+                    <th className="px-4 py-2 text-left font-medium">Court</th>
+                    <th className="px-4 py-2 text-left font-medium">Status</th>
+                    <th className="px-4 py-2 text-left font-medium">Next Date</th>
+                    <th className="px-4 py-2 text-left font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cases.map((caseItem) => (
+                    <tr key={caseItem.id} className="border-t border-foreground/10 hover:bg-foreground/5">
+                      <td className="px-4 py-2">{caseItem.caseNumber}</td>
+                      <td className="px-4 py-2">{caseItem.court}</td>
+                      <td className="px-4 py-2">{caseItem.status}</td>
+                      <td className="px-4 py-2">
+                        {caseItem.nextDate
+                          ? new Date(caseItem.nextDate).toLocaleDateString()
+                          : "None"}
+                      </td>
+                      <td className="px-4 py-2">
+                        <Link href={`/offender/dashboard/${id}/cases/${caseItem.id}`}>
+                          <Button className="button-link" size="sm" variant="default">
+                            View
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
+}
 }

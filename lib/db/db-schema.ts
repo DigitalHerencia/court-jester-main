@@ -1,9 +1,7 @@
 // Database schema definition for reference
 
-import { promises as fs } from "fs"
-import path from "path"
 // Updated import: use the synchronous API from "csv-parse/sync"
-import { parse } from "csv-parse/sync"
+import { query } from "./db";
 
 // SQL statements to create all tables (example)
 const createTablesSQL = `
@@ -150,28 +148,72 @@ CREATE TABLE notifications (
 );
 `
 
+// Add notification-related tables
+const notificationTablesSQL = `
+-- Table for storing hearing notification settings
+CREATE TABLE IF NOT EXISTS hearing_notifications (
+  id SERIAL PRIMARY KEY,
+  hearing_id INTEGER REFERENCES hearings(id) ON DELETE CASCADE,
+  notification_ids TEXT[], -- Array of browser notification IDs
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(hearing_id)
+);
+
+-- Add notification tracking columns to motion_filings
+ALTER TABLE motion_filings
+ADD COLUMN IF NOT EXISTS notification_sent BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS notification_sent_at TIMESTAMP;
+
+-- Table for storing notification preferences
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  id SERIAL PRIMARY KEY,
+  offender_id INTEGER REFERENCES offenders(id) ON DELETE CASCADE,
+  preferences JSONB NOT NULL DEFAULT '{
+    "court_date": true,
+    "motion_status": true,
+    "system": true,
+    "warning": true,
+    "reminder": true
+  }',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(offender_id)
+);
+
+-- Function to update the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Add triggers for updating timestamps
+CREATE TRIGGER update_hearing_notifications_updated_at
+  BEFORE UPDATE ON hearing_notifications
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_notification_preferences_updated_at
+  BEFORE UPDATE ON notification_preferences
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+`;
+
 async function initializeDatabaseSchema() {
   try {
-    // Example: read additional schema files if necessary
-    const extraSchemaPath = path.join(process.cwd(), "schema", "extra-schema.csv")
-    const extraSchemaContent = await fs.readFile(extraSchemaPath, "utf8")
-    // Parse CSV if needed (assuming your CSV contains additional SQL commands)
-    const records = parse(extraSchemaContent, {
-      columns: true,
-      skip_empty_lines: true,
-    })
-    console.log("Extra schema records:", records)
-
-    // Execute the SQL statements using your database client, e.g.:
-    // await query(createTablesSQL);
-    console.log("Database schema initialized.")
+    await query(createTablesSQL)
+    await query(notificationTablesSQL)
+    console.log("Database schema initialized successfully")
   } catch (error) {
     console.error("Error initializing database schema:", error)
     throw error
   }
 }
 
-export { createTablesSQL, initializeDatabaseSchema }
+export { createTablesSQL, notificationTablesSQL, initializeDatabaseSchema }
 
 
 
