@@ -1,5 +1,5 @@
 
-# <p align="center">Court<i class="fa fa-balance-scale" aria-hidden="true"></i>Jester</p>    
+# <p align="center">Court⚖️Jester</p>    
 
 <p align="center">
   <a href="https://nextjs.org/">
