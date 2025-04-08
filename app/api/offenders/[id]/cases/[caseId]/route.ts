@@ -1,4 +1,4 @@
-// app/api/offenders/[id]/cases/[caseId]/route.ts
+"use server"
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db/db";
@@ -6,22 +6,22 @@ import { verifyToken } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string; caseId: string } }
+  context: { params: Promise<{ id: string; caseId: string }> }
 ) {
   try {
     const token = request.cookies.get("token")?.value;
     const session = await verifyToken(token);
-
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { id, caseId } = context.params; // <-- Extract **inside** the try block
+    
+    // Await the params per Next.js 15 guidelines
+    const { id, caseId } = await context.params;
 
     if (session.role === "offender" && session.offenderId !== Number(id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-
+    
     const offenderId = Number(id);
     const caseIdNum = Number(caseId);
 
@@ -35,7 +35,8 @@ export async function GET(
               'statute', ch.statute,
               'class', ch.class,
               'citation_number', ch.citation_number,
-              'disposition', ch.disposition
+              'disposition', ch.disposition,
+              'charge_date', ch.charge_date
             )
           ) AS charges
         FROM charges ch
@@ -54,15 +55,13 @@ export async function GET(
       FROM cases c
       JOIN offenders o ON c.offender_id = o.id
       LEFT JOIN aggregated_charges ac ON c.id = ac.case_id
-      WHERE c.id = $1 AND c.offender_id = $2
+      WHERE c.id = $1 AND c.offender_id = $2;
     `;
-
+    
     const caseResult = await query(text, [caseIdNum, offenderId]);
-
     if (caseResult.rowCount === 0) {
       return NextResponse.json({ error: "Case not found" }, { status: 404 });
     }
-
     return NextResponse.json({ data: caseResult.rows[0] });
   } catch (error) {
     console.error("Error fetching case details:", error);
