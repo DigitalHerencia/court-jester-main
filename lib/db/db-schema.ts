@@ -1,4 +1,4 @@
-// Database schema definition for reference
+// lib/db/db-schema.ts
 
 // Updated import: use the synchronous API from "csv-parse/sync"
 import { query } from "./db";

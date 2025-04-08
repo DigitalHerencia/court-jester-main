@@ -1,10 +1,12 @@
+// app/api/offenders/[id]/cases/[caseId]/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db/db";
 import { verifyToken } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; caseId: string } }
+  context: { params: { id: string; caseId: string } }
 ) {
   try {
     const token = request.cookies.get("token")?.value;
@@ -14,22 +16,30 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Ensure offenders can only access their own cases.
-    if (session.role === "offender" && session.offenderId !== Number(params.id)) {
+    const { id, caseId } = context.params; // <-- Extract **inside** the try block
+
+    if (session.role === "offender" && session.offenderId !== Number(id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const caseId = Number(params.caseId);
-    const offenderId = Number(params.id);
+    const offenderId = Number(id);
+    const caseIdNum = Number(caseId);
 
-    // Use a CTE alias that doesn't conflict with the actual table name.
     const text = `
       WITH aggregated_charges AS (
         SELECT
-          cc.case_id,
-          JSON_AGG(JSON_BUILD_OBJECT('charge', cc.charge, 'description', cc.description)) AS charges
-        FROM case_charges cc
-        GROUP BY cc.case_id
+          ch.case_id,
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'charge', ch.description,
+              'statute', ch.statute,
+              'class', ch.class,
+              'citation_number', ch.citation_number,
+              'disposition', ch.disposition
+            )
+          ) AS charges
+        FROM charges ch
+        GROUP BY ch.case_id
       )
       SELECT
         c.id,
@@ -47,7 +57,7 @@ export async function GET(
       WHERE c.id = $1 AND c.offender_id = $2
     `;
 
-    const caseResult = await query(text, [caseId, offenderId]);
+    const caseResult = await query(text, [caseIdNum, offenderId]);
 
     if (caseResult.rowCount === 0) {
       return NextResponse.json({ error: "Case not found" }, { status: 404 });

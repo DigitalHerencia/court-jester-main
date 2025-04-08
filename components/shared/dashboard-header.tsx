@@ -1,16 +1,23 @@
-"use client"
+// components/shared/dashboard-header.tsx
+"use client";
 
-import { usePathname } from "next/navigation"
-import { Button } from "../ui/button"
-import Link from "next/link"
+import { usePathname } from "next/navigation";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
-// Client-side logout function
+/**
+ * Logs out the user and redirects to home.
+ */
 async function logout() {
-  const res = await fetch("/api/auth/logout", { method: "GET" })
-  if (res.ok) {
-    window.location.href = "/"
-  } else {
-    console.error("Failed to logout")
+  try {
+    const res = await fetch("/api/auth/logout", { method: "GET" });
+    if (res.ok) {
+      window.location.href = "/";
+    } else {
+      console.error("Logout failed");
+    }
+  } catch (err) {
+    console.error("Logout error:", err);
   }
 }
 
@@ -27,7 +34,7 @@ export function AdminDashboardHeader() {
         Logout
       </Button>
     </header>
-  )
+  );
 }
 
 export function OffenderDashboardHeader() {
@@ -43,12 +50,12 @@ export function OffenderDashboardHeader() {
         Logout
       </Button>
     </header>
-  )
+  );
 }
 
 export function DashboardHeader() {
-  const pathname = usePathname()
-  const isAdmin = pathname.includes("/admin/")
+  const pathname = usePathname();
+  const isAdmin = pathname.includes("/admin/");
 
-  return isAdmin ? <AdminDashboardHeader /> : <OffenderDashboardHeader />
+  return isAdmin ? <AdminDashboardHeader /> : <OffenderDashboardHeader />;
 }

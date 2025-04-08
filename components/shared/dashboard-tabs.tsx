@@ -1,3 +1,4 @@
+// components/shared/dashboard-tabs.tsx
 "use client";
 
 import Link from "next/link";
@@ -12,29 +13,30 @@ interface TabItem {
 
 interface DashboardTabsProps {
   role: "admin" | "offender";
-  offenderId?: string;
+  offenderId?: number;
 }
 
 export function DashboardTabs({ role, offenderId }: DashboardTabsProps) {
   const pathname = usePathname();
 
-  // Define tabs based on role; if offenderId is undefined, the offender-specific tabs won't work correctly.
   const tabs: TabItem[] =
     role === "admin"
       ? [
-          { label: "Notifications", href: "/admin/dashboard/notifications", count: "" },
+          { label: "Notifications", href: "/admin/dashboard/notifications" },
           { label: "Offenders", href: "/admin/dashboard/offenders" },
           { label: "Cases", href: "/admin/dashboard/cases" },
           { label: "Motions", href: "/admin/dashboard/motions" },
           { label: "Settings", href: "/admin/dashboard/settings" },
           { label: "Tools", href: "/admin/dashboard/tools" },
         ]
-      : [
-          { label: "Profile", href: `/offender/dashboard/${offenderId}/profile` },
-          { label: "Cases", href: `/offender/dashboard/${offenderId}/cases` },
-          { label: "Court Dates", href: `/offender/dashboard/${offenderId}/court-dates` },
-          { label: "Settings", href: `/offender/dashboard/${offenderId}/settings` },
-        ];
+      : offenderId
+        ? [
+            { label: "Profile", href: `/offender/dashboard/${offenderId}/profile` },
+            { label: "Cases", href: `/offender/dashboard/${offenderId}/cases` },
+            { label: "Court Dates", href: `/offender/dashboard/${offenderId}/court-dates` },
+            { label: "Settings", href: `/offender/dashboard/${offenderId}/settings` },
+          ]
+        : [];
 
   return (
     <div className="mb-4">
@@ -42,13 +44,13 @@ export function DashboardTabs({ role, offenderId }: DashboardTabsProps) {
         {tabs.map((tab) => (
           <Link
             key={tab.href}
+            href={tab.href}
             className={cn(
               "relative flex-1 px-4 py-2 text-center transition-colors font-kings",
               pathname === tab.href || pathname.startsWith(tab.href.replace(/\/$/, ""))
                 ? "font-medium bg-background text-foreground"
-                : "bg-foreground text-background hover:bg-foreground/90"
+                : "bg-foreground text-background hover:bg-background hover:opacity-90"
             )}
-            href={tab.href}
           >
             <span>{tab.label}</span>
             {tab.count && (

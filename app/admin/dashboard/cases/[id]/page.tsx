@@ -1,3 +1,5 @@
+// app/admin/dashboard/cases/[id]/page.tsx
+
 "use client"
 import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"

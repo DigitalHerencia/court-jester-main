@@ -1,4 +1,4 @@
-// app/api/offenders/[id]/cases/[caseId]/charges/route.ts  
+// ✅ Path: app/api/offenders/[id]/cases/[caseId]/charges/route.ts
 
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db/db"
@@ -6,9 +6,11 @@ import { verifyToken } from "@/lib/auth"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; caseId: string } }
+  context: { params: Promise<{ id: string; caseId: string }> }
 ) {
   try {
+    const { id, caseId } = await context.params
+
     const token = request.cookies.get("token")?.value
     const session = await verifyToken(token)
 
@@ -16,37 +18,33 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if (session.role === "offender" && session.offenderId !== Number.parseInt(params.id)) {
+    if (session.role === "offender" && session.offenderId !== Number(id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { id, caseId } = params
-
-    // Verify the case belongs to the offender
-    const caseResult = await query("SELECT id FROM cases WHERE id = $1 AND offender_id = $2", [caseId, id])
+    const caseResult = await query(
+      "SELECT id FROM cases WHERE id = $1 AND offender_id = $2",
+      [caseId, id]
+    )
     if (caseResult.rowCount === 0) {
       return NextResponse.json({ error: "Case not found or does not belong to this offender" }, { status: 404 })
     }
 
-    // Get charges for this case (including citation_number)
     const chargesResult = await query(
-      `
-        SELECT 
+      `SELECT 
           id, 
           description, 
           statute, 
           class, 
           citation_number,
-          disposition
+          disposition,
+          charge_date
         FROM charges
-        WHERE case_id = $1
-      `,
+        WHERE case_id = $1`,
       [caseId],
     )
 
-    return NextResponse.json({
-      charges: chargesResult.rows,
-    })
+    return NextResponse.json({ charges: chargesResult.rows })
   } catch (error) {
     console.error("Error fetching case charges:", error)
     return NextResponse.json({ error: "Failed to fetch case charges" }, { status: 500 })

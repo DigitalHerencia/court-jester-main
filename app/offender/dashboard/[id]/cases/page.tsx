@@ -1,3 +1,5 @@
+// app/offender/dashboard/[id]/cases/page.tsx
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -41,7 +43,7 @@ export default function OffenderCasesPage() {
   }, [offenderId]);
 
   return (
-    <Card className="shadow mb-4">
+    <Card className="card-secondary shadow mb-4">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">My Cases</CardTitle>
       </CardHeader>
@@ -53,7 +55,7 @@ export default function OffenderCasesPage() {
         ) : (
           <div className="space-y-4">
             {cases.map((c) => (
-              <div key={c.id} className="border rounded p-4 hover:shadow">
+              <div key={c.id} className="card-content  rounded p-4 hover:shadow">
                 <h2 className="text-lg font-semibold">Case #{c.case_number}</h2>
                 <p className="text-sm text-muted-foreground">
                   Court: {c.court} | Judge: {c.judge}

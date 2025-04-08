@@ -1,3 +1,5 @@
+// app/api/offenders/[id]/motions/[motionId]/route.ts
+
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db/db"
 import { verifyToken } from "@/lib/auth"
