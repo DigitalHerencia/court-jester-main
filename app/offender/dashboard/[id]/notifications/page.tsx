@@ -1,4 +1,7 @@
+// app/offender/dashboard/[id]/notifications/page.tsx
+
 "use client"
+
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Bell, Calendar, FileText, Info, AlertTriangle } from "lucide-react"

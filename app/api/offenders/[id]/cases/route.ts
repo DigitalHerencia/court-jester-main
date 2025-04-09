@@ -1,12 +1,16 @@
-// app/api/offenders/[id]/cases/route.ts
+// ✅ Path: app/api/offenders/[id]/cases/route.ts
 
-import { NextRequest, NextResponse } from "next/server"
-import { query } from "@/lib/db/db"
-import { verifyToken } from "@/lib/auth"
+import { NextRequest, NextResponse } from "next/server";
+import { query } from "@/lib/db/db";
+import { verifyToken } from "@/lib/auth";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    // Await the params before destructuring to ensure we work with resolved values.
+    const { id } = await params;
     const token = request.cookies.get("token")?.value;
     const session = await verifyToken(token);
 
@@ -18,14 +22,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch cases for this offender using the internal ID from the URL
+    // Fetch cases for this offender using the internal ID from the URL.
     const casesResult = await query(
       `SELECT 
          id,
-         case_number as "caseNumber",
+         case_number,
          court,
+         judge,
          status,
-         next_date as "nextDate"
+         next_date
        FROM cases 
        WHERE offender_id = $1 
        ORDER BY created_at DESC`,
