@@ -1,4 +1,6 @@
-"use server"
+// ✅ Path: app/api/offenders/[id]/cases/[caseId]/route.ts
+
+"use server";
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db/db";
@@ -14,24 +16,25 @@ export async function GET(
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     // Await the params per Next.js 15 guidelines
     const { id, caseId } = await context.params;
 
     if (session.role === "offender" && session.offenderId !== Number(id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    
+
     const offenderId = Number(id);
     const caseIdNum = Number(caseId);
 
-    const text = `
+    const sql = `
       WITH aggregated_charges AS (
         SELECT
           ch.case_id,
           JSON_AGG(
             JSON_BUILD_OBJECT(
-              'charge', ch.description,
+              'id', ch.id,
+              'description', ch.description,
               'statute', ch.statute,
               'class', ch.class,
               'citation_number', ch.citation_number,
@@ -51,14 +54,14 @@ export async function GET(
         c.judge,
         c.next_date,
         c.created_at,
-        ac.charges
+        COALESCE(ac.charges, '[]'::json) AS charges
       FROM cases c
       JOIN offenders o ON c.offender_id = o.id
       LEFT JOIN aggregated_charges ac ON c.id = ac.case_id
       WHERE c.id = $1 AND c.offender_id = $2;
     `;
-    
-    const caseResult = await query(text, [caseIdNum, offenderId]);
+
+    const caseResult = await query(sql, [caseIdNum, offenderId]);
     if (caseResult.rowCount === 0) {
       return NextResponse.json({ error: "Case not found" }, { status: 404 });
     }

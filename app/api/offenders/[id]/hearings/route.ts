@@ -1,6 +1,6 @@
-// app/api/offenders/[id]/hearings/route.ts
+// ✅ Path: app/api/offenders/[id]/hearings/route.ts
 
-"use server"
+"use server";
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db/db";
@@ -8,24 +8,30 @@ import { verifyToken } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string; caseId: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params to get the offender id
+    const { id } = await context.params;
     const token = request.cookies.get("token")?.value;
     const session = await verifyToken(token);
+    
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
-    // Await params
-    const { id, caseId } = await context.params;
     
     if (session.role === "offender" && session.offenderId !== Number(id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     
-    const caseIdNum = Number(caseId);
+    // Get the caseId from the URL query parameters
+    const url = new URL(request.url);
+    const caseId = url.searchParams.get("caseId");
+    if (!caseId) {
+      return NextResponse.json({ error: "Missing caseId parameter" }, { status: 400 });
+    }
     
+    const caseIdNum = Number(caseId);
     const hearingsQuery = `
       SELECT
         id,
