@@ -82,7 +82,7 @@ export default function LoginPage() {
           alt="Court Jester"
           height={220}
           width={150}
-          src="https://a5fvmmg873kgkibm.public.blob.vercel-storage.com/court-jester/joker-playing-card_u-l-q1llfru0-osUnpoXVjFN6NKKiez5weQaczsIMdU.jpeg"
+          src="https://a5fvmmg873kgkibm.public.blob.vercel-storage.com/court-jester/Untitled%20design-OxT8Gi8XbUzZjVaUR3rQd7rJuEePWJ.png"
         />
       </div>
 
