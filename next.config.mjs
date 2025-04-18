@@ -9,8 +9,9 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'a5fvmmg873kgkibm.public.blob.vercel-storage.com',
+        protocol: "https",
+        hostname: "a5fvmmg873kgkibm.public.blob.vercel-storage.com",
+        pathname: "/court-jester/**", // Light mode image path
       },
     ],
   },
