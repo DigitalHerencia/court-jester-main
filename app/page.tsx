@@ -79,7 +79,7 @@ export default function LoginPage() {
             priority
             alt="Court Jester"
             height={220}
-            src="https://a5fvmmg873kgkibm.public.blob.vercel-storage.com/court-jester/joker-playing-card_u-l-q1llfru0-osUnpoXVjFN6NKKiez5weQaczsIMdU.jpeg"
+            src="https://raw.githubusercontent.com/DigitalHerencia/court-jester-main/refs/heads/main/public/icons/Untitled%20design.png"
             width={150}
           />
         </div>
