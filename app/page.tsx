@@ -75,13 +75,27 @@ export default function LoginPage() {
         <p className="text-2xl mb-8 italic font-kings">Tu camarada en la sombra</p>
 
         <div className="relative mb-8 flex justify-center">
-          <Image
-            priority
-            alt="Court Jester"
-            height={220}
-            src="https://raw.githubusercontent.com/DigitalHerencia/court-jester-main/refs/heads/main/public/icons/Untitled%20design.png"
-            width={150}
-          />
+         {/* Light Mode Image */}
+      <div className="block dark:hidden">
+        <Image
+          priority
+          alt="Court Jester"
+          height={220}
+          width={150}
+          src="https://a5fvmmg873kgkibm.public.blob.vercel-storage.com/court-jester/joker-playing-card_u-l-q1llfru0-osUnpoXVjFN6NKKiez5weQaczsIMdU.jpeg"
+        />
+      </div>
+
+      {/* Dark Mode Image */}
+      <div className="hidden dark:block">
+        <Image
+          priority
+          alt="Court Jester"
+          height={220}
+          width={150}
+          src="https://raw.githubusercontent.com/DigitalHerencia/court-jester-main/refs/heads/main/public/icons/homepage.png"
+        />
+      </div>
         </div>
 
         <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
